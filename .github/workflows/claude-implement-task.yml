@@ -1,0 +1,54 @@
+name: Claude Implement Task
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  claude-implement:
+    if: github.event.label.name == 'claude implement'
+    runs-on: claude-runner
+    timeout-minutes: 60
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Bun v2
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Run Claude Implement Task
+        uses: anthropics/claude-code-action@v1
+        with:
+          path_to_bun_executable: ~/.bun/bin/bun
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          settings: |
+            {
+              "permissions": {
+                "allow": [
+                  "Bash(go *)",
+                  "Bash(git *)",
+                  "Bash(gh *)",
+                  "Bash(make *)",
+                  "Read(*)",
+                  "Write(*)",
+                  "Edit(*)"
+                ],
+                "deny": [
+                  "Bash(git *--force*)",
+                  "Bash(git * -f)",
+                  "Bash(git * -f *)"
+                ]
+              }
+            }
+          prompt: |
+            Use the /implement-task skill for issue #${{ github.event.issue.number }}.
