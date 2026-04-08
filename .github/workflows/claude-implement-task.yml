@@ -7,7 +7,7 @@ on:
 jobs:
   claude-implement:
     if: github.event.label.name == 'claude implement'
-    runs-on: claude-runner
+    runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
       contents: write
@@ -21,21 +21,29 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Bun v2
-        uses: oven-sh/setup-bun@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          bun-version: latest
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Run Claude Implement Task
         uses: anthropics/claude-code-action@v1
         with:
-          path_to_bun_executable: ~/.bun/bin/bun
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           settings: |
             {
               "permissions": {
                 "allow": [
-                  "Bash(go *)",
+                  "Bash(npm run build)",
+                  "Bash(npm run test)",
+                  "Bash(npm run test:coverage)",
+                  "Bash(npm run lint)",
+                  "Bash(npm ci)",
+                  "Bash(npm install *)",
                   "Bash(git *)",
                   "Bash(gh *)",
                   "Bash(make *)",
