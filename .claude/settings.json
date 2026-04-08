@@ -1,4 +1,9 @@
 {
+  "enabledPlugins": {
+    "gh-cli@outfitte-plugins": true,
+    "split-issue@outfitte-plugins": true,
+    "implement-task@outfitte-plugins": true
+  },
   "extraKnownMarketplaces": {
     "outfitte-plugins": {
       "source": {
@@ -6,10 +11,5 @@
         "repo": "Outfitte/plugins"
       }
     }
-  },
-  "enabledPlugins": {
-    "tdd@outfitte-plugins": true,
-    "gh-cli@outfitte-plugins": true,
-    "split-issue@outfitte-plugins": true
   }
 }
