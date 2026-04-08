@@ -24,7 +24,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install dependencies
@@ -46,11 +46,23 @@ jobs:
               "permissions": {
                 "allow": [
                   "Bash(npm run build)",
+                  "Bash(npm run dev)",
                   "Bash(npm run test)",
+                  "Bash(npm run test:watch)",
                   "Bash(npm run test:coverage)",
                   "Bash(npm run lint)",
+                  "Bash(npm run lint:fix)",
+                  "Bash(npm run format)",
+                  "Bash(npm run format:check)",
                   "Bash(npm ci)",
                   "Bash(npm install *)",
+                  "Bash(npm create *)",
+                  "Bash(npm test)",
+                  "Bash(npx *)",
+                  "Bash(node *)",
+                  "Bash(docker build *)",
+                  "Bash(docker compose *)",
+                  "Bash(docker run *)",
                   "Bash(git *)",
                   "Bash(gh *)",
                   "Bash(make *)",
