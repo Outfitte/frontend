@@ -1,0 +1,15 @@
+{
+  "extraKnownMarketplaces": {
+    "outfitte-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "Outfitte/plugins"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "tdd@outfitte-plugins": true,
+    "gh-cli@outfitte-plugins": true,
+    "split-issue@outfitte-plugins": true
+  }
+}
