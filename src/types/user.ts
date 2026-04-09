@@ -9,4 +9,5 @@ export interface User {
 export interface TokenPair {
   accessToken: string
   refreshToken: string
+  expiresAt: string
 }
