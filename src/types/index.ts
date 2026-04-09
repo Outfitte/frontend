@@ -1,4 +1,4 @@
-export type { ApiError } from './api'
+export type { ApiErrorBody } from './api'
 export type { Category, FieldHint } from './category'
 export type { Item, Photo } from './item'
 export type { Location } from './location'

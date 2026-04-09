@@ -12,6 +12,9 @@ export class ApiError extends Error {
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '/api'
 
+// Singleton refresh promise prevents concurrent 401s from triggering multiple refresh calls.
+let inflightRefresh: Promise<void> | null = null
+
 function buildHeaders(hasBody: boolean): Record<string, string> {
   const { token } = useAuthStore.getState()
   const headers: Record<string, string> = {}
@@ -42,17 +45,13 @@ async function executeRequest(
   })
 }
 
-async function refreshAndRetry<T>(
-  method: string,
-  path: string,
-  body?: unknown
-): Promise<T> {
+async function doRefresh(): Promise<void> {
   const { refreshToken, setAuth, clearAuth } = useAuthStore.getState()
 
   const refreshResponse = await fetch(`${BASE_URL}/auth/refresh`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refreshToken }),
+    body: JSON.stringify({ refresh_token: refreshToken }),
   })
 
   if (!refreshResponse.ok) {
@@ -62,7 +61,20 @@ async function refreshAndRetry<T>(
   }
 
   const data = await refreshResponse.json()
-  setAuth(data.token, data.refreshToken)
+  setAuth(data.access_token, data.refresh_token)
+}
+
+async function refreshAndRetry<T>(
+  method: string,
+  path: string,
+  body?: unknown
+): Promise<T> {
+  if (!inflightRefresh) {
+    inflightRefresh = doRefresh().finally(() => {
+      inflightRefresh = null
+    })
+  }
+  await inflightRefresh
 
   const retryResponse = await executeRequest(method, path, body)
   return parseResponse<T>(retryResponse)

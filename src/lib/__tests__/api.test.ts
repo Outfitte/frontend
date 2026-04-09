@@ -81,6 +81,21 @@ describe('api', () => {
     expect(err).toBeInstanceOf(ApiError)
   })
 
+  it('api.get should throw ApiError with Unknown error message when response body is not JSON', async () => {
+    server.use(
+      http.get('/api/not-json', () =>
+        new HttpResponse('Gateway Timeout', {
+          status: 504,
+          headers: { 'Content-Type': 'text/plain' },
+        })
+      )
+    )
+    await expect(api.get('/not-json')).rejects.toMatchObject({
+      status: 504,
+      message: 'Unknown error',
+    })
+  })
+
   it('api.get should surface network errors as ApiError', async () => {
     server.use(
       http.get('/api/netfail', () => HttpResponse.error())
@@ -108,6 +123,42 @@ describe('api', () => {
     })
     expect(useAuthStore.getState().token).toBeNull()
     expect(useAuthStore.getState().refreshToken).toBeNull()
+  })
+
+  it('api.get should make only one refresh call when two requests receive 401 simultaneously', async () => {
+    let refreshCallCount = 0
+    useAuthStore.setState({ token: 'expired-token', refreshToken: 'valid-refresh-xyz789' })
+
+    server.use(
+      http.get('/api/concurrent-1', ({ request }) => {
+        if (request.headers.get('Authorization') === 'Bearer expired-token') {
+          return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+        return HttpResponse.json({ data: 'resource-1' })
+      }),
+      http.get('/api/concurrent-2', ({ request }) => {
+        if (request.headers.get('Authorization') === 'Bearer expired-token') {
+          return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+        return HttpResponse.json({ data: 'resource-2' })
+      }),
+      http.post('/api/auth/refresh', () => {
+        refreshCallCount++
+        return HttpResponse.json({
+          access_token: 'fresh-token-abc123',
+          refresh_token: 'new-refresh-xyz789',
+        })
+      })
+    )
+
+    const [r1, r2] = await Promise.all([
+      api.get<{ data: string }>('/concurrent-1'),
+      api.get<{ data: string }>('/concurrent-2'),
+    ])
+
+    expect(refreshCallCount).toBe(1)
+    expect(r1).toEqual({ data: 'resource-1' })
+    expect(r2).toEqual({ data: 'resource-2' })
   })
 
   // --- Edge cases ---
@@ -211,7 +262,7 @@ describe('api', () => {
   it('api.get should retry with new token after 401 triggers refresh', async () => {
     useAuthStore.setState({
       token: 'expired-token',
-      refreshToken: 'valid-refresh-token-xyz',
+      refreshToken: 'valid-refresh-token-xyz789',
     })
 
     let requestCount = 0
@@ -225,11 +276,11 @@ describe('api', () => {
         return HttpResponse.json({ secret: 'data' })
       }),
       http.post('/api/auth/refresh', async ({ request }) => {
-        const body = (await request.json()) as { refreshToken: string }
-        if (body.refreshToken === 'valid-refresh-token-xyz') {
+        const body = (await request.json()) as { refresh_token: string }
+        if (body.refresh_token === 'valid-refresh-token-xyz789') {
           return HttpResponse.json({
-            token: 'fresh-access-token',
-            refreshToken: 'new-refresh-token',
+            access_token: 'fresh-access-token-abc123',
+            refresh_token: 'new-refresh-token-xyz789',
           })
         }
         return HttpResponse.json({ error: 'Invalid refresh token' }, { status: 401 })
@@ -239,6 +290,6 @@ describe('api', () => {
     const result = await api.get<{ secret: string }>('/protected-resource')
     expect(result).toEqual({ secret: 'data' })
     expect(requestCount).toBe(2)
-    expect(useAuthStore.getState().token).toBe('fresh-access-token')
+    expect(useAuthStore.getState().token).toBe('fresh-access-token-abc123')
   })
 })
