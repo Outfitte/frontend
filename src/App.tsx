@@ -1,6 +1,4 @@
 import { useState } from 'react'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClient } from '@/lib/query-client'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
@@ -10,7 +8,7 @@ function App() {
   const [count, setCount] = useState(0)
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <>
       <section id="center">
         <div className="hero">
           <img src={heroImg} className="base" width="170" height="179" alt="" />
@@ -116,7 +114,7 @@ function App() {
 
       <div className="ticks"></div>
       <section id="spacer"></section>
-    </QueryClientProvider>
+    </>
   )
 }
 

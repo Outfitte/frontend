@@ -1,5 +1,4 @@
-import { describe, it, expect } from 'vitest'
-import { QueryClient } from '@tanstack/react-query'
+import { describe, it, expect, vi } from 'vitest'
 import { queryClient } from '../query-client'
 
 describe('queryClient', () => {
@@ -9,7 +8,13 @@ describe('queryClient', () => {
     expect(defaultOptions.mutations?.retry).toBe(false)
   })
 
-  it('should be an instance of QueryClient', () => {
-    expect(queryClient).toBeInstanceOf(QueryClient)
+  it('should use 3 retries for queries when not in test environment', async () => {
+    vi.stubEnv('MODE', 'production')
+    vi.resetModules()
+    const { queryClient: prodClient } = await import('../query-client')
+    const defaultOptions = prodClient.getDefaultOptions()
+    expect(defaultOptions.queries?.retry).toBe(3)
+    vi.unstubAllEnvs()
+    vi.resetModules()
   })
 })
