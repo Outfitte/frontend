@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import { Button } from '@/components/ui/button'
-import { render } from './utils'
+import { render } from '@/test/utils'
 
 describe('Button', () => {
   it('Button should be disabled when given the disabled prop', () => {
