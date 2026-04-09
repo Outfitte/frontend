@@ -12,9 +12,12 @@ export class ApiError extends Error {
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '/api'
 
-async function buildHeaders(): Promise<Record<string, string>> {
+function buildHeaders(hasBody: boolean): Record<string, string> {
   const { token } = useAuthStore.getState()
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  const headers: Record<string, string> = {}
+  if (hasBody) {
+    headers['Content-Type'] = 'application/json'
+  }
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
   }
@@ -31,7 +34,7 @@ async function executeRequest(
   path: string,
   body?: unknown
 ): Promise<Response> {
-  const headers = await buildHeaders()
+  const headers = buildHeaders(body !== undefined)
   return fetch(`${BASE_URL}${path}`, {
     method,
     headers,

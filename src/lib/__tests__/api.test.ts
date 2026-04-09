@@ -119,6 +119,18 @@ describe('api', () => {
     await expect(api.delete('/items/1')).resolves.toBeUndefined()
   })
 
+  it('api.get should not attach Content-Type header when request has no body', async () => {
+    let capturedContentType: string | null = null
+    server.use(
+      http.get('/api/check-content-type', ({ request }) => {
+        capturedContentType = request.headers.get('Content-Type')
+        return HttpResponse.json({ ok: true })
+      })
+    )
+    await api.get('/check-content-type')
+    expect(capturedContentType).toBeNull()
+  })
+
   it('api.get should not attach Authorization header when unauthenticated', async () => {
     let capturedAuth: string | null = null
     server.use(
