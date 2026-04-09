@@ -1,3 +1,22 @@
+export interface MockUser {
+  id: string
+  email: string
+  name: string
+}
+
+export interface MockToken {
+  accessToken: string
+  refreshToken: string
+  expiresAt: string
+}
+
+export interface MockItem {
+  id: string
+  name: string
+  description: string
+  createdAt: string
+}
+
 export function mockUser(overrides: Partial<MockUser> = {}): MockUser {
   return {
     id: 'user-001',
@@ -24,23 +43,4 @@ export function mockItem(overrides: Partial<MockItem> = {}): MockItem {
     createdAt: new Date('2024-01-01').toISOString(),
     ...overrides,
   }
-}
-
-export interface MockUser {
-  id: string
-  email: string
-  name: string
-}
-
-export interface MockToken {
-  accessToken: string
-  refreshToken: string
-  expiresAt: string
-}
-
-export interface MockItem {
-  id: string
-  name: string
-  description: string
-  createdAt: string
 }

@@ -3,7 +3,7 @@ import { render as rtlRender, type RenderOptions, type RenderResult } from '@tes
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 
-function Providers({ children }: { children: React.ReactNode }) {
+export function render(ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>): RenderResult {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -11,14 +11,14 @@ function Providers({ children }: { children: React.ReactNode }) {
     },
   })
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <MemoryRouter>{children}</MemoryRouter>
-    </QueryClientProvider>
-  )
-}
+  function Providers({ children }: { children: React.ReactNode }) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>{children}</MemoryRouter>
+      </QueryClientProvider>
+    )
+  }
 
-export function render(ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>): RenderResult {
   return rtlRender(ui, { wrapper: Providers, ...options })
 }
 
