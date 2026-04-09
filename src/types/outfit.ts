@@ -1,21 +1,27 @@
+import type { Photo } from './item'
+
 export interface OutfitItem {
-  itemId: string
+  outfit_id: string
+  item_id: string
   position: number
 }
 
 export interface Outfit {
   id: string
-  name: string
-  description?: string
+  owner_id: string
+  name: string | null
+  notes: string | null
   items: OutfitItem[]
-  createdAt: string
-  updatedAt: string
+  photos: Photo[]
+  created_at: string
 }
 
 export interface OutfitLog {
   id: string
-  outfitId: string
-  wornAt: string
-  notes?: string
-  createdAt: string
+  outfit_id: string
+  owner_id: string
+  worn_on: string
+  notes: string | null
+  wear_log_ids: string[]
+  created_at: string
 }

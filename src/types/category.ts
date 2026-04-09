@@ -1,14 +1,12 @@
 export interface FieldHint {
-  field: string
+  key: string
   label: string
-  type: 'text' | 'number' | 'select' | 'multiselect' | 'date'
-  options?: string[]
-  required?: boolean
+  placeholder: string
 }
 
 export interface Category {
   id: string
-  name: string
-  parentId?: string
-  fieldHints: FieldHint[]
+  label: string
+  is_preset: boolean
+  field_hints: FieldHint[]
 }

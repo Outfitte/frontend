@@ -1,7 +1,7 @@
 export interface Location {
   id: string
-  name: string
-  description?: string
-  createdAt: string
-  updatedAt: string
+  owner_id: string
+  parent_id: string | null
+  label: string
+  created_at: string
 }

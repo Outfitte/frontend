@@ -1,7 +1,8 @@
 export interface WearLog {
   id: string
-  itemId: string
-  wornAt: string
-  notes?: string
-  createdAt: string
+  item_id: string
+  owner_id: string
+  worn_on: string
+  notes: string | null
+  created_at: string
 }

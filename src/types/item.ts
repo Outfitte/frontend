@@ -1,28 +1,23 @@
 export interface Photo {
   id: string
-  url: string
-  isPrimary: boolean
-  createdAt: string
-}
-
-export interface ItemMetadata {
-  brand?: string
-  colors?: string[]
-  size?: string
-  condition?: 'new' | 'like_new' | 'good' | 'fair' | 'poor'
-  purchaseDate?: string
-  purchasePrice?: number
-  notes?: string
+  media_key: string
+  position: number
+  created_at: string
 }
 
 export interface Item {
   id: string
+  owner_id: string
   name: string
-  description?: string
-  categoryId: string
-  locationId?: string
+  brand: string | null
+  category_id: string | null
+  color: string | null
+  metadata: Record<string, string>
   photos: Photo[]
-  metadata: ItemMetadata
-  createdAt: string
-  updatedAt: string
+  location_id: string | null
+  purchase_price: string | null
+  purchase_currency: string | null
+  purchase_date: string | null
+  seller_url: string | null
+  created_at: string
 }

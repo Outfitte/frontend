@@ -1,5 +1,3 @@
 export interface AppSettings {
-  theme: 'light' | 'dark' | 'system'
-  language: string
-  currency?: string
+  registration_enabled: boolean
 }

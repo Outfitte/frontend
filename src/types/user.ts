@@ -1,13 +1,16 @@
 export interface User {
   id: string
   email: string
-  name: string
-  createdAt: string
-  updatedAt: string
+  role: 'user' | 'admin'
+  created_at: string
+}
+
+export interface UserSummary {
+  id: string
+  email: string
 }
 
 export interface TokenPair {
-  accessToken: string
-  refreshToken: string
-  expiresAt: string
+  access_token: string
+  refresh_token: string
 }
