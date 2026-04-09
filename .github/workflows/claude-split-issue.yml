@@ -9,7 +9,7 @@ jobs:
     if: |
       github.event.issue.pull_request == null &&
       contains(github.event.comment.body, '@claude split issue')
-    runs-on: claude-runner
+    runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
       contents: write

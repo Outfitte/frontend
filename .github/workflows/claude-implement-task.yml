@@ -35,12 +35,6 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           show_full_output: "true"
-          plugin_marketplaces: |
-            https://github.com/Outfitte/plugins.git
-          plugins: |
-            gh-cli@outfitte-plugins
-            split-issue@outfitte-plugins
-            implement-task@outfitte-plugins
           settings: |
             {
               "permissions": {
