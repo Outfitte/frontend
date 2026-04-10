@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore } from '@/stores/auth'
 
 export class ApiError extends Error {
   status: number
@@ -16,13 +16,13 @@ const BASE_URL = import.meta.env.VITE_API_URL ?? '/api'
 let inflightRefresh: Promise<void> | null = null
 
 function buildHeaders(hasBody: boolean): Record<string, string> {
-  const { token } = useAuthStore.getState()
+  const { accessToken } = useAuthStore.getState()
   const headers: Record<string, string> = {}
   if (hasBody) {
     headers['Content-Type'] = 'application/json'
   }
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`
+  if (accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`
   }
   return headers
 }
@@ -46,7 +46,7 @@ async function executeRequest(
 }
 
 async function doRefresh(): Promise<void> {
-  const { refreshToken, setAuth, clearAuth } = useAuthStore.getState()
+  const { refreshToken, setTokens } = useAuthStore.getState()
 
   const refreshResponse = await fetch(`${BASE_URL}/auth/refresh`, {
     method: 'POST',
@@ -55,13 +55,14 @@ async function doRefresh(): Promise<void> {
   })
 
   if (!refreshResponse.ok) {
-    clearAuth()
+    localStorage.removeItem('refresh_token')
+    useAuthStore.setState({ accessToken: null, refreshToken: null, user: null, isAuthenticated: false })
     const message = await parseErrorBody(refreshResponse)
     throw new ApiError(refreshResponse.status, message)
   }
 
   const data = await refreshResponse.json()
-  setAuth(data.access_token, data.refresh_token)
+  setTokens(data.access_token, data.refresh_token)
 }
 
 async function refreshAndRetry<T>(
