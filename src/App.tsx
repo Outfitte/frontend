@@ -2,6 +2,7 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
+import { Toaster } from '@/components/layout/Toaster'
 import './App.css'
 
 function App() {
@@ -114,6 +115,7 @@ function App() {
 
       <div className="ticks"></div>
       <section id="spacer"></section>
+      <Toaster />
     </>
   )
 }

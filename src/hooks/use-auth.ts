@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import { toast } from '@/lib/toast'
 import { ApiError, BASE_URL } from '@/lib/api'
 import { useAuthStore } from '@/stores/auth'
 import type { User, TokenPair } from '@/types'

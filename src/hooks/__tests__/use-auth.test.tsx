@@ -6,7 +6,7 @@ import { server } from '@/test/mocks/server'
 import { useLogin, useRegister, useLogout, useRefreshToken } from '@/hooks/use-auth'
 import { useAuthStore } from '@/stores/auth'
 
-vi.mock('sonner', () => ({
+vi.mock('@/lib/toast', () => ({
   toast: { error: vi.fn() },
 }))
 
@@ -44,7 +44,7 @@ describe('useLogin', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true))
 
-    const { toast } = await import('sonner')
+    const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Network error')
   })
 
@@ -65,7 +65,7 @@ describe('useLogin', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true))
 
-    const { toast } = await import('sonner')
+    const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Unknown error')
   })
 
@@ -83,7 +83,7 @@ describe('useLogin', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true))
 
-    const { toast } = await import('sonner')
+    const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Unknown error')
   })
 
@@ -101,7 +101,7 @@ describe('useLogin', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true))
 
-    const { toast } = await import('sonner')
+    const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Invalid credentials')
   })
 
@@ -157,7 +157,7 @@ describe('useRegister', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true))
 
-    const { toast } = await import('sonner')
+    const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Email already in use')
   })
 
@@ -214,7 +214,7 @@ describe('useLogout', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true))
 
-    const { toast } = await import('sonner')
+    const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Token already revoked')
     const state = useAuthStore.getState()
     expect(state.accessToken).toBeNull()
@@ -274,7 +274,7 @@ describe('useRefreshToken', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true))
 
-    const { toast } = await import('sonner')
+    const { toast } = await import('@/lib/toast')
     expect(toast.error).not.toHaveBeenCalled()
     expect(result.current.error?.message).toBe('Refresh token expired')
   })
