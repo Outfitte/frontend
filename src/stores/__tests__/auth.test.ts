@@ -24,6 +24,21 @@ describe('auth store', () => {
     expect(state.isHydrating).toBe(true)
   })
 
+  it('logout should clear tokens and succeed when API call throws network error', async () => {
+    server.use(
+      http.post('/api/auth/logout', () => HttpResponse.error())
+    )
+    useAuthStore.getState().setTokens('access-token-abc123', 'refresh-token-xyz789')
+
+    await expect(useAuthStore.getState().logout()).resolves.toBeUndefined()
+
+    const state = useAuthStore.getState()
+    expect(state.accessToken).toBeNull()
+    expect(state.refreshToken).toBeNull()
+    expect(state.isAuthenticated).toBe(false)
+    expect(localStorage.getItem('refresh_token')).toBeNull()
+  })
+
   it('logout should clear tokens and succeed when API call fails', async () => {
     server.use(
       http.post('/api/auth/logout', () => new HttpResponse(null, { status: 500 }))

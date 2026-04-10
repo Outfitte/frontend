@@ -95,6 +95,16 @@ describe('theme store', () => {
     expect(document.documentElement.classList.contains('dark')).toBe(true)
   })
 
+  it('setTheme should not add dark class when called with system and matchMedia is unavailable', () => {
+    vi.stubGlobal('matchMedia', undefined)
+
+    useThemeStore.getState().setTheme('system')
+
+    expect(document.documentElement.classList.contains('dark')).toBe(false)
+    expect(localStorage.getItem('theme')).toBe('system')
+    expect(useThemeStore.getState().theme).toBe('system')
+  })
+
   it('initTheme should restore light theme and remove dark class when localStorage has light', () => {
     vi.stubGlobal('matchMedia', (query: string) => ({
       matches: false,
