@@ -10,7 +10,7 @@ export class ApiError extends Error {
   }
 }
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? '/api'
+export const BASE_URL = import.meta.env.VITE_API_URL ?? '/api'
 
 // Singleton refresh promise prevents concurrent 401s from triggering multiple refresh calls.
 let inflightRefresh: Promise<void> | null = null
