@@ -33,9 +33,10 @@ export function LoginPage() {
 
   function onSubmit(values: LoginFormValues) {
     const next = searchParams.get('next')
+    const safePath = next && next.startsWith('/') && !next.startsWith('//') ? next : '/'
     login.mutate(
       { username: values.email, password: values.password },
-      { onSuccess: () => navigate(next ?? '/') }
+      { onSuccess: () => navigate(safePath) }
     )
   }
 

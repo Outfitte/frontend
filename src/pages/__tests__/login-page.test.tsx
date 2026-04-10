@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { screen } from '@testing-library/react'
+import { describe, it, expect } from 'vitest'
+import { screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { render } from '@/test/utils'
@@ -8,9 +8,6 @@ import { LoginPage } from '@/pages/LoginPage'
 import { Route, Routes } from 'react-router'
 
 describe('LoginPage', () => {
-  beforeEach(() => {
-    // Reset to login page route on each test
-  })
 
   it('LoginPage should show required field errors when form is submitted empty', async () => {
     const user = userEvent.setup()
@@ -74,7 +71,9 @@ describe('LoginPage', () => {
 
     expect(await screen.findByRole('button', { name: /signing in/i })).toBeDisabled()
 
-    resolveRequest()
+    await act(async () => {
+      resolveRequest()
+    })
   })
 
   it('LoginPage should render email field, password field, sign-in button, and register link', () => {
@@ -124,5 +123,82 @@ describe('LoginPage', () => {
     await user.click(screen.getByRole('link', { name: /register/i }))
 
     expect(await screen.findByText('Register page')).toBeInTheDocument()
+  })
+
+  it('LoginPage should redirect to / when next param is an external URL', async () => {
+    server.use(
+      http.post('/api/auth/login', () =>
+        HttpResponse.json({
+          access_token: 'access-token-abc123',
+          refresh_token: 'refresh-token-xyz789',
+        })
+      )
+    )
+    const user = userEvent.setup()
+    render(
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<div>Dashboard</div>} />
+      </Routes>,
+      { initialEntries: ['/login?next=//evil.com'] }
+    )
+
+    await user.type(screen.getByLabelText(/email/i), 'alice@example.com')
+    await user.type(screen.getByLabelText(/password/i), 'secret123')
+    await user.click(screen.getByRole('button', { name: /sign in/i }))
+
+    expect(await screen.findByText('Dashboard')).toBeInTheDocument()
+  })
+
+  it('LoginPage should redirect to next param path when login succeeds with valid internal path', async () => {
+    server.use(
+      http.post('/api/auth/login', () =>
+        HttpResponse.json({
+          access_token: 'access-token-abc123',
+          refresh_token: 'refresh-token-xyz789',
+        })
+      )
+    )
+    const user = userEvent.setup()
+    render(
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/items" element={<div>Items page</div>} />
+      </Routes>,
+      { initialEntries: ['/login?next=%2Fitems'] }
+    )
+
+    await user.type(screen.getByLabelText(/email/i), 'alice@example.com')
+    await user.type(screen.getByLabelText(/password/i), 'secret123')
+    await user.click(screen.getByRole('button', { name: /sign in/i }))
+
+    expect(await screen.findByText('Items page')).toBeInTheDocument()
+  })
+
+  it('LoginPage should clear previous error when form is resubmitted', async () => {
+    server.use(
+      http.post('/api/auth/login', () =>
+        HttpResponse.json({ error: 'Invalid credentials' }, { status: 401 })
+      )
+    )
+    const user = userEvent.setup()
+    render(<LoginPage />)
+
+    await user.type(screen.getByLabelText(/email/i), 'alice@example.com')
+    await user.type(screen.getByLabelText(/password/i), 'wrongpassword')
+    await user.click(screen.getByRole('button', { name: /sign in/i }))
+    expect(await screen.findByRole('alert')).toBeInTheDocument()
+
+    server.use(
+      http.post('/api/auth/login', () =>
+        new Promise<Response>(() => {
+          // never resolves — request stays in flight
+        })
+      )
+    )
+    await user.click(screen.getByRole('button', { name: /sign in/i }))
+
+    // error banner should be gone while new request is in flight
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 })
