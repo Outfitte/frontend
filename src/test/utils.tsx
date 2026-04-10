@@ -7,9 +7,13 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router'
 
+type CustomRenderOptions = Omit<RenderOptions, 'wrapper'> & {
+  initialEntries?: string[]
+}
+
 export function render(
   ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>
+  { initialEntries, ...options }: CustomRenderOptions = {}
 ): RenderResult {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -21,7 +25,7 @@ export function render(
   function Providers({ children }: { children: React.ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter>{children}</MemoryRouter>
+        <MemoryRouter initialEntries={initialEntries}>{children}</MemoryRouter>
       </QueryClientProvider>
     )
   }
