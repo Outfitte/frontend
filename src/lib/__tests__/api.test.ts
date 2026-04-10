@@ -100,7 +100,7 @@ describe('api', () => {
     server.use(
       http.get('/api/netfail', () => HttpResponse.error())
     )
-    const err = await api.get('/netfail').catch((e) => e)
+    const err = await api.get('/netfail').catch((e) => e) as ApiError
     expect(err).toBeInstanceOf(ApiError)
     expect(err.status).toBe(0)
   })
