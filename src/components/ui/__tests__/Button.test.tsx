@@ -13,4 +13,10 @@ describe('Button', () => {
     render(<Button>Click me</Button>)
     expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument()
   })
+
+  it('Button should render as the child element when asChild prop is provided', () => {
+    render(<Button asChild><a href="/home">Home</a></Button>)
+    expect(screen.getByRole('link', { name: 'Home' })).toBeInTheDocument()
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+  })
 })

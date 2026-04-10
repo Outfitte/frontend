@@ -82,6 +82,18 @@ describe('api', () => {
     expect(err).toBeInstanceOf(ApiError)
   })
 
+  it('api.get should throw ApiError with Unknown error message when response body has no error field', async () => {
+    server.use(
+      http.get('/api/no-error-field', () =>
+        HttpResponse.json({ message: 'something went wrong' }, { status: 500 })
+      )
+    )
+    await expect(api.get('/no-error-field')).rejects.toMatchObject({
+      status: 500,
+      message: 'Unknown error',
+    })
+  })
+
   it('api.get should throw ApiError with Unknown error message when response body is not JSON', async () => {
     server.use(
       http.get('/api/not-json', () =>
