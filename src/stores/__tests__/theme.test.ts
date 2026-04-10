@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { useThemeStore } from '@/stores/theme'
 
 describe('theme store', () => {
@@ -13,6 +13,23 @@ describe('theme store', () => {
   })
 
   it('theme store should default to system when no localStorage value exists', () => {
+    expect(useThemeStore.getState().theme).toBe('system')
+  })
+
+  it('setTheme should remove dark class when called with system and prefers-color-scheme is light', () => {
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: false,
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }))
+
+    document.documentElement.classList.add('dark')
+
+    useThemeStore.getState().setTheme('system')
+
+    expect(document.documentElement.classList.contains('dark')).toBe(false)
+    expect(localStorage.getItem('theme')).toBe('system')
     expect(useThemeStore.getState().theme).toBe('system')
   })
 
@@ -49,7 +66,7 @@ describe('theme store', () => {
     expect(useThemeStore.getState().theme).toBe('system')
   })
 
-  it('setTheme should remove dark class when called with system and prefers-color-scheme is light', () => {
+  it('initTheme should default to system when localStorage has no theme', () => {
     vi.stubGlobal('matchMedia', (query: string) => ({
       matches: false,
       media: query,
@@ -57,12 +74,8 @@ describe('theme store', () => {
       removeEventListener: vi.fn(),
     }))
 
-    document.documentElement.classList.add('dark')
+    useThemeStore.getState().initTheme()
 
-    useThemeStore.getState().setTheme('system')
-
-    expect(document.documentElement.classList.contains('dark')).toBe(false)
-    expect(localStorage.getItem('theme')).toBe('system')
     expect(useThemeStore.getState().theme).toBe('system')
   })
 
@@ -97,18 +110,5 @@ describe('theme store', () => {
 
     expect(useThemeStore.getState().theme).toBe('light')
     expect(document.documentElement.classList.contains('dark')).toBe(false)
-  })
-
-  it('initTheme should default to system when localStorage has no theme', () => {
-    vi.stubGlobal('matchMedia', (query: string) => ({
-      matches: false,
-      media: query,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    }))
-
-    useThemeStore.getState().initTheme()
-
-    expect(useThemeStore.getState().theme).toBe('system')
   })
 })
