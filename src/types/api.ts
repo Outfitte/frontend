@@ -1,3 +1,3 @@
-export interface ApiError {
+export interface ApiErrorBody {
   error: string
 }
