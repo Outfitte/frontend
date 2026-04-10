@@ -1,17 +1,17 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { ApiError } from '@/lib/api'
+import { ApiError, BASE_URL } from '@/lib/api'
 import { useAuthStore } from '@/stores/auth'
 import type { User } from '@/types'
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? '/api'
+const REFRESH_TOKEN_KEY = 'refresh_token'
 
 interface Credentials {
   username: string
   password: string
 }
 
-interface LoginResponse {
+interface TokenPairResponse {
   access_token: string
   refresh_token: string
 }
@@ -46,8 +46,8 @@ function showError(error: ApiError) {
 export function useLogin() {
   const { setTokens } = useAuthStore()
 
-  return useMutation<LoginResponse, ApiError, Credentials>({
-    mutationFn: (credentials) => postAuth<LoginResponse>('/auth/login', credentials),
+  return useMutation<TokenPairResponse, ApiError, Credentials>({
+    mutationFn: (credentials) => postAuth<TokenPairResponse>('/auth/login', credentials),
     onSuccess: (data) => {
       setTokens(data.access_token, data.refresh_token)
     },
@@ -70,13 +70,19 @@ export function useRegister() {
 
 export function useLogout() {
   const queryClient = useQueryClient()
-  const { logout, refreshToken } = useAuthStore()
+  const { refreshToken } = useAuthStore()
 
   return useMutation<void, ApiError>({
     mutationFn: () => postAuth<void>('/auth/logout', { refresh_token: refreshToken }),
     onSuccess: async () => {
-      await logout()
-      queryClient.invalidateQueries()
+      useAuthStore.setState({
+        accessToken: null,
+        refreshToken: null,
+        user: null,
+        isAuthenticated: false,
+      })
+      localStorage.removeItem(REFRESH_TOKEN_KEY)
+      await queryClient.invalidateQueries()
     },
     onError: showError,
   })
@@ -85,8 +91,8 @@ export function useLogout() {
 export function useRefreshToken() {
   const { setTokens } = useAuthStore()
 
-  return useMutation<LoginResponse, ApiError, { refresh_token: string }>({
-    mutationFn: (vars) => postAuth<LoginResponse>('/auth/refresh', vars),
+  return useMutation<TokenPairResponse, ApiError, { refresh_token: string }>({
+    mutationFn: (vars) => postAuth<TokenPairResponse>('/auth/refresh', vars),
     onSuccess: (data) => {
       setTokens(data.access_token, data.refresh_token)
     },
