@@ -83,6 +83,76 @@ describe('Routing', () => {
     expect(screen.getByTestId('dashboard-page')).toBeInTheDocument()
   })
 
+  it('App should render register page when unauthenticated user visits /register', () => {
+    render(<AppWithLocation />, { initialEntries: ['/register'] })
+    expect(screen.getByTestId('register-page')).toBeInTheDocument()
+  })
+
+  it('App should render items page when authenticated user visits /items', () => {
+    useAuthStore.setState({
+      accessToken: 'access-token-abc123',
+      refreshToken: 'refresh-token-xyz789',
+      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      isAuthenticated: true,
+      isHydrating: false,
+      hydrateFromStorage: async () => {},
+    })
+    render(<AppWithLocation />, { initialEntries: ['/items'] })
+    expect(screen.getByTestId('items-page')).toBeInTheDocument()
+  })
+
+  it('App should render outfits page when authenticated user visits /outfits', () => {
+    useAuthStore.setState({
+      accessToken: 'access-token-abc123',
+      refreshToken: 'refresh-token-xyz789',
+      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      isAuthenticated: true,
+      isHydrating: false,
+      hydrateFromStorage: async () => {},
+    })
+    render(<AppWithLocation />, { initialEntries: ['/outfits'] })
+    expect(screen.getByTestId('outfits-page')).toBeInTheDocument()
+  })
+
+  it('App should render calendar page when authenticated user visits /calendar', () => {
+    useAuthStore.setState({
+      accessToken: 'access-token-abc123',
+      refreshToken: 'refresh-token-xyz789',
+      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      isAuthenticated: true,
+      isHydrating: false,
+      hydrateFromStorage: async () => {},
+    })
+    render(<AppWithLocation />, { initialEntries: ['/calendar'] })
+    expect(screen.getByTestId('calendar-page')).toBeInTheDocument()
+  })
+
+  it('App should render shared page when authenticated user visits /shared', () => {
+    useAuthStore.setState({
+      accessToken: 'access-token-abc123',
+      refreshToken: 'refresh-token-xyz789',
+      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      isAuthenticated: true,
+      isHydrating: false,
+      hydrateFromStorage: async () => {},
+    })
+    render(<AppWithLocation />, { initialEntries: ['/shared'] })
+    expect(screen.getByTestId('shared-page')).toBeInTheDocument()
+  })
+
+  it('App should render settings page when authenticated user visits /settings', () => {
+    useAuthStore.setState({
+      accessToken: 'access-token-abc123',
+      refreshToken: 'refresh-token-xyz789',
+      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      isAuthenticated: true,
+      isHydrating: false,
+      hydrateFromStorage: async () => {},
+    })
+    render(<AppWithLocation />, { initialEntries: ['/settings'] })
+    expect(screen.getByTestId('settings-page')).toBeInTheDocument()
+  })
+
   it('App should render 404 page when route does not exist', () => {
     render(<AppWithLocation />, { initialEntries: ['/this-route-does-not-exist'] })
     expect(screen.getByTestId('not-found-page')).toBeInTheDocument()
