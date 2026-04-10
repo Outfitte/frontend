@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { ApiError, BASE_URL } from '@/lib/api'
 import { useAuthStore } from '@/stores/auth'
-import type { User } from '@/types'
+import type { User, TokenPair } from '@/types'
 
 const REFRESH_TOKEN_KEY = 'refresh_token'
 
@@ -11,15 +11,8 @@ interface Credentials {
   password: string
 }
 
-interface TokenPairResponse {
-  access_token: string
-  refresh_token: string
-}
-
-interface RegisterResponse {
+interface RegisterResponse extends TokenPair {
   user: User
-  access_token: string
-  refresh_token: string
 }
 
 async function postAuth<T>(path: string, body: unknown): Promise<T> {
@@ -39,6 +32,16 @@ async function postAuth<T>(path: string, body: unknown): Promise<T> {
   return data as T
 }
 
+function clearAuthState() {
+  useAuthStore.setState({
+    accessToken: null,
+    refreshToken: null,
+    user: null,
+    isAuthenticated: false,
+  })
+  localStorage.removeItem(REFRESH_TOKEN_KEY)
+}
+
 function showError(error: ApiError) {
   toast.error(error.message)
 }
@@ -46,8 +49,8 @@ function showError(error: ApiError) {
 export function useLogin() {
   const { setTokens } = useAuthStore()
 
-  return useMutation<TokenPairResponse, ApiError, Credentials>({
-    mutationFn: (credentials) => postAuth<TokenPairResponse>('/auth/login', credentials),
+  return useMutation<TokenPair, ApiError, Credentials>({
+    mutationFn: (credentials) => postAuth<TokenPair>('/auth/login', credentials),
     onSuccess: (data) => {
       setTokens(data.access_token, data.refresh_token)
     },
@@ -75,27 +78,23 @@ export function useLogout() {
   return useMutation<void, ApiError>({
     mutationFn: () => postAuth<void>('/auth/logout', { refresh_token: refreshToken }),
     onSuccess: async () => {
-      useAuthStore.setState({
-        accessToken: null,
-        refreshToken: null,
-        user: null,
-        isAuthenticated: false,
-      })
-      localStorage.removeItem(REFRESH_TOKEN_KEY)
+      clearAuthState()
       await queryClient.invalidateQueries()
     },
-    onError: showError,
+    onError: (error) => {
+      clearAuthState()
+      showError(error)
+    },
   })
 }
 
 export function useRefreshToken() {
   const { setTokens } = useAuthStore()
 
-  return useMutation<TokenPairResponse, ApiError, { refresh_token: string }>({
-    mutationFn: (vars) => postAuth<TokenPairResponse>('/auth/refresh', vars),
+  return useMutation<TokenPair, ApiError, { refresh_token: string }>({
+    mutationFn: (vars) => postAuth<TokenPair>('/auth/refresh', vars),
     onSuccess: (data) => {
       setTokens(data.access_token, data.refresh_token)
     },
-    onError: showError,
   })
 }

@@ -126,6 +126,7 @@ describe('useLogin', () => {
     expect(state.accessToken).toBe('access-token-abc123')
     expect(state.refreshToken).toBe('refresh-token-xyz789')
     expect(state.isAuthenticated).toBe(true)
+    expect(state.user).toBeNull()
   })
 })
 
@@ -199,7 +200,7 @@ describe('useLogout', () => {
     vi.clearAllMocks()
   })
 
-  it('useLogout should call toast.error with ApiError message when server returns 401', async () => {
+  it('useLogout should call toast.error and clear auth state when server returns 401', async () => {
     server.use(
       http.post('/api/auth/logout', () =>
         HttpResponse.json({ error: 'Token already revoked' }, { status: 401 })
@@ -215,6 +216,10 @@ describe('useLogout', () => {
 
     const { toast } = await import('sonner')
     expect(toast.error).toHaveBeenCalledWith('Token already revoked')
+    const state = useAuthStore.getState()
+    expect(state.accessToken).toBeNull()
+    expect(state.refreshToken).toBeNull()
+    expect(state.isAuthenticated).toBe(false)
   })
 
   it('useLogout should clear auth store and invalidate queries when server returns 204', async () => {
@@ -236,6 +241,7 @@ describe('useLogout', () => {
 
     const state = useAuthStore.getState()
     expect(state.accessToken).toBeNull()
+    expect(state.refreshToken).toBeNull()
     expect(state.isAuthenticated).toBe(false)
     expect(invalidateSpy).toHaveBeenCalled()
   })
@@ -254,7 +260,7 @@ describe('useRefreshToken', () => {
     vi.clearAllMocks()
   })
 
-  it('useRefreshToken should call toast.error with ApiError message when server returns 401', async () => {
+  it('useRefreshToken should expose error via mutation state without calling toast when server returns 401', async () => {
     server.use(
       http.post('/api/auth/refresh', () =>
         HttpResponse.json({ error: 'Refresh token expired' }, { status: 401 })
@@ -269,7 +275,8 @@ describe('useRefreshToken', () => {
     await waitFor(() => expect(result.current.isError).toBe(true))
 
     const { toast } = await import('sonner')
-    expect(toast.error).toHaveBeenCalledWith('Refresh token expired')
+    expect(toast.error).not.toHaveBeenCalled()
+    expect(result.current.error?.message).toBe('Refresh token expired')
   })
 
   it('useRefreshToken should update tokens in auth store when server returns 200 with new token pair', async () => {
