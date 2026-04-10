@@ -33,6 +33,7 @@ export const useAuthStore = create<AuthState>(() => ({
     useAuthStore.setState({
       accessToken: null,
       refreshToken: null,
+      user: null,
       isAuthenticated: false,
     })
     localStorage.removeItem(REFRESH_TOKEN_KEY)

@@ -2,11 +2,12 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/mocks/server'
 import { api, ApiError } from '@/lib/api'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthStore } from '@/stores/auth'
 
 describe('api', () => {
   beforeEach(() => {
-    useAuthStore.setState({ token: null, refreshToken: null })
+    useAuthStore.setState({ accessToken: null, refreshToken: null, user: null, isAuthenticated: false })
+    localStorage.clear()
   })
 
   // --- Failure / error cases first ---
@@ -107,8 +108,9 @@ describe('api', () => {
 
   it('api.get should clear auth and throw ApiError when 401 after failed refresh', async () => {
     useAuthStore.setState({
-      token: 'expired-token',
+      accessToken: 'expired-token',
       refreshToken: 'bad-refresh-token',
+      isAuthenticated: true,
     })
     server.use(
       http.get('/api/protected', () =>
@@ -121,13 +123,13 @@ describe('api', () => {
     await expect(api.get('/protected')).rejects.toMatchObject({
       status: 401,
     })
-    expect(useAuthStore.getState().token).toBeNull()
+    expect(useAuthStore.getState().accessToken).toBeNull()
     expect(useAuthStore.getState().refreshToken).toBeNull()
   })
 
   it('api.get should make only one refresh call when two requests receive 401 simultaneously', async () => {
     let refreshCallCount = 0
-    useAuthStore.setState({ token: 'expired-token', refreshToken: 'valid-refresh-xyz789' })
+    useAuthStore.setState({ accessToken: 'expired-token', refreshToken: 'valid-refresh-xyz789', isAuthenticated: true })
 
     server.use(
       http.get('/api/concurrent-1', ({ request }) => {
@@ -197,7 +199,7 @@ describe('api', () => {
   // --- Happy path ---
 
   it('api.get should attach Authorization header when auth store has a token', async () => {
-    useAuthStore.setState({ token: 'valid-token-abc123', refreshToken: null })
+    useAuthStore.setState({ accessToken: 'valid-token-abc123', refreshToken: null, isAuthenticated: true })
     let capturedAuth: string | null = null
     server.use(
       http.get('/api/check-auth', ({ request }) => {
@@ -261,8 +263,9 @@ describe('api', () => {
 
   it('api.get should retry with new token after 401 triggers refresh', async () => {
     useAuthStore.setState({
-      token: 'expired-token',
+      accessToken: 'expired-token',
       refreshToken: 'valid-refresh-token-xyz789',
+      isAuthenticated: true,
     })
 
     let requestCount = 0
@@ -290,6 +293,6 @@ describe('api', () => {
     const result = await api.get<{ secret: string }>('/protected-resource')
     expect(result).toEqual({ secret: 'data' })
     expect(requestCount).toBe(2)
-    expect(useAuthStore.getState().token).toBe('fresh-access-token-abc123')
+    expect(useAuthStore.getState().accessToken).toBe('fresh-access-token-abc123')
   })
 })
