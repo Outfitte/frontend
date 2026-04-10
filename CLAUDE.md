@@ -43,6 +43,11 @@ src/
 - Test names follow `<Subject> should <expectation> when <condition>`
 - Use explicit readable values (`'alice@example.com'`, `'Submit'`) — not empty defaults
 
+## Dependencies
+
+- Import from `react-router` only — `react-router-dom` is deprecated in v7 and not installed
+- Zod v4: use `z.strictObject()`/`z.looseObject()` (not `.strict()`/`.passthrough()`), and `{ error: "..." }` (not `{ message: "..." }`)
+
 ## Path alias
 
 `@` resolves to `src/` (configured in `vite.config.ts` and `vitest.config.ts`).
