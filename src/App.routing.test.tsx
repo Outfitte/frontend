@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { act } from 'react'
 import { useLocation } from 'react-router'
 import { render, screen } from '@/test/utils'
@@ -30,6 +30,8 @@ describe('Routing', () => {
       hydrateFromStorage: async () => {},
     })
   })
+
+  // --- Failure / redirect cases ---
 
   it('App should redirect to /login when unauthenticated user visits /', () => {
     render(<AppWithLocation />, { initialEntries: ['/'] })
@@ -69,6 +71,42 @@ describe('Routing', () => {
     expect(screen.getByTestId('dashboard-page')).toBeInTheDocument()
     expect(screen.getByTestId('location')).toHaveTextContent('/')
   })
+
+  it('App should render 404 page when route does not exist', () => {
+    render(<AppWithLocation />, { initialEntries: ['/this-route-does-not-exist'] })
+    expect(screen.getByTestId('not-found-page')).toBeInTheDocument()
+  })
+
+  it('App should show loading spinner while isHydrating is true then render route when resolved', async () => {
+    let resolveHydration!: () => void
+    const hydrationPromise = new Promise<void>((resolve) => {
+      resolveHydration = resolve
+    })
+    useAuthStore.setState({
+      accessToken: null,
+      refreshToken: null,
+      user: null,
+      isAuthenticated: false,
+      isHydrating: true,
+      hydrateFromStorage: async () => {
+        await hydrationPromise
+        useAuthStore.setState({ isHydrating: false })
+      },
+    })
+
+    render(<AppWithLocation />, { initialEntries: ['/'] })
+    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument()
+
+    await act(async () => {
+      resolveHydration()
+      await hydrationPromise
+    })
+
+    expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument()
+    expect(screen.getByTestId('login-page')).toBeInTheDocument()
+  })
+
+  // --- Happy path ---
 
   it('App should render dashboard when authenticated user visits /', () => {
     useAuthStore.setState({
@@ -151,39 +189,5 @@ describe('Routing', () => {
     })
     render(<AppWithLocation />, { initialEntries: ['/settings'] })
     expect(screen.getByTestId('settings-page')).toBeInTheDocument()
-  })
-
-  it('App should render 404 page when route does not exist', () => {
-    render(<AppWithLocation />, { initialEntries: ['/this-route-does-not-exist'] })
-    expect(screen.getByTestId('not-found-page')).toBeInTheDocument()
-  })
-
-  it('App should show loading spinner while isHydrating is true then render route when resolved', async () => {
-    let resolveHydration!: () => void
-    const hydrationPromise = new Promise<void>((resolve) => {
-      resolveHydration = resolve
-    })
-    useAuthStore.setState({
-      accessToken: null,
-      refreshToken: null,
-      user: null,
-      isAuthenticated: false,
-      isHydrating: true,
-      hydrateFromStorage: async () => {
-        await hydrationPromise
-        useAuthStore.setState({ isHydrating: false })
-      },
-    })
-
-    render(<AppWithLocation />, { initialEntries: ['/'] })
-    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument()
-
-    await act(async () => {
-      resolveHydration()
-      await hydrationPromise
-    })
-
-    expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument()
-    expect(screen.getByTestId('login-page')).toBeInTheDocument()
   })
 })
