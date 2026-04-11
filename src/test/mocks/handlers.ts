@@ -7,8 +7,8 @@ export const handlers = [
 
   http.post('/api/auth/login', () => {
     return HttpResponse.json({
-      token: 'mock-token-abc123',
-      user: { id: '1', email: 'user@example.com' },
+      access_token: 'mock-access-token-abc123',
+      refresh_token: 'mock-refresh-token-xyz789',
     })
   }),
 

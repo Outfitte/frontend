@@ -42,6 +42,8 @@ src/
 - Write failure/error cases before the happy path
 - Test names follow `<Subject> should <expectation> when <condition>`
 - Use explicit readable values (`'alice@example.com'`, `'Submit'`) — not empty defaults
+- Forms that use react-hook-form must have `noValidate`; JSDOM enforces native HTML5 constraint validation (e.g. `type="email"`) and blocks the submit event before the hook's resolver runs
+- Route-level pages must have `data-testid="<name>-page"` on their root element — `App.routing.test.tsx` uses these to verify routing
 
 ## Dependencies
 
