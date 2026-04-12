@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router'
 import {
   CalendarIcon,
+  HomeIcon,
   ShirtIcon,
   ShareIcon,
   SettingsIcon,
@@ -35,6 +36,7 @@ import { useThemeStore } from '@/stores/theme'
 import { Button } from '@/components/ui/button'
 
 const NAV_ITEMS = [
+  { to: '/', label: 'Dashboard', icon: HomeIcon },
   { to: '/items', label: 'Items', icon: TagIcon },
   { to: '/outfits', label: 'Outfits', icon: ShirtIcon },
   { to: '/calendar', label: 'Calendar', icon: CalendarIcon },
@@ -63,7 +65,7 @@ function DarkModeToggle() {
 
 function UserMenu() {
   const { user, logout } = useAuthStore()
-  const initials = user?.email?.slice(0, 2).toUpperCase() ?? '?'
+  const initials = user?.email?.[0]?.toUpperCase() ?? '?'
 
   return (
     <DropdownMenu>
@@ -90,7 +92,7 @@ function UserMenu() {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"
-          onSelect={() => { logout() }}
+          onSelect={logout}
         >
           Log out
         </DropdownMenuItem>
@@ -102,48 +104,48 @@ function UserMenu() {
 export function AppLayout() {
   return (
     <TooltipProvider>
-    <SidebarProvider>
-      <Sidebar collapsible="icon">
-        <SidebarHeader>
-          <span className="px-2 text-lg font-semibold group-data-[collapsible=icon]:hidden">
-            Outfitte
-          </span>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
-                  <SidebarMenuItem key={to}>
-                    <SidebarMenuButton asChild tooltip={label}>
-                      <NavLink to={to} end={to === '/'}>
-                        <Icon />
-                        <span>{label}</span>
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-      </Sidebar>
-      <SidebarInset>
-        <header className="flex h-14 items-center gap-2 border-b px-4">
-          <SidebarTrigger />
-          <div className="flex flex-1 items-center justify-between">
-            <span className="font-semibold lg:hidden">Outfitte</span>
-            <div className="ml-auto flex items-center gap-2">
-              <DarkModeToggle />
-              <UserMenu />
+      <SidebarProvider>
+        <Sidebar collapsible="icon">
+          <SidebarHeader>
+            <span className="px-2 text-lg font-semibold group-data-[collapsible=icon]:hidden">
+              Outfitte
+            </span>
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+                    <SidebarMenuItem key={to}>
+                      <SidebarMenuButton asChild tooltip={label}>
+                        <NavLink to={to} end={to === '/'}>
+                          <Icon />
+                          <span>{label}</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+        </Sidebar>
+        <SidebarInset>
+          <header className="flex h-14 items-center gap-2 border-b px-4">
+            <SidebarTrigger />
+            <div className="flex flex-1 items-center justify-between">
+              <span className="font-semibold lg:hidden">Outfitte</span>
+              <div className="ml-auto flex items-center gap-2">
+                <DarkModeToggle />
+                <UserMenu />
+              </div>
             </div>
-          </div>
-        </header>
-        <main className="flex-1 p-4">
-          <Outlet />
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+          </header>
+          <main className="flex-1 p-4">
+            <Outlet />
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
     </TooltipProvider>
   )
 }

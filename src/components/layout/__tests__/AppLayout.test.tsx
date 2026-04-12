@@ -7,34 +7,57 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
 
-function renderLayout() {
+function renderLayout(initialEntries?: string[]) {
   return render(
     <Routes>
       <Route element={<AppLayout />}>
-        <Route path="/" element={<div>child content</div>} />
+        <Route path="/" element={<div>dashboard content</div>} />
         <Route path="/items" element={<div>items content</div>} />
         <Route path="/settings" element={<div>settings content</div>} />
       </Route>
-    </Routes>
+    </Routes>,
+    { initialEntries }
   )
 }
 
 describe('AppLayout', () => {
   beforeEach(() => {
     useAuthStore.setState({
-      user: { id: '1', email: 'alice@example.com', role: 'user', created_at: '2024-01-01' },
+      user: { id: 'user-1', email: 'alice@example.com', role: 'user', created_at: '2024-01-01' },
       isAuthenticated: true,
       isHydrating: false,
     })
   })
-  it('AppLayout should render app name', () => {
+
+  afterEach(() => {
+    useThemeStore.getState().setTheme('system')
+    useAuthStore.setState({ user: null, isAuthenticated: false, isHydrating: true })
+  })
+
+  it('AppLayout should show ? initials when no user is authenticated', () => {
+    useAuthStore.setState({ user: null, isAuthenticated: false, isHydrating: false })
     renderLayout()
+
+    expect(screen.getByText('?')).toBeInTheDocument()
+  })
+
+  it('AppLayout should show switch to dark mode button when theme is light', () => {
+    useThemeStore.getState().setTheme('light')
+    renderLayout()
+
+    expect(screen.getByRole('button', { name: /switch to dark mode/i })).toBeInTheDocument()
+  })
+
+  it('AppLayout should render app name when rendered', () => {
+    renderLayout()
+
     expect(screen.getAllByText('Outfitte').length).toBeGreaterThan(0)
   })
 
-  it('AppLayout should render all nav links in the sidebar', () => {
+  it('AppLayout should render all nav links when rendered', () => {
     renderLayout()
 
+    expect(screen.getByRole('link', { name: /dashboard/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /items/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /outfits/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /calendar/i })).toBeInTheDocument()
@@ -43,14 +66,7 @@ describe('AppLayout', () => {
   })
 
   it('AppLayout should highlight the active nav link when on its route', () => {
-    render(
-      <Routes>
-        <Route element={<AppLayout />}>
-          <Route path="/items" element={<div>items content</div>} />
-        </Route>
-      </Routes>,
-      { initialEntries: ['/items'] }
-    )
+    renderLayout(['/items'])
 
     const itemsLink = screen.getByRole('link', { name: /items/i })
     expect(itemsLink).toHaveAttribute('aria-current', 'page')
@@ -76,7 +92,7 @@ describe('AppLayout', () => {
     expect(useAuthStore.getState().isAuthenticated).toBe(false)
   })
 
-  it('AppLayout should render dark mode toggle button', () => {
+  it('AppLayout should render dark mode toggle button when rendered', () => {
     renderLayout()
 
     expect(
@@ -84,27 +100,23 @@ describe('AppLayout', () => {
     ).toBeInTheDocument()
   })
 
-  it('AppLayout should toggle theme when dark mode button is clicked', async () => {
-    const user = userEvent.setup()
-    renderLayout()
-
-    const toggle = screen.getByRole('button', { name: /switch to (dark|light) mode/i })
-    await user.click(toggle)
-
-    expect(
-      screen.getByRole('button', { name: /switch to (dark|light) mode/i })
-    ).toBeInTheDocument()
-  })
-
-  it('AppLayout should show switch to light mode button when theme is dark', async () => {
+  it('AppLayout should switch to light mode when toggle is clicked in dark mode', async () => {
     useThemeStore.getState().setTheme('dark')
     const user = userEvent.setup()
     renderLayout()
 
-    expect(screen.getByRole('button', { name: /switch to light mode/i })).toBeInTheDocument()
-
     await user.click(screen.getByRole('button', { name: /switch to light mode/i }))
 
     expect(useThemeStore.getState().theme).toBe('light')
+  })
+
+  it('AppLayout should switch to dark mode when toggle is clicked in light mode', async () => {
+    useThemeStore.getState().setTheme('light')
+    const user = userEvent.setup()
+    renderLayout()
+
+    await user.click(screen.getByRole('button', { name: /switch to dark mode/i }))
+
+    expect(useThemeStore.getState().theme).toBe('dark')
   })
 })
