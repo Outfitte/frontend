@@ -1,10 +1,11 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router'
 import { render } from '@/test/utils'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme'
 
 function renderLayout() {
   return render(
@@ -93,5 +94,17 @@ describe('AppLayout', () => {
     expect(
       screen.getByRole('button', { name: /switch to (dark|light) mode/i })
     ).toBeInTheDocument()
+  })
+
+  it('AppLayout should show switch to light mode button when theme is dark', async () => {
+    useThemeStore.getState().setTheme('dark')
+    const user = userEvent.setup()
+    renderLayout()
+
+    expect(screen.getByRole('button', { name: /switch to light mode/i })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /switch to light mode/i }))
+
+    expect(useThemeStore.getState().theme).toBe('light')
   })
 })
