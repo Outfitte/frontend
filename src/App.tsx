@@ -3,6 +3,7 @@ import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router'
 import { Toaster } from '@/components/layout/Toaster'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
@@ -34,10 +35,12 @@ function AuthRoute() {
 
 function App() {
   const { isHydrating, hydrateFromStorage } = useAuthStore()
+  const { initTheme } = useThemeStore()
 
   useEffect(() => {
     hydrateFromStorage()
-  }, [hydrateFromStorage])
+    initTheme()
+  }, [hydrateFromStorage, initTheme])
 
   if (isHydrating) {
     return <div data-testid="loading-spinner">Loading…</div>
