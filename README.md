@@ -1,73 +1,63 @@
-# React + TypeScript + Vite
+# Outfitte Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Web frontend for [Outfitte](https://github.com/Outfitte).
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **React 19** with TypeScript
+- **Vite** — build tool and dev server
+- **Tailwind CSS v4** — utility-first styling
+- **shadcn/ui** — component primitives
+- **TanStack Query** — server state management
+- **Zustand** — client state management
+- **React Router v7** — client-side routing
+- **Vitest + Testing Library + MSW** — testing
 
-## React Compiler
+## Prerequisites
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js 22+
+- npm
 
-## Expanding the ESLint configuration
+## Quick start
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Commands
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Task | Command |
+|---|---|
+| Dev server | `npm run dev` |
+| Production build | `npm run build` |
+| Run tests | `npm test` |
+| Coverage report | `npm run test:coverage` |
+| Lint | `npm run lint` |
+| Format | `npm run format` |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Docker
+
+```bash
+docker build -t outfitte-frontend .
+docker run -p 8080:80 outfitte-frontend
 ```
+
+The multi-stage Dockerfile builds with Node 22 Alpine and serves the static output from Nginx on port 80.
+
+## Environment variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `VITE_API_URL` | `/api` | Base URL for API requests |
+
+In development, add a proxy rule to `vite.config.ts` to forward `/api` to a local backend. In Docker, Nginx proxies `/api/` to `http://backend:8080` — configure the `backend` hostname in `nginx.conf`.
+
+## Links
+
+- [Backend repo](https://github.com/Outfitte/backend)
+- [Deploy repo](https://github.com/Outfitte/deploy)
+
+## License
+
+[AGPL-3.0](LICENSE)
