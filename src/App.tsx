@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router'
 import { Toaster } from '@/components/layout/Toaster'
+import { AppLayout } from '@/components/layout/AppLayout'
 import { useAuthStore } from '@/stores/auth'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { LoginPage } from '@/pages/LoginPage'
@@ -51,12 +52,14 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
         </Route>
         <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/items" element={<ItemsPage />} />
-          <Route path="/outfits" element={<OutfitsPage />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/shared" element={<SharedPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/items" element={<ItemsPage />} />
+            <Route path="/outfits" element={<OutfitsPage />} />
+            <Route path="/calendar" element={<CalendarPage />} />
+            <Route path="/shared" element={<SharedPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Route>
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
