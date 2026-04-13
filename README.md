@@ -31,16 +31,20 @@ npm run dev
 |---|---|
 | Dev server | `npm run dev` |
 | Production build | `npm run build` |
-| Run tests | `npm test` |
+| Preview build | `npm run preview` |
+| Run tests (once) | `npm test` |
+| Run tests (watch) | `npm run test:watch` |
 | Coverage report | `npm run test:coverage` |
 | Lint | `npm run lint` |
+| Lint + autofix | `npm run lint:fix` |
 | Format | `npm run format` |
+| Check formatting | `npm run format:check` |
 
 ## Docker
 
 ```bash
-docker build -t outfitte-frontend .
-docker run -p 8080:80 outfitte-frontend
+docker build -t frontend .
+docker run -p 8080:80 frontend
 ```
 
 The multi-stage Dockerfile builds with Node 22 Alpine and serves the static output from Nginx on port 80.
