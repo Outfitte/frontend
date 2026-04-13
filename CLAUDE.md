@@ -50,7 +50,7 @@ src/
 npx shadcn add <component-name>
 ```
 
-Components land in `src/components/ui/` and are managed by the CLI — do not hand-edit them. Configuration is in `components.json`.
+Components land in `src/components/ui/` and are managed by the CLI — avoid hand-editing them; prefer overriding via CSS variables or wrapper components. Configuration is in `components.json`.
 
 ## API client
 
@@ -72,7 +72,7 @@ api.delete<T>(path)
 
 - **Query keys**: breadcrumb-style arrays — `['admin', 'settings']`, `['users', userId]`
 - **Queries**: plain `useQuery` calls; `queryFn` calls an `api.*` method directly
-- **Mutations**: always typed with all four generics `useMutation<TData, TError, TVariables, TContext>`
+- **Mutations**: always type at least `TData` and `TError`; add `TVariables` and `TContext` when using optimistic updates
 - **Optimistic updates**:
   1. `onMutate` — cancel in-flight queries, snapshot old data, apply optimistic update, return snapshot as context
   2. `onError` — roll back using the context snapshot; call `toast.error()`
@@ -103,7 +103,7 @@ const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
 - Use `z.strictObject()` / `z.looseObject()` (not `.strict()` / `.passthrough()`)
 - Use `{ error: "..." }` (not `{ message: "..." }`) in Zod v4
 - Cross-field validation via `.refine()` with an explicit `path` array
-- `noValidate` on every `<form>` — JSDOM enforces native HTML5 constraint validation and blocks submit before the resolver runs
+- Every `<form>` must have `noValidate` (see Testing section for why)
 
 ## Zustand store conventions
 
@@ -126,8 +126,9 @@ export const useFooStore = create<FooState>(() => ({
 
 - Actions live inside the store initialiser (not `set` callback style)
 - Call `useStoreName.setState()` inside actions
-- Sync with `localStorage` manually; hydrate via an explicit `hydrateFromStorage()` action called in `useEffect` at app mount
-- Prefer `useStore(s => s.field)` selectors for primitive values to avoid unnecessary re-renders
+- Only sync to `localStorage` in the action(s) responsible for persistence; other state mutations just call `setState`
+- Hydrate from storage via an explicit action (`hydrateFromStorage`, `initTheme`, etc.) called at app mount
+- Prefer `useStore(s => s.field)` selectors for primitive values; actions and function refs don't need selectors
 
 ## Testing
 
@@ -145,7 +146,7 @@ export const useFooStore = create<FooState>(() => ({
 2. Write the minimal production code to make it pass
 3. Refactor, then repeat
 
-Never write multiple tests up front. Never implement the full body before each individual test is red. Every implementation task includes tests; coverage thresholds are enforced (`npx vitest run --coverage`).
+Never write multiple tests up front. Never implement the full body before each individual test is red. Every implementation task includes tests; coverage thresholds are enforced (`npm run test:coverage`).
 
 ## Dependencies
 
@@ -180,7 +181,7 @@ The multi-stage Dockerfile builds with Node 22 Alpine then serves the static out
 
 ## Proxy configuration
 
-The API base URL is configured via the `VITE_API_URL` environment variable (default: `/api`). In development, add a proxy rule to `vite.config.ts` if you need to forward `/api` to a local backend:
+**Development:** `VITE_API_URL` sets the API base URL (default: `/api`). Add a proxy rule to `vite.config.ts` to forward `/api` to a local backend:
 
 ```typescript
 server: {
@@ -189,6 +190,8 @@ server: {
   },
 },
 ```
+
+**Production (Docker):** Nginx proxies `/api/` and `/media/` to `http://backend:8080` (see `nginx.conf`). `VITE_API_URL` is baked into the JS bundle at build time and should be left as `/api` for Docker deployments — configure the `backend` hostname in `nginx.conf` instead.
 
 ## Path alias
 
