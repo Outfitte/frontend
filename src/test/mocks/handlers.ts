@@ -33,4 +33,13 @@ export const handlers = [
       language: 'en',
     })
   }),
+
+  http.get('/api/admin/settings', () => {
+    return HttpResponse.json({ registration_enabled: false })
+  }),
+
+  http.patch('/api/admin/settings', async ({ request }) => {
+    const body = await request.json() as { registration_enabled: boolean }
+    return HttpResponse.json({ registration_enabled: body.registration_enabled })
+  }),
 ]

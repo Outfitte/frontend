@@ -42,6 +42,60 @@ describe('SettingsPage', () => {
     })
   })
 
+  // --- Failure / error cases ---
+
+  it('SettingsPage should not render user info when user is null', () => {
+    render(<SettingsPage />)
+
+    expect(screen.queryByText(/alice@example\.com/)).not.toBeInTheDocument()
+    expect(screen.getByTestId('settings-page')).toBeInTheDocument()
+  })
+
+  it('SettingsPage should not show admin section when user role is user', () => {
+    useAuthStore.setState({ user: regularUser })
+    render(<SettingsPage />)
+
+    expect(screen.queryByRole('switch', { name: /registration/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /^admin$/i })).not.toBeInTheDocument()
+  })
+
+  it('SettingsPage should show error message when GET /admin/settings fails', async () => {
+    useAuthStore.setState({ user: adminUser })
+    server.use(
+      http.get('/api/admin/settings', () =>
+        HttpResponse.json({ error: 'Forbidden' }, { status: 403 })
+      )
+    )
+    render(<SettingsPage />)
+
+    expect(await screen.findByText(/failed to load admin settings/i)).toBeInTheDocument()
+    expect(screen.queryByRole('switch', { name: /registration/i })).not.toBeInTheDocument()
+  })
+
+  it('SettingsPage should show error toast and revert switch when PATCH /admin/settings fails', async () => {
+    useAuthStore.setState({ user: adminUser })
+    server.use(
+      http.get('/api/admin/settings', () =>
+        HttpResponse.json({ registration_enabled: true })
+      ),
+      http.patch('/api/admin/settings', () =>
+        HttpResponse.json({ error: 'Server error' }, { status: 500 })
+      )
+    )
+    const user = userEvent.setup()
+    render(<SettingsPage />)
+
+    const toggle = await screen.findByRole('switch', { name: /registration/i })
+    expect(toggle).toBeChecked()
+
+    await user.click(toggle)
+
+    await waitFor(() => {
+      expect(vi.mocked(toast.error)).toHaveBeenCalledWith('Server error')
+    })
+    expect(screen.getByRole('switch', { name: /registration/i })).toBeChecked()
+  })
+
   // --- Happy path ---
 
   it('SettingsPage should show user email and role when user is set', () => {
@@ -52,7 +106,31 @@ describe('SettingsPage', () => {
     expect(screen.getByText(/user/)).toBeInTheDocument()
   })
 
-  // --- Failure / error cases ---
+  it('SettingsPage should show admin section with registration toggle when user role is admin', async () => {
+    useAuthStore.setState({ user: adminUser })
+    server.use(
+      http.get('/api/admin/settings', () =>
+        HttpResponse.json({ registration_enabled: false })
+      )
+    )
+    render(<SettingsPage />)
+
+    expect(await screen.findByRole('switch', { name: /registration/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /^admin$/i })).toBeInTheDocument()
+  })
+
+  it('SettingsPage should reflect registration_enabled from API when admin loads settings', async () => {
+    useAuthStore.setState({ user: adminUser })
+    server.use(
+      http.get('/api/admin/settings', () =>
+        HttpResponse.json({ registration_enabled: false })
+      )
+    )
+    render(<SettingsPage />)
+
+    const toggle = await screen.findByRole('switch', { name: /registration/i })
+    expect(toggle).not.toBeChecked()
+  })
 
   it('SettingsPage should send PATCH and optimistically update switch when registration toggle is clicked', async () => {
     useAuthStore.setState({ user: adminUser })
@@ -106,61 +184,13 @@ describe('SettingsPage', () => {
     expect(localStorage.getItem('theme')).toBe('light')
   })
 
-  it('SettingsPage should reflect registration_enabled from API when admin loads settings', async () => {
-    useAuthStore.setState({ user: adminUser })
-    server.use(
-      http.get('/api/admin/settings', () =>
-        HttpResponse.json({ registration_enabled: false })
-      )
-    )
-    render(<SettingsPage />)
-
-    const toggle = await screen.findByRole('switch', { name: /registration/i })
-    expect(toggle).not.toBeChecked()
-  })
-
-  it('SettingsPage should show admin section with registration toggle when user role is admin', async () => {
-    useAuthStore.setState({ user: adminUser })
-    server.use(
-      http.get('/api/admin/settings', () =>
-        HttpResponse.json({ registration_enabled: false })
-      )
-    )
-    render(<SettingsPage />)
-
-    expect(await screen.findByRole('switch', { name: /registration/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /^admin$/i })).toBeInTheDocument()
-  })
-
-  it('SettingsPage should not show admin section when user role is user', () => {
+  it('SettingsPage should persist system theme to localStorage when system theme is selected', async () => {
     useAuthStore.setState({ user: regularUser })
-    render(<SettingsPage />)
-
-    expect(screen.queryByRole('switch', { name: /registration/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: /^admin$/i })).not.toBeInTheDocument()
-  })
-
-  it('SettingsPage should show error toast and revert switch when PATCH /admin/settings fails', async () => {
-    useAuthStore.setState({ user: adminUser })
-    server.use(
-      http.get('/api/admin/settings', () =>
-        HttpResponse.json({ registration_enabled: true })
-      ),
-      http.patch('/api/admin/settings', () =>
-        HttpResponse.json({ error: 'Server error' }, { status: 500 })
-      )
-    )
     const user = userEvent.setup()
     render(<SettingsPage />)
 
-    const toggle = await screen.findByRole('switch', { name: /registration/i })
-    expect(toggle).toBeChecked()
+    await user.click(screen.getByRole('button', { name: /system/i }))
 
-    await user.click(toggle)
-
-    await waitFor(() => {
-      expect(vi.mocked(toast.error)).toHaveBeenCalledWith('Server error')
-    })
-    expect(screen.getByRole('switch', { name: /registration/i })).toBeChecked()
+    expect(localStorage.getItem('theme')).toBe('system')
   })
 })

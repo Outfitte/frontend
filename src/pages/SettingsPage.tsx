@@ -17,7 +17,7 @@ function useAdminSettings() {
 
 function useUpdateAdminSettings() {
   const queryClient = useQueryClient()
-  return useMutation<AppSettings, Error, Partial<AppSettings>>({
+  return useMutation<AppSettings, Error, Partial<AppSettings>, { previous: AppSettings | undefined }>({
     mutationFn: (data) => api.patch('/admin/settings', data),
     onMutate: async (newSettings) => {
       await queryClient.cancelQueries({ queryKey: ['admin', 'settings'] })
@@ -28,9 +28,8 @@ function useUpdateAdminSettings() {
       return { previous }
     },
     onError: (error, _vars, context) => {
-      const ctx = context as { previous: AppSettings | undefined } | undefined
-      if (ctx?.previous !== undefined) {
-        queryClient.setQueryData(['admin', 'settings'], ctx.previous)
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(['admin', 'settings'], context.previous)
       }
       toast.error(error.message)
     },
@@ -41,10 +40,11 @@ function useUpdateAdminSettings() {
 }
 
 function AdminSection() {
-  const { data: settings } = useAdminSettings()
+  const { data: settings, isPending, isError } = useAdminSettings()
   const updateSettings = useUpdateAdminSettings()
 
-  if (!settings) return null
+  if (isPending) return <p className="mt-4 text-sm text-muted-foreground">Loading…</p>
+  if (isError) return <p className="mt-4 text-sm text-destructive">Failed to load admin settings.</p>
 
   function handleRegistrationToggle(checked: boolean) {
     updateSettings.mutate({ registration_enabled: checked })
@@ -58,6 +58,7 @@ function AdminSection() {
           id="registration-toggle"
           checked={settings.registration_enabled}
           onCheckedChange={handleRegistrationToggle}
+          disabled={updateSettings.isPending}
           aria-label="Registration enabled"
         />
         <Label htmlFor="registration-toggle">Allow new user registration</Label>
