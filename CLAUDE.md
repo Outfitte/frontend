@@ -108,6 +108,8 @@ const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
 ## Zustand store conventions
 
 ```typescript
+const STORAGE_KEY = 'foo-store-value'
+
 interface FooState {
   value: string | null
   setValue: (v: string) => void
@@ -116,7 +118,7 @@ interface FooState {
 export const useFooStore = create<FooState>(() => ({
   value: null,
   setValue: (v) => {
-    localStorage.setItem(KEY, v)
+    localStorage.setItem(STORAGE_KEY, v)
     useFooStore.setState({ value: v })
   },
 }))
@@ -135,7 +137,7 @@ export const useFooStore = create<FooState>(() => ({
 - Use explicit readable values (`'alice@example.com'`, `'Submit'`) — not empty defaults
 - Forms that use react-hook-form must have `noValidate`; JSDOM enforces native HTML5 constraint validation (e.g. `type="email"`) and blocks the submit event before the hook's resolver runs
 - Route-level pages must have `data-testid="<name>-page"` on their root element — `App.routing.test.tsx` uses these to verify routing
-- Mock all API calls with MSW handlers in `src/test/mocks/handlers.ts`; the server is configured with `onUnhandledRequest: 'error'` so unmocked requests fail loudly
+- Mock all API calls with MSW handlers in `src/test/mocks/handlers.ts`. The server (`src/test/setup.ts`) is configured with `onUnhandledRequest: 'error'`, so unmocked requests fail loudly
 
 ## TDD workflow
 
