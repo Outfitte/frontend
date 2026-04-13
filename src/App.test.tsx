@@ -15,7 +15,6 @@ describe('App', () => {
       hydrateFromStorage: async () => {},
     })
     localStorage.clear()
-    document.documentElement.classList.remove('dark')
     useThemeStore.setState({ theme: 'system' })
   })
 
@@ -29,14 +28,14 @@ describe('App', () => {
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument()
   })
 
-  it('App should not apply dark class to documentElement on mount when localStorage theme is light', () => {
+  it('App should not apply dark class to documentElement when localStorage theme is light on app mount', () => {
     document.documentElement.classList.add('dark')
     localStorage.setItem('theme', 'light')
     render(<App />)
     expect(document.documentElement.classList.contains('dark')).toBe(false)
   })
 
-  it('App should not apply dark class to documentElement on mount when localStorage has no theme', () => {
+  it('App should not apply dark class to documentElement when localStorage has no theme on app mount', () => {
     vi.stubGlobal('matchMedia', (query: string) => ({
       matches: false,
       media: query,
@@ -47,7 +46,19 @@ describe('App', () => {
     expect(document.documentElement.classList.contains('dark')).toBe(false)
   })
 
-  it('App should apply dark class to documentElement on mount when localStorage theme is dark', () => {
+  it('App should apply dark class to documentElement when system preference is dark on app mount', () => {
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: query === '(prefers-color-scheme: dark)',
+      media: query,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }))
+    render(<App />)
+    expect(document.documentElement.classList.contains('dark')).toBe(true)
+  })
+
+  // 'dark' branch in setTheme short-circuits before matchMedia, so no stub needed
+  it('App should apply dark class to documentElement when localStorage theme is dark on app mount', () => {
     localStorage.setItem('theme', 'dark')
     render(<App />)
     expect(document.documentElement.classList.contains('dark')).toBe(true)
