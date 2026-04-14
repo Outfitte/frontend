@@ -125,6 +125,7 @@ describe('useLogin', () => {
 
     const state = useAuthStore.getState()
     expect(state.accessToken).toBe('access-token-abc123')
+    expect(state.refreshToken).toBe('refresh-token-xyz789')
     expect(state.isAuthenticated).toBe(true)
     expect(state.user).toBeNull()
     const { toast } = await import('@/lib/toast')

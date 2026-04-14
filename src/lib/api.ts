@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/stores/auth'
+import { BASE_URL } from '@/lib/constants'
 
 export class ApiError extends Error {
   status: number
@@ -10,7 +11,7 @@ export class ApiError extends Error {
   }
 }
 
-export const BASE_URL = import.meta.env.VITE_API_URL ?? '/api'
+export { BASE_URL }
 
 // Singleton refresh promise prevents concurrent 401s from triggering multiple refresh calls.
 let inflightRefresh: Promise<void> | null = null
