@@ -1,4 +1,5 @@
 import { http, HttpResponse } from 'msw'
+import { mockItem, mockCategory, mockLocation, mockChildLocation, mockWearLog, mockPhoto } from './fixtures'
 
 export const handlers = [
   http.get('/api/health', () => {
@@ -50,5 +51,135 @@ export const handlers = [
       role: 'user',
       created_at: '2026-01-01T00:00:00Z',
     })
+  }),
+
+  // --- Items ---
+
+  http.get('/api/items', ({ request }) => {
+    const url = new URL(request.url)
+    const status = url.searchParams.get('status') ?? 'active'
+    return HttpResponse.json([mockItem({ id: 'item-001' }), mockItem({ id: 'item-002', name: 'Red Wool Coat' })].filter(
+      () => status === 'all' || true
+    ))
+  }),
+
+  http.post('/api/items', async ({ request }) => {
+    const body = await request.json() as Record<string, unknown>
+    return HttpResponse.json(
+      mockItem({ id: 'item-new-001', name: body['name'] as string }),
+      { status: 201 }
+    )
+  }),
+
+  http.get('/api/items/:id', ({ params }) => {
+    return HttpResponse.json(mockItem({ id: params['id'] as string }))
+  }),
+
+  http.patch('/api/items/:id', async ({ params, request }) => {
+    const body = await request.json() as Record<string, unknown>
+    return HttpResponse.json(mockItem({ id: params['id'] as string, ...body }))
+  }),
+
+  http.delete('/api/items/:id', () => {
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  // --- Item photos ---
+
+  http.post('/api/items/:id/photos', ({ params }) => {
+    return HttpResponse.json(
+      mockPhoto({ id: 'photo-new-001', media_key: `uploads/${params['id'] as string}/photo-new-001.jpg` }),
+      { status: 201 }
+    )
+  }),
+
+  http.delete('/api/items/:id/photos/:key', () => {
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  // --- Item location assignment ---
+
+  http.patch('/api/items/:id/location', async ({ params, request }) => {
+    const body = await request.json() as { location_id: string | null }
+    return HttpResponse.json(mockItem({ id: params['id'] as string, location_id: body.location_id }))
+  }),
+
+  // --- Item lifecycle ---
+
+  http.post('/api/items/:id/archive', ({ params }) => {
+    return HttpResponse.json(mockItem({ id: params['id'] as string }))
+  }),
+
+  http.post('/api/items/:id/unarchive', ({ params }) => {
+    return HttpResponse.json(mockItem({ id: params['id'] as string }))
+  }),
+
+  http.post('/api/items/:id/dispose', ({ params }) => {
+    return HttpResponse.json(mockItem({ id: params['id'] as string }))
+  }),
+
+  // --- Wear logs ---
+
+  http.get('/api/items/:id/wear-logs', ({ params }) => {
+    return HttpResponse.json([
+      mockWearLog({ id: 'wearlog-001', item_id: params['id'] as string }),
+      mockWearLog({ id: 'wearlog-002', item_id: params['id'] as string, worn_on: '2026-04-11', notes: 'Casual day' }),
+    ])
+  }),
+
+  http.post('/api/items/:id/wear-logs', async ({ params, request }) => {
+    const body = await request.json() as Record<string, unknown>
+    return HttpResponse.json(
+      mockWearLog({ id: 'wearlog-new-001', item_id: params['id'] as string, worn_on: body['worn_on'] as string }),
+      { status: 201 }
+    )
+  }),
+
+  http.delete('/api/items/:id/wear-logs/:logID', () => {
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  // --- Locations ---
+
+  http.get('/api/locations', () => {
+    return HttpResponse.json([
+      mockLocation({ id: 'loc-001' }),
+      mockChildLocation({ id: 'loc-002' }),
+    ])
+  }),
+
+  http.post('/api/locations', async ({ request }) => {
+    const body = await request.json() as Record<string, unknown>
+    return HttpResponse.json(
+      mockLocation({ id: 'loc-new-001', label: body['label'] as string }),
+      { status: 201 }
+    )
+  }),
+
+  http.get('/api/locations/:id', ({ params }) => {
+    return HttpResponse.json(mockLocation({ id: params['id'] as string }))
+  }),
+
+  http.patch('/api/locations/:id', async ({ params, request }) => {
+    const body = await request.json() as Record<string, unknown>
+    return HttpResponse.json(mockLocation({ id: params['id'] as string, ...body }))
+  }),
+
+  http.delete('/api/locations/:id', () => {
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  http.patch('/api/locations/:id/move', async ({ params, request }) => {
+    const body = await request.json() as { parent_id: string | null }
+    return HttpResponse.json(mockLocation({ id: params['id'] as string, parent_id: body.parent_id }))
+  }),
+
+  // --- Categories ---
+
+  http.get('/api/categories', () => {
+    return HttpResponse.json([
+      mockCategory({ id: 'cat-001', label: 'Jackets' }),
+      mockCategory({ id: 'cat-002', label: 'Trousers', field_hints: [] }),
+    ])
   }),
 ]
