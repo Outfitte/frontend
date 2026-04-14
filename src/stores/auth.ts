@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { User } from '@/types'
+import { BASE_URL } from '@/lib/constants'
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? '/api'
 const REFRESH_TOKEN_KEY = 'refresh_token'
 
 interface AuthState {
@@ -66,9 +66,20 @@ export const useAuthStore = create<AuthState>(() => ({
     useAuthStore.setState({
       accessToken: data.access_token,
       refreshToken: data.refresh_token,
-      user: data.user,
+      user: null,
       isAuthenticated: true,
       isHydrating: false,
     })
+
+    try {
+      const meResponse = await fetch(`${BASE_URL}/users/me`, {
+        headers: { Authorization: `Bearer ${data.access_token}` },
+      })
+      if (meResponse.ok) {
+        useAuthStore.setState({ user: await meResponse.json() })
+      }
+    } catch {
+      // user stays null
+    }
   },
 }))

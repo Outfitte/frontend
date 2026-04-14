@@ -42,4 +42,13 @@ export const handlers = [
     const body = await request.json() as { registration_enabled: boolean }
     return HttpResponse.json({ registration_enabled: body.registration_enabled })
   }),
+
+  http.get('/api/users/me', () => {
+    return HttpResponse.json({
+      id: 'user-001',
+      email: 'user@example.com',
+      role: 'user',
+      created_at: '2026-01-01T00:00:00Z',
+    })
+  }),
 ]
