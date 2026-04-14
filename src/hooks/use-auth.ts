@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from '@/lib/toast'
-import { ApiError, BASE_URL } from '@/lib/api'
+import { ApiError, BASE_URL, api } from '@/lib/api'
 import { useAuthStore } from '@/stores/auth'
 import type { User, TokenPair } from '@/types'
 
@@ -46,13 +46,19 @@ function showError(error: ApiError) {
   toast.error(error.message)
 }
 
+async function fetchMe(): Promise<User | null> {
+  return api.get<User>('/users/me').catch(() => null)
+}
+
 export function useLogin() {
-  const { setTokens } = useAuthStore()
+  const { setTokens, setUser } = useAuthStore()
 
   return useMutation<TokenPair, ApiError, Credentials>({
     mutationFn: (credentials) => postAuth<TokenPair>('/auth/login', credentials),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setTokens(data.access_token, data.refresh_token)
+      const user = await fetchMe()
+      if (user) setUser(user)
     },
     onError: showError,
   })

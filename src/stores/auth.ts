@@ -63,10 +63,23 @@ export const useAuthStore = create<AuthState>(() => ({
     }
     const data = await response.json()
     localStorage.setItem(REFRESH_TOKEN_KEY, data.refresh_token)
+
+    let user = null
+    try {
+      const meResponse = await fetch(`${BASE_URL}/users/me`, {
+        headers: { Authorization: `Bearer ${data.access_token}` },
+      })
+      if (meResponse.ok) {
+        user = await meResponse.json()
+      }
+    } catch {
+      // user stays null
+    }
+
     useAuthStore.setState({
       accessToken: data.access_token,
       refreshToken: data.refresh_token,
-      user: data.user,
+      user,
       isAuthenticated: true,
       isHydrating: false,
     })

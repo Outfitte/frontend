@@ -105,14 +105,42 @@ describe('useLogin', () => {
     expect(toast.error).toHaveBeenCalledWith('Invalid credentials')
   })
 
-  it('useLogin should set tokens in auth store when server returns 200 with tokens', async () => {
+  it('useLogin should leave user as null when GET /users/me returns 500 after successful login', async () => {
     server.use(
       http.post('/api/auth/login', () =>
         HttpResponse.json({
           access_token: 'access-token-abc123',
           refresh_token: 'refresh-token-xyz789',
         })
-      )
+      ),
+      http.get('/api/users/me', () => new HttpResponse(null, { status: 500 }))
+    )
+    const { result } = renderHook(() => useLogin(), { wrapper: makeWrapper() })
+
+    act(() => {
+      result.current.mutate({ username: 'alice@example.com', password: 'secret123' })
+    })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    const state = useAuthStore.getState()
+    expect(state.accessToken).toBe('access-token-abc123')
+    expect(state.isAuthenticated).toBe(true)
+    expect(state.user).toBeNull()
+    const { toast } = await import('@/lib/toast')
+    expect(toast.error).not.toHaveBeenCalled()
+  })
+
+  it('useLogin should set user in auth store when GET /users/me returns user data after successful login', async () => {
+    const user = { id: 'user-001', email: 'alice@example.com', role: 'user' as const, created_at: '2024-01-01T00:00:00Z' }
+    server.use(
+      http.post('/api/auth/login', () =>
+        HttpResponse.json({
+          access_token: 'access-token-abc123',
+          refresh_token: 'refresh-token-xyz789',
+        })
+      ),
+      http.get('/api/users/me', () => HttpResponse.json(user))
     )
     const { result } = renderHook(() => useLogin(), { wrapper: makeWrapper() })
 
@@ -126,7 +154,7 @@ describe('useLogin', () => {
     expect(state.accessToken).toBe('access-token-abc123')
     expect(state.refreshToken).toBe('refresh-token-xyz789')
     expect(state.isAuthenticated).toBe(true)
-    expect(state.user).toBeNull()
+    expect(state.user).toEqual(user)
   })
 })
 
