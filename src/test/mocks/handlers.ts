@@ -55,12 +55,11 @@ export const handlers = [
 
   // --- Items ---
 
-  http.get('/api/items', ({ request }) => {
-    const url = new URL(request.url)
-    const status = url.searchParams.get('status') ?? 'active'
-    return HttpResponse.json([mockItem({ id: 'item-001' }), mockItem({ id: 'item-002', name: 'Red Wool Coat' })].filter(
-      () => status === 'all' || true
-    ))
+  http.get('/api/items', () => {
+    return HttpResponse.json([
+      mockItem({ id: 'item-001' }),
+      mockItem({ id: 'item-002', name: 'Red Wool Coat' }),
+    ])
   }),
 
   http.post('/api/items', async ({ request }) => {
@@ -135,7 +134,7 @@ export const handlers = [
     )
   }),
 
-  http.delete('/api/items/:id/wear-logs/:logID', () => {
+  http.delete('/api/items/:id/wear-logs/:logId', () => {
     return new HttpResponse(null, { status: 204 })
   }),
 

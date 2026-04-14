@@ -1,7 +1,4 @@
-import type { Category, FieldHint } from '@/types/category'
-import type { Item, Photo } from '@/types/item'
-import type { Location } from '@/types/location'
-import type { WearLog } from '@/types/wear-log'
+import type { Category, FieldHint, Item, Location, Photo, WearLog } from '@/types'
 
 export interface MockUser {
   id: string
@@ -98,7 +95,7 @@ export function mockCategory(overrides: Partial<Category> = {}): Category {
     label: 'Jackets',
     is_preset: true,
     field_hints: [
-      mockFieldHint({ key: 'condition', label: 'Condition', placeholder: 'e.g. new, good, worn' }),
+      mockFieldHint(),
       mockFieldHint({ key: 'size', label: 'Size', placeholder: 'e.g. S, M, L, XL' }),
     ],
     ...overrides,
