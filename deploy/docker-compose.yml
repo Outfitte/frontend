@@ -1,0 +1,9 @@
+services:
+  frontend:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      BACKEND_URL: http://backend:8080

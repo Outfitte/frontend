@@ -51,19 +51,24 @@ The multi-stage Dockerfile builds with Node 22 Alpine and serves the static outp
 
 ## Environment variables
 
-| Variable | Default | Description |
-|---|---|---|
-| `VITE_API_URL` | `/api` | Base URL for API requests |
+| Variable | Description |
+|---|---|
+| `BACKEND_URL` | URL of the backend API server (used by Vite dev proxy and nginx) |
 
-In development, add a proxy rule to `vite.config.ts` to forward `/api` to a local backend:
+Copy `.env.example` to `.env` and set `BACKEND_URL`:
 
-```typescript
-server: {
-  proxy: { '/api': 'http://localhost:3000' },
-},
+```bash
+cp .env.example .env
+# edit .env to set BACKEND_URL=http://localhost:3000
 ```
 
-In Docker, Nginx proxies `/api/` and `/media/` to `http://backend:8080` — configure the `backend` hostname in `nginx.conf`.
+Or pass it inline:
+
+```bash
+BACKEND_URL=http://localhost:3000 npm run dev
+```
+
+In Docker, set `BACKEND_URL` via the environment. See `deploy/docker-compose.yml` for an example.
 
 ## Links
 

@@ -63,7 +63,7 @@ api.patch<T>(path, body)
 api.delete<T>(path)
 ```
 
-- Base URL: `VITE_API_URL` env var, defaults to `/api`
+- Base URL: always `/api` (see `constants.ts`); proxied to `BACKEND_URL` at the Vite dev server or nginx layer
 - Auth: Bearer token injected automatically from `useAuthStore.getState()`
 - Errors: throws `ApiError` with a `.status` property; 401 triggers a token refresh (singleton `inflightRefresh` prevents concurrent refreshes)
 - 204 responses return `undefined`
@@ -181,17 +181,20 @@ The multi-stage Dockerfile builds with Node 22 Alpine then serves the static out
 
 ## Proxy configuration
 
-**Development:** `VITE_API_URL` sets the API base URL (default: `/api`). Add a proxy rule to `vite.config.ts` to forward `/api` to a local backend:
+A single `BACKEND_URL` environment variable controls the backend proxy target in both dev and prod. The app itself always calls `/api` — `BASE_URL` in `constants.ts` is the literal string `'/api'`.
 
-```typescript
-server: {
-  proxy: {
-    '/api': 'http://localhost:3000',
-  },
-},
+**Development:** Set `BACKEND_URL` in your shell or a `.env` file (see `.env.example`). `vite.config.ts` reads `process.env.BACKEND_URL` and forwards `/api` to that URL:
+
+```bash
+BACKEND_URL=http://localhost:3000 npm run dev
 ```
 
-**Production (Docker):** Nginx proxies `/api/` and `/media/` to `http://backend:8080` (see `nginx.conf`). `VITE_API_URL` is baked into the JS bundle at build time and should be left as `/api` for Docker deployments — configure the `backend` hostname in `nginx.conf` instead.
+**Production (Docker):** `nginx.conf.template` uses `${BACKEND_URL}` as the proxy target. The official nginx image runs `envsubst` automatically on files in `/etc/nginx/templates/` at container startup — no custom entrypoint needed. Set the variable in `deploy/docker-compose.yml` or via your orchestrator:
+
+```yaml
+environment:
+  BACKEND_URL: http://backend:8080
+```
 
 ## Path alias
 

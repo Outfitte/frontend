@@ -11,4 +11,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    proxy: process.env.BACKEND_URL
+      ? { '/api': process.env.BACKEND_URL }
+      : undefined,
+  },
 })
