@@ -37,10 +37,12 @@ jobs:
           show_full_output: "true"
           plugin_marketplaces: |
             https://github.com/Outfitte/plugins.git
+            https://github.com/anthropics/claude-plugins-official.git
           plugins: |
             gh-cli@outfitte-plugins
             split-issue@outfitte-plugins
             implement-task@outfitte-plugins
+            context7@claude-plugins-official
           settings: |
             {
               "permissions": {
@@ -68,7 +70,10 @@ jobs:
                   "Bash(make *)",
                   "Read(*)",
                   "Write(*)",
-                  "Edit(*)"
+                  "Edit(*)",
+                  "mcp__context7__resolve-library-id",
+                  "mcp__context7__get-library-docs",
+                  "WebSearch"
                 ],
                 "deny": [
                   "Bash(git *--force*)",
