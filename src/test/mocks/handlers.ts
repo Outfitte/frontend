@@ -134,7 +134,7 @@ export const handlers = [
     )
   }),
 
-  http.delete('/api/items/:id/wear-logs/:logId', () => {
+  http.delete('/api/items/:id/wear-logs/:logID', () => {
     return new HttpResponse(null, { status: 204 })
   }),
 
