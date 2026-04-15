@@ -5,6 +5,8 @@ export interface Photo {
   created_at: string
 }
 
+export type ItemStatus = 'active' | 'archived' | 'disposed'
+
 export interface Item {
   id: string
   owner_id: string
@@ -12,6 +14,7 @@ export interface Item {
   brand: string | null
   category_id: string | null
   color: string | null
+  status: ItemStatus
   metadata: Record<string, string>
   photos: Photo[]
   location_id: string | null

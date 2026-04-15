@@ -36,6 +36,7 @@ import {
   useUnarchiveItem,
   useDeleteItem,
   useDisposeItem,
+  type DisposeReason,
 } from '@/hooks/use-items'
 import { useWearLogs, useLogWear, useDeleteWearLog } from '@/hooks/use-wear-logs'
 import { useLocations } from '@/hooks/use-locations'
@@ -43,8 +44,6 @@ import { useCategories } from '@/hooks/use-categories'
 import { getAncestors } from '@/lib/location-tree'
 import { BASE_URL } from '@/lib/constants'
 import { cn } from '@/lib/utils'
-
-type DisposeReason = 'donated' | 'sold' | 'discarded' | 'lost' | 'other'
 
 const wearLogSchema = z.strictObject({
   worn_on: z
@@ -65,15 +64,23 @@ export function ItemDetailPage() {
   const [activePhotoIdx, setActivePhotoIdx] = useState(0)
   const [isArchived, setIsArchived] = useState(false)
 
-  // Reset photo index when navigating to a different item
-  useEffect(() => {
-    setActivePhotoIdx(0)
-  }, [id])
   const [showWearForm, setShowWearForm] = useState(false)
   const [showDisposeDialog, setShowDisposeDialog] = useState(false)
   const [disposeReason, setDisposeReason] = useState<DisposeReason>('donated')
 
   const { data: item, isLoading, error } = useItem(id!)
+
+  // Reset photo index when navigating to a different item
+  useEffect(() => {
+    setActivePhotoIdx(0)
+  }, [id])
+
+  // Sync archived state from server data on load and after refetch
+  useEffect(() => {
+    if (item) {
+      setIsArchived(item.status === 'archived')
+    }
+  }, [item])
   const { data: wearLogs = [] } = useWearLogs(id)
   const { data: locations = [] } = useLocations()
   const { data: categories = [] } = useCategories()

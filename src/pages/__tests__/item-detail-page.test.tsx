@@ -138,6 +138,42 @@ describe('ItemDetailPage', () => {
     expect(await screen.findByText(/date cannot be in the future/i)).toBeInTheDocument()
   })
 
+  it('ItemDetailPage should stay on page and not navigate when delete API returns error', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.delete('/api/items/:id', () =>
+        HttpResponse.json({ error: 'Server error' }, { status: 500 })
+      )
+    )
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.click(screen.getByRole('button', { name: /^delete$/i }))
+    await screen.findByRole('alertdialog')
+    await user.click(screen.getByRole('button', { name: /confirm delete/i }))
+
+    // Page should remain (item detail page still visible)
+    expect(await screen.findByTestId('item-detail-page')).toBeInTheDocument()
+  })
+
+  it('ItemDetailPage should close dispose dialog and not navigate when dispose API returns error', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.post('/api/items/:id/dispose', () =>
+        HttpResponse.json({ error: 'Server error' }, { status: 500 })
+      )
+    )
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.click(screen.getByRole('button', { name: /dispose/i }))
+    await screen.findByRole('dialog')
+    await user.click(screen.getByRole('button', { name: /confirm/i }))
+
+    // Page remains (detail page still visible after failed dispose)
+    expect(await screen.findByTestId('item-detail-page')).toBeInTheDocument()
+  })
+
   it('ItemDetailPage should send delete request when delete wear log button is clicked', async () => {
     const user = userEvent.setup()
     let deletedLogId = ''
@@ -330,6 +366,18 @@ describe('ItemDetailPage', () => {
     await user.click(screen.getByRole('button', { name: /^archive$/i }))
 
     await waitFor(() => expect(archivedId).toBe(ITEM_ID))
+  })
+
+  it('ItemDetailPage should show Unarchive button when loading an already-archived item', async () => {
+    server.use(
+      http.get('/api/items/:id', () =>
+        HttpResponse.json(mockItem({ id: ITEM_ID, name: 'Blue Denim Jacket', status: 'archived' }))
+      )
+    )
+    renderPage()
+
+    expect(await screen.findByRole('button', { name: /unarchive/i })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^archive$/i })).not.toBeInTheDocument()
   })
 
   it('ItemDetailPage should show Unarchive button after archiving item', async () => {
