@@ -6,10 +6,11 @@ import type { WearLog } from '@/types'
 
 export function useWearLogs(itemId?: string) {
   return useQuery<WearLog[], ApiError>({
-    queryKey: queryKeys.items.wearLogs(itemId ?? ''),
+    queryKey: queryKeys.items.wearLogs(itemId!),
     queryFn: () =>
       api
         .get<WearLog[]>(`/items/${itemId}/wear-logs`)
+        // Sort client-side: API response order is not guaranteed
         .then((logs) => logs.sort((a, b) => b.worn_on.localeCompare(a.worn_on))),
     enabled: !!itemId,
   })

@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook, waitFor } from '@/test/utils'
+import { renderHook, waitFor, act } from '@/test/utils'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/mocks/server'
 import { mockWearLog } from '@/test/mocks/fixtures'
 import { queryKeys } from '@/lib/query-keys'
+import { toast } from '@/lib/toast'
 import { useWearLogs, useLogWear, useDeleteWearLog } from '@/hooks/use-wear-logs'
 
 vi.mock('@/lib/toast', () => ({
@@ -34,8 +35,7 @@ describe('useWearLogs', () => {
   it('useWearLogs should not fetch when itemId is undefined', async () => {
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useWearLogs(undefined), { wrapper })
-    await new Promise((r) => setTimeout(r, 50))
-    expect(result.current.fetchStatus).toBe('idle')
+    await waitFor(() => expect(result.current.fetchStatus).toBe('idle'))
     expect(result.current.data).toBeUndefined()
   })
 
@@ -93,9 +93,10 @@ describe('useLogWear', () => {
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useLogWear(), { wrapper })
-    result.current.mutate({ itemId: 'item-001', worn_on: '2099-01-01' })
+    act(() => {
+      result.current.mutate({ itemId: 'item-001', worn_on: '2099-01-01' })
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
-    const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('worn_on cannot be in the future')
   })
 
@@ -117,10 +118,11 @@ describe('useLogWear', () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useLogWear(), { wrapper })
-    result.current.mutate({ itemId: 'item-001', worn_on: '2026-04-15', notes: 'Team meeting' })
+    act(() => {
+      result.current.mutate({ itemId: 'item-001', worn_on: '2026-04-15', notes: 'Team meeting' })
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(result.current.data).toMatchObject({ id: 'wearlog-new-001', worn_on: '2026-04-15' })
-    const { toast } = await import('@/lib/toast')
     expect(toast.success).toHaveBeenCalledWith('Wear logged')
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.wearLogs('item-001') })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.detail('item-001') })
@@ -142,9 +144,10 @@ describe('useDeleteWearLog', () => {
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useDeleteWearLog(), { wrapper })
-    result.current.mutate({ itemId: 'item-001', logId: 'wearlog-missing' })
+    act(() => {
+      result.current.mutate({ itemId: 'item-001', logId: 'wearlog-missing' })
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
-    const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Wear log not found')
   })
 
@@ -157,7 +160,9 @@ describe('useDeleteWearLog', () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useDeleteWearLog(), { wrapper })
-    result.current.mutate({ itemId: 'item-001', logId: 'wearlog-missing' })
+    act(() => {
+      result.current.mutate({ itemId: 'item-001', logId: 'wearlog-missing' })
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.wearLogs('item-001') })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.detail('item-001') })
@@ -172,9 +177,10 @@ describe('useDeleteWearLog', () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useDeleteWearLog(), { wrapper })
-    result.current.mutate({ itemId: 'item-001', logId: 'wearlog-001' })
+    act(() => {
+      result.current.mutate({ itemId: 'item-001', logId: 'wearlog-001' })
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    const { toast } = await import('@/lib/toast')
     expect(toast.success).toHaveBeenCalledWith('Wear log deleted')
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.wearLogs('item-001') })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.detail('item-001') })
