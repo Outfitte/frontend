@@ -1,11 +1,30 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { api } from '@/lib/api'
-import { ApiError } from '@/lib/api'
+import { api, ApiError } from '@/lib/api'
 import { toast } from '@/lib/toast'
 import { queryKeys } from '@/lib/query-keys'
 import type { Item } from '@/types'
 
+export type ItemStatus = 'active' | 'archived' | 'all'
+
 type DisposeReason = 'donated' | 'sold' | 'discarded' | 'lost' | 'other'
+
+interface CreateItemVars {
+  name: string
+  brand?: string | null
+  category_id?: string | null
+  color?: string | null
+  location_id?: string | null
+  purchase_price?: string | null
+  purchase_currency?: string | null
+  purchase_date?: string | null
+  seller_url?: string | null
+  metadata?: Record<string, string>
+}
+
+interface UpdateItemVars {
+  id: string
+  data: Partial<Item>
+}
 
 interface DisposeVars {
   id: string
@@ -17,18 +36,15 @@ interface AssignLocationVars {
   location_id: string | null
 }
 
-interface UpdateItemVars {
-  id: string
-  data: Partial<Item>
-}
-
 // ─── Query hooks ─────────────────────────────────────────────────────────────
 
-export function useItems(status?: string) {
+export function useItems(status?: ItemStatus) {
   return useQuery<Item[], ApiError>({
     queryKey: queryKeys.items.list(status),
     queryFn: () => {
-      const path = status ? `/items?status=${status}` : '/items'
+      const path = status
+        ? `/items?${new URLSearchParams({ status }).toString()}`
+        : '/items'
       return api.get<Item[]>(path)
     },
   })
@@ -45,7 +61,7 @@ export function useItem(id: string) {
 
 export function useCreateItem() {
   const queryClient = useQueryClient()
-  return useMutation<Item, ApiError, Record<string, unknown>>({
+  return useMutation<Item, ApiError, CreateItemVars>({
     mutationFn: (data) => api.post<Item>('/items', data),
     onSuccess: () => {
       toast.success('Item created')
@@ -91,7 +107,8 @@ export function useArchiveItem() {
   return useMutation<void, ApiError, string, { previous: Item[] | undefined }>({
     mutationFn: (id) => api.post<void>(`/items/${id}/archive`),
     onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.items.all })
+      // Cancel only the default (active) list to avoid cancelling unrelated status variants
+      await queryClient.cancelQueries({ queryKey: queryKeys.items.list() })
       const previous = queryClient.getQueryData<Item[]>(queryKeys.items.list())
       if (previous) {
         queryClient.setQueryData<Item[]>(
@@ -122,7 +139,8 @@ export function useUnarchiveItem() {
   return useMutation<void, ApiError, string, { previous: Item[] | undefined }>({
     mutationFn: (id) => api.post<void>(`/items/${id}/unarchive`),
     onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: queryKeys.items.all })
+      // Cancel only the archived list to avoid cancelling unrelated status variants
+      await queryClient.cancelQueries({ queryKey: queryKeys.items.list('archived') })
       const previous = queryClient.getQueryData<Item[]>(queryKeys.items.list('archived'))
       if (previous) {
         queryClient.setQueryData<Item[]>(
@@ -150,6 +168,7 @@ export function useUnarchiveItem() {
 
 export function useDisposeItem() {
   const queryClient = useQueryClient()
+  // No optimistic update — dispose is irreversible; confirm with server before updating UI
   return useMutation<void, ApiError, DisposeVars>({
     mutationFn: ({ id, reason }) => api.post<void>(`/items/${id}/dispose`, { reason }),
     onSuccess: () => {
