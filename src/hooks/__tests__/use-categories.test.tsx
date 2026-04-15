@@ -6,10 +6,6 @@ import { server } from '@/test/mocks/server'
 import { mockCategory } from '@/test/mocks/fixtures'
 import { useCategories } from '@/hooks/use-categories'
 
-vi.mock('@/lib/toast', () => ({
-  toast: { error: vi.fn(), success: vi.fn(), info: vi.fn() },
-}))
-
 function makeWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {
