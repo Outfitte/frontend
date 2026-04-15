@@ -218,6 +218,18 @@ describe('ItemDetailPage', () => {
     )
   })
 
+  it('ItemDetailPage should not show location breadcrumb when item has no location', async () => {
+    server.use(
+      http.get('/api/items/:id', () =>
+        HttpResponse.json(mockItem({ id: ITEM_ID, location_id: null }))
+      )
+    )
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    expect(screen.queryByTestId('location-breadcrumb')).not.toBeInTheDocument()
+  })
+
   it('ItemDetailPage should render location as breadcrumb with ancestor chain', async () => {
     renderPage()
 
@@ -253,6 +265,19 @@ describe('ItemDetailPage', () => {
 
     expect(screen.getByLabelText(/date/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/notes/i)).toBeInTheDocument()
+  })
+
+  it('ItemDetailPage should close wear log form when Cancel button is clicked', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.click(screen.getByRole('button', { name: /log wear/i }))
+    expect(screen.getByLabelText(/date/i)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /cancel/i }))
+
+    expect(screen.queryByLabelText(/date/i)).not.toBeInTheDocument()
   })
 
   it('ItemDetailPage should create wear log when form is submitted with valid date', async () => {
@@ -322,6 +347,108 @@ describe('ItemDetailPage', () => {
     )
   })
 
+  it('ItemDetailPage should send unarchive request when Unarchive button is clicked', async () => {
+    const user = userEvent.setup()
+    let unarchived = false
+    server.use(
+      http.post('/api/items/:id/archive', () => new HttpResponse(null, { status: 204 })),
+      http.post('/api/items/:id/unarchive', () => {
+        unarchived = true
+        return new HttpResponse(null, { status: 204 })
+      })
+    )
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.click(screen.getByRole('button', { name: /^archive$/i }))
+    await screen.findByRole('button', { name: /unarchive/i })
+    await user.click(screen.getByRole('button', { name: /unarchive/i }))
+
+    await waitFor(() => expect(unarchived).toBe(true))
+  })
+
+  it('ItemDetailPage should not show last-worn date when item has no wear logs', async () => {
+    server.use(
+      http.get('/api/items/:id/wear-logs', () => HttpResponse.json([]))
+    )
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    expect(screen.getByTestId('wear-count')).toHaveTextContent('0')
+    expect(screen.queryByTestId('last-worn')).not.toBeInTheDocument()
+  })
+
+  it('ItemDetailPage should navigate to next photo when Next arrow button is clicked', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-001'))
+
+    await user.click(screen.getByRole('button', { name: /next photo/i }))
+
+    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-002'))
+  })
+
+  it('ItemDetailPage should navigate to previous photo when Prev arrow button is clicked', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.click(screen.getByRole('button', { name: /next photo/i }))
+    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-002'))
+
+    await user.click(screen.getByRole('button', { name: /previous photo/i }))
+
+    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-001'))
+  })
+
+  it('ItemDetailPage should wrap to last photo when Prev is clicked on the first photo', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    // Start at first photo, click prev → wraps to last
+    await user.click(screen.getByRole('button', { name: /previous photo/i }))
+
+    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-002'))
+  })
+
+  it('ItemDetailPage should wrap to first photo when Next is clicked on the last photo', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    // Navigate to last photo, then click next → wraps to first
+    await user.click(screen.getByRole('button', { name: /next photo/i }))
+    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-002'))
+
+    await user.click(screen.getByRole('button', { name: /next photo/i }))
+
+    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-001'))
+  })
+
+  it('ItemDetailPage should render purchase section when only seller URL is set', async () => {
+    server.use(
+      http.get('/api/items/:id', () =>
+        HttpResponse.json(
+          mockItem({
+            id: ITEM_ID,
+            purchase_price: null,
+            purchase_currency: null,
+            purchase_date: null,
+            seller_url: 'https://example.com/jacket',
+          })
+        )
+      )
+    )
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    expect(screen.getByTestId('purchase-section')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /seller/i })).toBeInTheDocument()
+  })
+
   it('ItemDetailPage should open dispose dialog with reason select when Dispose button is clicked', async () => {
     const user = userEvent.setup()
     renderPage()
@@ -331,6 +458,21 @@ describe('ItemDetailPage', () => {
 
     expect(await screen.findByRole('dialog')).toBeInTheDocument()
     expect(screen.getByRole('combobox', { name: /reason/i })).toBeInTheDocument()
+  })
+
+  it('ItemDetailPage should close dispose dialog when Cancel button is clicked', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.click(screen.getByRole('button', { name: /dispose/i }))
+    await screen.findByRole('dialog')
+
+    await user.click(screen.getByRole('button', { name: /^cancel$/i }))
+
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    )
   })
 
   it('ItemDetailPage should send dispose request with selected reason when dispose form is submitted', async () => {
