@@ -61,18 +61,21 @@ api.get<T>(path)
 api.post<T>(path, body)
 api.patch<T>(path, body)
 api.delete<T>(path)
+api.upload<T>(path, formData)   // multipart/form-data — skips JSON Content-Type, goes through same auth/retry pipeline
 ```
 
 - Base URL: always `/api` (see `constants.ts`); proxied to `BACKEND_URL` at the Vite dev server or nginx layer
 - Auth: Bearer token injected automatically from `useAuthStore.getState()`
 - Errors: throws `ApiError` with a `.status` property; 401 triggers a token refresh (singleton `inflightRefresh` prevents concurrent refreshes)
 - 204 responses return `undefined`
+- **Never call `fetch` directly in hooks** — always go through `api.*` so auth, retry, and error handling are consistent
 
 ## TanStack Query conventions
 
 - **Query keys**: breadcrumb-style arrays — `['admin', 'settings']`, `['users', userId]`
 - **Queries**: plain `useQuery` calls; `queryFn` calls an `api.*` method directly
 - **Mutations**: always type at least `TData` and `TError`; add `TVariables` and `TContext` when using optimistic updates
+- **Cache invalidation**: always call `queryClient.invalidateQueries()` in `onSettled`, not `onSuccess` — this ensures the cache refreshes after both success and error
 - **Optimistic updates**:
   1. `onMutate` — cancel in-flight queries, snapshot old data, apply optimistic update, return snapshot as context
   2. `onError` — roll back using the context snapshot; call `toast.error()`
