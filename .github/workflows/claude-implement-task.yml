@@ -30,11 +30,27 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Create MCP config
+        run: |
+          cat > /tmp/mcp-config.json << 'EOF'
+          {
+            "mcpServers": {
+              "context7": {
+                "command": "npx",
+                "args": ["-y", "@upstash/context7-mcp@latest"]
+              }
+            }
+          }
+          EOF
+
       - name: Run Claude Implement Task
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           show_full_output: "true"
+          claude_args: |
+            --mcp-config /tmp/mcp-config.json
+            --allowedTools "mcp__context7__resolve-library-id,mcp__context7__get-library-docs,WebSearch"
           plugin_marketplaces: |
             https://github.com/Outfitte/plugins.git
           plugins: |
@@ -68,7 +84,10 @@ jobs:
                   "Bash(make *)",
                   "Read(*)",
                   "Write(*)",
-                  "Edit(*)"
+                  "Edit(*)",
+                  "mcp__context7__resolve-library-id",
+                  "mcp__context7__get-library-docs",
+                  "WebSearch"
                 ],
                 "deny": [
                   "Bash(git *--force*)",
