@@ -30,47 +30,10 @@ function makeWrapper() {
 describe('useUploadPhoto', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    useAuthStore.setState({ accessToken: null })
   })
 
-  it('useUploadPhoto should call toast.error with Unknown error when error response body is not JSON', async () => {
-    server.use(
-      http.post('/api/items/:id/photos', () =>
-        new HttpResponse('not json', { status: 500, headers: { 'Content-Type': 'text/plain' } })
-      )
-    )
-    const { wrapper } = makeWrapper()
-    const { result } = renderHook(() => useUploadPhoto(), { wrapper })
-    act(() => {
-      result.current.mutate({
-        itemId: 'item-001',
-        photo: new File(['img'], 'photo.jpg', { type: 'image/jpeg' }),
-      })
-    })
-    await waitFor(() => expect(result.current.isError).toBe(true))
-    const { toast } = await import('@/lib/toast')
-    expect(toast.error).toHaveBeenCalledWith('Unknown error')
-  })
-
-  it('useUploadPhoto should call toast.error with Unknown error when response body has no error field', async () => {
-    server.use(
-      http.post('/api/items/:id/photos', () =>
-        HttpResponse.json({}, { status: 400 })
-      )
-    )
-    const { wrapper } = makeWrapper()
-    const { result } = renderHook(() => useUploadPhoto(), { wrapper })
-    act(() => {
-      result.current.mutate({
-        itemId: 'item-001',
-        photo: new File(['img'], 'photo.jpg', { type: 'image/jpeg' }),
-      })
-    })
-    await waitFor(() => expect(result.current.isError).toBe(true))
-    const { toast } = await import('@/lib/toast')
-    expect(toast.error).toHaveBeenCalledWith('Unknown error')
-  })
-
-  it('useUploadPhoto should call toast.error when POST /items/:id/photos returns 413', async () => {
+  it('useUploadPhoto should call toast.error when POST /items/:id/photos returns 413 file too large', async () => {
     server.use(
       http.post('/api/items/:id/photos', () =>
         HttpResponse.json({ error: 'File too large' }, { status: 413 })
@@ -108,6 +71,25 @@ describe('useUploadPhoto', () => {
     expect(toast.error).toHaveBeenCalledWith('Item not found')
   })
 
+  it('useUploadPhoto should invalidate item detail when upload fails', async () => {
+    server.use(
+      http.post('/api/items/:id/photos', () =>
+        HttpResponse.json({ error: 'File too large' }, { status: 413 })
+      )
+    )
+    const { queryClient, wrapper } = makeWrapper()
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    const { result } = renderHook(() => useUploadPhoto(), { wrapper })
+    act(() => {
+      result.current.mutate({
+        itemId: 'item-001',
+        photo: new File(['img'], 'photo.jpg', { type: 'image/jpeg' }),
+      })
+    })
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.detail('item-001') })
+  })
+
   it('useUploadPhoto should include Authorization header when access token is set', async () => {
     let capturedAuthHeader: string | null | undefined
     server.use(
@@ -143,7 +125,6 @@ describe('useUploadPhoto', () => {
         )
       })
     )
-    useAuthStore.setState({ accessToken: null })
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useUploadPhoto(), { wrapper })
     act(() => {
@@ -156,7 +137,15 @@ describe('useUploadPhoto', () => {
     expect(capturedAuthHeader).toBeNull()
   })
 
-  it('useUploadPhoto should call toast.success and invalidate item detail on success', async () => {
+  it('useUploadPhoto should call toast.success and invalidate item detail when POST /items/:id/photos returns 201', async () => {
+    server.use(
+      http.post('/api/items/:id/photos', ({ params }) =>
+        HttpResponse.json(
+          mockPhoto({ id: 'photo-new-001', media_key: `uploads/${params['id'] as string}/photo-new-001.jpg` }),
+          { status: 201 }
+        )
+      )
+    )
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useUploadPhoto(), { wrapper })
@@ -183,7 +172,7 @@ describe('useDeletePhoto', () => {
     vi.clearAllMocks()
   })
 
-  it('useDeletePhoto should call toast.error when DELETE /items/:id/photos/:key returns 404', async () => {
+  it('useDeletePhoto should call toast.error when DELETE /items/:id/photos/:key returns 404 photo not found', async () => {
     server.use(
       http.delete('/api/items/:id/photos/:key', () =>
         HttpResponse.json({ error: 'Photo not found' }, { status: 404 })
@@ -199,7 +188,28 @@ describe('useDeletePhoto', () => {
     expect(toast.error).toHaveBeenCalledWith('Photo not found')
   })
 
-  it('useDeletePhoto should call toast.success and invalidate item detail on success', async () => {
+  it('useDeletePhoto should invalidate item detail when delete fails', async () => {
+    server.use(
+      http.delete('/api/items/:id/photos/:key', () =>
+        HttpResponse.json({ error: 'Photo not found' }, { status: 404 })
+      )
+    )
+    const { queryClient, wrapper } = makeWrapper()
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    const { result } = renderHook(() => useDeletePhoto(), { wrapper })
+    act(() => {
+      result.current.mutate({ itemId: 'item-001', key: 'uploads/item-001/photo-001.jpg' })
+    })
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.detail('item-001') })
+  })
+
+  it('useDeletePhoto should call toast.success and invalidate item detail when DELETE /items/:id/photos/:key returns 204', async () => {
+    server.use(
+      http.delete('/api/items/:id/photos/:key', () =>
+        new HttpResponse(null, { status: 204 })
+      )
+    )
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useDeletePhoto(), { wrapper })

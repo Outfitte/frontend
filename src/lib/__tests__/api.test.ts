@@ -273,6 +273,62 @@ describe('api', () => {
     expect(result).toEqual({ deleted: true })
   })
 
+  // --- api.upload ---
+
+  it('api.upload should throw ApiError when server returns 413', async () => {
+    server.use(
+      http.post('/api/items/item-001/photos', () =>
+        HttpResponse.json({ error: 'File too large' }, { status: 413 })
+      )
+    )
+    const formData = new FormData()
+    formData.append('photo', new File(['img'], 'photo.jpg', { type: 'image/jpeg' }))
+    await expect(api.upload('/items/item-001/photos', formData)).rejects.toMatchObject({
+      status: 413,
+      message: 'File too large',
+    })
+  })
+
+  it('api.upload should surface network errors as ApiError with status 0', async () => {
+    server.use(
+      http.post('/api/items/item-001/photos', () => HttpResponse.error())
+    )
+    const formData = new FormData()
+    formData.append('photo', new File(['img'], 'photo.jpg', { type: 'image/jpeg' }))
+    const err = await api.upload('/items/item-001/photos', formData).catch((e) => e) as ApiError
+    expect(err).toBeInstanceOf(ApiError)
+    expect(err.status).toBe(0)
+  })
+
+  it('api.upload should not set Content-Type header when sending FormData', async () => {
+    let capturedContentType: string | null = null
+    server.use(
+      http.post('/api/items/item-001/photos', ({ request }) => {
+        capturedContentType = request.headers.get('Content-Type')
+        return HttpResponse.json({ id: 'photo-001' }, { status: 201 })
+      })
+    )
+    const formData = new FormData()
+    formData.append('photo', new File(['img'], 'photo.jpg', { type: 'image/jpeg' }))
+    await api.upload('/items/item-001/photos', formData)
+    expect(capturedContentType).not.toContain('application/json')
+  })
+
+  it('api.upload should send FormData and return parsed JSON when server returns 201', async () => {
+    let receivedFormData: FormData | undefined
+    server.use(
+      http.post('/api/items/item-001/photos', async ({ request }) => {
+        receivedFormData = await request.formData()
+        return HttpResponse.json({ id: 'photo-new-001', media_key: 'uploads/item-001/photo-new-001.jpg' }, { status: 201 })
+      })
+    )
+    const formData = new FormData()
+    formData.append('photo', new File(['img'], 'photo.jpg', { type: 'image/jpeg' }))
+    const result = await api.upload<{ id: string }>('/items/item-001/photos', formData)
+    expect(receivedFormData?.has('photo')).toBe(true)
+    expect(result).toEqual({ id: 'photo-new-001', media_key: 'uploads/item-001/photo-new-001.jpg' })
+  })
+
   it('api.get should retry with new token after 401 triggers refresh', async () => {
     useAuthStore.setState({
       accessToken: 'expired-token',

@@ -38,11 +38,12 @@ async function executeRequest(
   path: string,
   body?: unknown
 ): Promise<Response> {
-  const headers = buildHeaders(body !== undefined)
+  const isFormData = body instanceof FormData
+  const headers = buildHeaders(!isFormData && body !== undefined)
   return fetch(`${BASE_URL}${path}`, {
     method,
     headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
+    body: isFormData ? (body as FormData) : body !== undefined ? JSON.stringify(body) : undefined,
   })
 }
 
@@ -113,4 +114,5 @@ export const api = {
   post: <T>(path: string, body?: unknown): Promise<T> => request<T>('POST', path, body),
   patch: <T>(path: string, body?: unknown): Promise<T> => request<T>('PATCH', path, body),
   delete: <T>(path: string): Promise<T> => request<T>('DELETE', path),
+  upload: <T>(path: string, body: FormData): Promise<T> => request<T>('POST', path, body),
 }
