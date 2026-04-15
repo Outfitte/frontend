@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { format, parseISO, isAfter } from 'date-fns'
 import { useForm } from 'react-hook-form'
@@ -64,6 +64,11 @@ export function ItemDetailPage() {
 
   const [activePhotoIdx, setActivePhotoIdx] = useState(0)
   const [isArchived, setIsArchived] = useState(false)
+
+  // Reset photo index when navigating to a different item
+  useEffect(() => {
+    setActivePhotoIdx(0)
+  }, [id])
   const [showWearForm, setShowWearForm] = useState(false)
   const [showDisposeDialog, setShowDisposeDialog] = useState(false)
   const [disposeReason, setDisposeReason] = useState<DisposeReason>('donated')
@@ -366,7 +371,7 @@ export function ItemDetailPage() {
                     <dd>{format(parseISO(item.purchase_date), 'MMM d, yyyy')}</dd>
                   </div>
                 )}
-                {item.seller_url && (
+                {item.seller_url && /^https?:\/\//i.test(item.seller_url) && (
                   <div className="flex gap-2">
                     <dt className="font-medium text-muted-foreground">Seller</dt>
                     <dd>
