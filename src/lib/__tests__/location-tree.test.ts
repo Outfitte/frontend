@@ -21,6 +21,12 @@ describe('buildLocationTree', () => {
     expect(buildLocationTree([])).toEqual([])
   })
 
+  it('buildLocationTree should omit orphaned child when given location whose parent_id is not in the list', () => {
+    const locations = [loc('b', 'missing-parent', 'Shelf')]
+    const tree = buildLocationTree(locations)
+    expect(tree).toEqual([])
+  })
+
   it('buildLocationTree should return one root node with empty children when given single location with no parent', () => {
     const locations = [loc('a', null, 'Closet')]
     expect(buildLocationTree(locations)).toEqual([{ ...locations[0], children: [] }])
@@ -43,12 +49,6 @@ describe('buildLocationTree', () => {
     expect(tree[0].children).toHaveLength(1)
     expect(tree[0].children[0].id).toBe('b')
     expect(tree[0].children[0].children).toEqual([])
-  })
-
-  it('buildLocationTree should omit orphaned child when given location whose parent_id is not in the list', () => {
-    const locations = [loc('b', 'missing-parent', 'Shelf')]
-    const tree = buildLocationTree(locations)
-    expect(tree).toEqual([])
   })
 
   it('buildLocationTree should support deep nesting when given 3+ level hierarchy', () => {

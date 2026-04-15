@@ -27,12 +27,19 @@ export function buildLocationTree(locations: Location[]): LocationTreeNode[] {
   return roots
 }
 
-export function flattenTree(tree: LocationTreeNode[], depth = 0): (Location & { depth: number })[] {
+export function flattenTree(tree: LocationTreeNode[]): (Location & { depth: number })[] {
   const result: (Location & { depth: number })[] = []
-  for (const node of tree) {
+  const stack: { node: LocationTreeNode; depth: number }[] = []
+  for (let i = tree.length - 1; i >= 0; i--) {
+    stack.push({ node: tree[i], depth: 0 })
+  }
+  while (stack.length > 0) {
+    const { node, depth } = stack.pop()!
     const { children, ...loc } = node
     result.push({ ...loc, depth })
-    result.push(...flattenTree(children, depth + 1))
+    for (let i = children.length - 1; i >= 0; i--) {
+      stack.push({ node: children[i], depth: depth + 1 })
+    }
   }
   return result
 }
@@ -61,8 +68,9 @@ export function getDescendantIds(locations: Location[], id: string): string[] {
   }
   const result: string[] = []
   const queue = [...(childrenOf.get(id) ?? [])]
-  while (queue.length > 0) {
-    const childId = queue.shift()!
+  let head = 0
+  while (head < queue.length) {
+    const childId = queue[head++]
     result.push(childId)
     queue.push(...(childrenOf.get(childId) ?? []))
   }
