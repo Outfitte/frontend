@@ -55,7 +55,7 @@ describe('useLocations', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(result.current.data).toEqual([
       mockLocation({ id: 'loc-001' }),
-      mockChildLocation({ id: 'loc-002' }),
+      mockChildLocation(),
     ])
   })
 })
@@ -108,6 +108,20 @@ describe('useCreateLocation', () => {
     expect(toast.error).toHaveBeenCalledWith('Validation failed')
   })
 
+  it('useCreateLocation should invalidate locations list when POST /locations returns 400', async () => {
+    server.use(
+      http.post('/api/locations', () =>
+        HttpResponse.json({ error: 'Validation failed' }, { status: 400 })
+      )
+    )
+    const { queryClient, wrapper } = makeWrapper()
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    const { result } = renderHook(() => useCreateLocation(), { wrapper })
+    act(() => { result.current.mutate({ label: 'Bedroom' }) })
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.locations.all })
+  })
+
   it('useCreateLocation should call toast.success and invalidate locations list on success', async () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
@@ -158,6 +172,21 @@ describe('useUpdateLocation', () => {
     expect(toast.error).toHaveBeenCalledWith('Location not found')
   })
 
+  it('useUpdateLocation should invalidate list and detail when PATCH /locations/:id returns 404', async () => {
+    server.use(
+      http.patch('/api/locations/:id', () =>
+        HttpResponse.json({ error: 'Location not found' }, { status: 404 })
+      )
+    )
+    const { queryClient, wrapper } = makeWrapper()
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    const { result } = renderHook(() => useUpdateLocation(), { wrapper })
+    act(() => { result.current.mutate({ id: 'loc-missing', label: 'New Label' }) })
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.locations.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.locations.detail('loc-missing') })
+  })
+
   it('useUpdateLocation should call toast.success and invalidate list and detail on success', async () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
@@ -205,6 +234,20 @@ describe('useDeleteLocation', () => {
     expect(toast.error).toHaveBeenCalledWith('Location has assigned items')
   })
 
+  it('useDeleteLocation should invalidate locations list when DELETE /locations/:id returns 409', async () => {
+    server.use(
+      http.delete('/api/locations/:id', () =>
+        HttpResponse.json({ error: 'Location has children' }, { status: 409 })
+      )
+    )
+    const { queryClient, wrapper } = makeWrapper()
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    const { result } = renderHook(() => useDeleteLocation(), { wrapper })
+    act(() => { result.current.mutate('loc-001') })
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.locations.all })
+  })
+
   it('useDeleteLocation should call toast.success and invalidate locations list on success', async () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
@@ -235,6 +278,20 @@ describe('useMoveLocation', () => {
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(result.current.error?.status).toBe(409)
     expect(toast.error).toHaveBeenCalledWith('Move would create a cycle')
+  })
+
+  it('useMoveLocation should invalidate locations list when PATCH /locations/:id/move returns 409', async () => {
+    server.use(
+      http.patch('/api/locations/:id/move', () =>
+        HttpResponse.json({ error: 'Move would create a cycle' }, { status: 409 })
+      )
+    )
+    const { queryClient, wrapper } = makeWrapper()
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    const { result } = renderHook(() => useMoveLocation(), { wrapper })
+    act(() => { result.current.mutate({ id: 'loc-001', parent_id: 'loc-002' }) })
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.locations.all })
   })
 
   it('useMoveLocation should call toast.success and invalidate locations list on success', async () => {

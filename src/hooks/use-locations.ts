@@ -28,10 +28,11 @@ export function useLocations() {
   })
 }
 
-export function useLocation(id: string) {
+export function useLocation(id: string | undefined) {
   return useQuery<Location, ApiError>({
-    queryKey: queryKeys.locations.detail(id),
+    queryKey: queryKeys.locations.detail(id!),
     queryFn: () => api.get<Location>(`/locations/${id}`),
+    enabled: !!id,
   })
 }
 
@@ -43,10 +44,12 @@ export function useCreateLocation() {
     mutationFn: (data) => api.post<Location>('/locations', data),
     onSuccess: () => {
       toast.success('Location created')
-      queryClient.invalidateQueries({ queryKey: queryKeys.locations.all })
     },
     onError: (error) => {
       toast.error(error.message)
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.locations.all })
     },
   })
 }
@@ -55,13 +58,15 @@ export function useUpdateLocation() {
   const queryClient = useQueryClient()
   return useMutation<Location, ApiError, UpdateLocationVars>({
     mutationFn: ({ id, label }) => api.patch<Location>(`/locations/${id}`, { label }),
-    onSuccess: (_, { id }) => {
+    onSuccess: () => {
       toast.success('Location updated')
-      queryClient.invalidateQueries({ queryKey: queryKeys.locations.all })
-      queryClient.invalidateQueries({ queryKey: queryKeys.locations.detail(id) })
     },
     onError: (error) => {
       toast.error(error.message)
+    },
+    onSettled: (_, __, { id }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.locations.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.locations.detail(id) })
     },
   })
 }
@@ -72,10 +77,12 @@ export function useDeleteLocation() {
     mutationFn: (id) => api.delete<void>(`/locations/${id}`),
     onSuccess: () => {
       toast.success('Location deleted')
-      queryClient.invalidateQueries({ queryKey: queryKeys.locations.all })
     },
     onError: (error) => {
       toast.error(error.message)
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.locations.all })
     },
   })
 }
@@ -87,10 +94,12 @@ export function useMoveLocation() {
       api.patch<Location>(`/locations/${id}/move`, { parent_id }),
     onSuccess: () => {
       toast.success('Location moved')
-      queryClient.invalidateQueries({ queryKey: queryKeys.locations.all })
     },
     onError: (error) => {
       toast.error(error.message)
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.locations.all })
     },
   })
 }
