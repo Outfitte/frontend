@@ -247,6 +247,23 @@ describe('useArchiveItem', () => {
     expect(toast.error).toHaveBeenCalledWith('Archive failed')
   })
 
+  it('useArchiveItem should call toast.error without rollback when no list data is cached and server returns error', async () => {
+    server.use(
+      http.post('/api/items/:id/archive', () =>
+        HttpResponse.json({ error: 'Archive failed' }, { status: 400 })
+      )
+    )
+    const { queryClient, wrapper } = makeWrapper()
+    // No pre-seeded data — covers the false branches of if (previous) in onMutate
+    // and if (context?.previous !== undefined) in onError
+    const { result } = renderHook(() => useArchiveItem(), { wrapper })
+    act(() => { result.current.mutate('item-001') })
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(queryClient.getQueryData(queryKeys.items.list())).toBeUndefined()
+    const { toast } = await import('@/lib/toast')
+    expect(toast.error).toHaveBeenCalledWith('Archive failed')
+  })
+
   it('useArchiveItem should optimistically remove item from list and invalidate list and detail on success', async () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
@@ -287,6 +304,23 @@ describe('useUnarchiveItem', () => {
     await waitFor(() => expect(result.current.isError).toBe(true))
     const data = queryClient.getQueryData<Item[]>(queryKeys.items.list('archived'))
     expect(data).toHaveLength(2)
+    const { toast } = await import('@/lib/toast')
+    expect(toast.error).toHaveBeenCalledWith('Unarchive failed')
+  })
+
+  it('useUnarchiveItem should call toast.error without rollback when no archived list data is cached and server returns error', async () => {
+    server.use(
+      http.post('/api/items/:id/unarchive', () =>
+        HttpResponse.json({ error: 'Unarchive failed' }, { status: 400 })
+      )
+    )
+    const { queryClient, wrapper } = makeWrapper()
+    // No pre-seeded data — covers the false branches of if (previous) in onMutate
+    // and if (context?.previous !== undefined) in onError
+    const { result } = renderHook(() => useUnarchiveItem(), { wrapper })
+    act(() => { result.current.mutate('item-001') })
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(queryClient.getQueryData(queryKeys.items.list('archived'))).toBeUndefined()
     const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Unarchive failed')
   })
