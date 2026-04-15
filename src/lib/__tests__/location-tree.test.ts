@@ -45,6 +45,12 @@ describe('buildLocationTree', () => {
     expect(tree[0].children[0].children).toEqual([])
   })
 
+  it('buildLocationTree should omit orphaned child when given location whose parent_id is not in the list', () => {
+    const locations = [loc('b', 'missing-parent', 'Shelf')]
+    const tree = buildLocationTree(locations)
+    expect(tree).toEqual([])
+  })
+
   it('buildLocationTree should support deep nesting when given 3+ level hierarchy', () => {
     const locations = [
       loc('a', null, 'Closet'),
@@ -123,6 +129,11 @@ describe('getAncestors', () => {
       loc('c', 'b', 'Box'),
     ]
     expect(getAncestors(locations, 'c')).toEqual([locations[0], locations[1]])
+  })
+
+  it('getAncestors should stop early when parent_id points to missing location', () => {
+    const locations = [loc('b', 'missing-parent', 'Shelf')]
+    expect(getAncestors(locations, 'b')).toEqual([])
   })
 })
 
