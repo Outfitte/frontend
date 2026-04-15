@@ -8,6 +8,7 @@ import { useItems, useArchiveItem, useUnarchiveItem, useDeleteItem, type ItemSta
 import { useCategories } from '@/hooks/use-categories'
 import { useLocations } from '@/hooks/use-locations'
 import { useLogWear } from '@/hooks/use-wear-logs'
+import { cn } from '@/lib/utils'
 import type { Item } from '@/types'
 
 type SortOption = 'newest' | 'oldest' | 'name'
@@ -82,13 +83,8 @@ export function ItemsPage() {
     } else if (action === 'archive') {
       setOptimisticallyRemovedIds((prev) => new Set([...prev, itemId]))
       archiveItem(itemId, {
+        // On error, restore the item; on success the invalidated query refetch naturally removes it
         onError: () =>
-          setOptimisticallyRemovedIds((prev) => {
-            const next = new Set(prev)
-            next.delete(itemId)
-            return next
-          }),
-        onSettled: () =>
           setOptimisticallyRemovedIds((prev) => {
             const next = new Set(prev)
             next.delete(itemId)
@@ -98,13 +94,8 @@ export function ItemsPage() {
     } else if (action === 'unarchive') {
       setOptimisticallyRemovedIds((prev) => new Set([...prev, itemId]))
       unarchiveItem(itemId, {
+        // On error, restore the item; on success the invalidated query refetch naturally removes it
         onError: () =>
-          setOptimisticallyRemovedIds((prev) => {
-            const next = new Set(prev)
-            next.delete(itemId)
-            return next
-          }),
-        onSettled: () =>
           setOptimisticallyRemovedIds((prev) => {
             const next = new Set(prev)
             next.delete(itemId)
@@ -126,11 +117,12 @@ export function ItemsPage() {
             <button
               key={value}
               onClick={() => setParam('status', value)}
-              className={`px-3 py-1.5 text-sm first:rounded-l-md last:rounded-r-md ${
+              className={cn(
+                'px-3 py-1.5 text-sm first:rounded-l-md last:rounded-r-md',
                 status === value
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-background text-foreground hover:bg-muted'
-              }`}
+              )}
             >
               {label}
             </button>

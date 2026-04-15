@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
@@ -54,7 +54,73 @@ describe('ItemsPage', () => {
     expect(screen.getByRole('link', { name: /add your first item/i })).toBeInTheDocument()
   })
 
+  it('ItemsPage should show placeholder when item has no photos', async () => {
+    server.use(
+      http.get('/api/items', () =>
+        HttpResponse.json([mockItem({ id: 'item-001', name: 'No Photo Item', photos: [] })])
+      )
+    )
+    render(<ItemsPage />)
+
+    await screen.findByText('No Photo Item')
+    expect(screen.getByTestId('item-photo-placeholder')).toBeInTheDocument()
+  })
+
+  it('ItemsPage should render item card without category label when item has no category_id', async () => {
+    server.use(
+      http.get('/api/items', () =>
+        HttpResponse.json([mockItem({ id: 'item-001', name: 'Uncategorized Item', category_id: null })])
+      )
+    )
+    render(<ItemsPage />)
+
+    await screen.findByText('Uncategorized Item')
+    // No category badge should appear — the card still renders without error
+    expect(screen.getByTestId('item-card')).toBeInTheDocument()
+  })
+
+  it('ItemsPage should restore item card when archive fails', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.post('/api/items/:id/archive', () =>
+        HttpResponse.json({ error: 'Server error' }, { status: 500 })
+      )
+    )
+    render(<ItemsPage />)
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.click(screen.getAllByRole('button', { name: /item options/i })[0])
+    await user.click(screen.getByRole('menuitem', { name: /archive/i }))
+
+    expect(await screen.findByText('Blue Denim Jacket')).toBeInTheDocument()
+  })
+
+  it('ItemsPage should remove item and restore on unarchive failure when status is archived', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.get('/api/items', () =>
+        HttpResponse.json([mockItem({ id: 'item-001', name: 'Blue Denim Jacket' })])
+      ),
+      http.post('/api/items/:id/unarchive', () =>
+        HttpResponse.json({ error: 'Server error' }, { status: 500 })
+      )
+    )
+    render(<ItemsPage />, { initialEntries: ['/items?status=archived'] })
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.click(screen.getAllByRole('button', { name: /item options/i })[0])
+    await user.click(screen.getByRole('menuitem', { name: /unarchive/i }))
+
+    expect(await screen.findByText('Blue Denim Jacket')).toBeInTheDocument()
+  })
+
   // --- Happy path ---
+
+  it('ItemsPage should have data-testid items-page on root element', () => {
+    render(<ItemsPage />)
+
+    expect(screen.getByTestId('items-page')).toBeInTheDocument()
+  })
 
   it('ItemsPage should render item cards in a grid when items exist', async () => {
     render(<ItemsPage />)
@@ -73,16 +139,19 @@ describe('ItemsPage', () => {
     expect(screen.getAllByText('Coats').length).toBeGreaterThanOrEqual(1)
   })
 
-  it('ItemsPage should show placeholder when item has no photos', async () => {
-    server.use(
-      http.get('/api/items', () =>
-        HttpResponse.json([mockItem({ id: 'item-001', name: 'No Photo Item', photos: [] })])
-      )
-    )
+  it('ItemsPage should link each card to its item detail page', async () => {
     render(<ItemsPage />)
 
-    await screen.findByText('No Photo Item')
-    expect(screen.getByTestId('item-photo-placeholder')).toBeInTheDocument()
+    await screen.findByText('Blue Denim Jacket')
+    expect(screen.getByRole('link', { name: 'View Blue Denim Jacket' })).toHaveAttribute('href', '/items/item-001')
+    expect(screen.getByRole('link', { name: 'View Red Wool Coat' })).toHaveAttribute('href', '/items/item-002')
+  })
+
+  it('ItemsPage should have link to create new item', async () => {
+    render(<ItemsPage />)
+
+    await screen.findByText('Blue Denim Jacket')
+    expect(screen.getByRole('link', { name: /add item/i })).toHaveAttribute('href', '/items/new')
   })
 
   it('ItemsPage should default status filter to active', async () => {
@@ -131,6 +200,19 @@ describe('ItemsPage', () => {
     expect(screen.queryByText('Red Wool Coat')).not.toBeInTheDocument()
   })
 
+  it('ItemsPage should clear category filter when All categories is selected', async () => {
+    const user = userEvent.setup()
+    render(<ItemsPage />)
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.selectOptions(screen.getByRole('combobox', { name: /category/i }), 'cat-001')
+    expect(screen.queryByText('Red Wool Coat')).not.toBeInTheDocument()
+
+    await user.selectOptions(screen.getByRole('combobox', { name: /category/i }), '')
+    expect(screen.getByText('Blue Denim Jacket')).toBeInTheDocument()
+    expect(screen.getByText('Red Wool Coat')).toBeInTheDocument()
+  })
+
   it('ItemsPage should show only items matching selected location filter', async () => {
     const user = userEvent.setup()
     render(<ItemsPage />)
@@ -161,6 +243,26 @@ describe('ItemsPage', () => {
     const cards = screen.getAllByTestId('item-card')
     expect(cards[0]).toHaveTextContent('Alpha Hoodie')
     expect(cards[1]).toHaveTextContent('Zebra Print Scarf')
+  })
+
+  it('ItemsPage should sort items oldest first when sort is set to oldest', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.get('/api/items', () =>
+        HttpResponse.json([
+          mockItem({ id: 'item-001', name: 'Newer Item', created_at: '2026-04-01T00:00:00Z' }),
+          mockItem({ id: 'item-002', name: 'Older Item', created_at: '2025-01-01T00:00:00Z' }),
+        ])
+      )
+    )
+    render(<ItemsPage />)
+
+    await screen.findByText('Newer Item')
+    await user.selectOptions(screen.getByRole('combobox', { name: /sort/i }), 'oldest')
+
+    const cards = screen.getAllByTestId('item-card')
+    expect(cards[0]).toHaveTextContent('Older Item')
+    expect(cards[1]).toHaveTextContent('Newer Item')
   })
 
   it('ItemsPage should post wear log with today\'s date when wore today button is clicked', async () => {
@@ -216,42 +318,20 @@ describe('ItemsPage', () => {
     resolveArchive()
   })
 
-  it('ItemsPage should link each card to its item detail page', async () => {
-    render(<ItemsPage />)
-
-    await screen.findByText('Blue Denim Jacket')
-    const detailLinks = screen.getAllByRole('link', { name: /view item/i })
-    expect(detailLinks[0]).toHaveAttribute('href', '/items/item-001')
-    expect(detailLinks[1]).toHaveAttribute('href', '/items/item-002')
-  })
-
-  it('ItemsPage should have link to create new item', async () => {
-    render(<ItemsPage />)
-
-    await screen.findByText('Blue Denim Jacket')
-    expect(screen.getByRole('link', { name: /add item/i })).toHaveAttribute('href', '/items/new')
-  })
-
-  it('ItemsPage should have data-testid items-page on root element', () => {
-    render(<ItemsPage />)
-
-    expect(screen.getByTestId('items-page')).toBeInTheDocument()
-  })
-
-  it('ItemsPage should restore item card when archive fails', async () => {
+  it('ItemsPage should show Unarchive instead of Archive when status is archived', async () => {
     const user = userEvent.setup()
     server.use(
-      http.post('/api/items/:id/archive', () =>
-        HttpResponse.json({ error: 'Server error' }, { status: 500 })
+      http.get('/api/items', () =>
+        HttpResponse.json([mockItem({ id: 'item-001', name: 'Blue Denim Jacket' })])
       )
     )
-    render(<ItemsPage />)
+    render(<ItemsPage />, { initialEntries: ['/items?status=archived'] })
 
     await screen.findByText('Blue Denim Jacket')
     await user.click(screen.getAllByRole('button', { name: /item options/i })[0])
-    await user.click(screen.getByRole('menuitem', { name: /archive/i }))
 
-    expect(await screen.findByText('Blue Denim Jacket')).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: /unarchive/i })).toBeInTheDocument()
+    expect(screen.queryByRole('menuitem', { name: /^archive$/i })).not.toBeInTheDocument()
   })
 
   it('ItemsPage should call DELETE /items/:id when delete is selected from context menu', async () => {
@@ -272,57 +352,14 @@ describe('ItemsPage', () => {
     await waitFor(() => expect(deletedId).toBe('item-001'))
   })
 
-  it('ItemsPage should show Unarchive instead of Archive when status is archived', async () => {
-    const user = userEvent.setup()
-    server.use(
-      http.get('/api/items', () =>
-        HttpResponse.json([mockItem({ id: 'item-001', name: 'Blue Denim Jacket' })])
-      )
-    )
-    render(<ItemsPage />, { initialEntries: ['/items?status=archived'] })
-
-    await screen.findByText('Blue Denim Jacket')
-    await user.click(screen.getAllByRole('button', { name: /item options/i })[0])
-
-    expect(screen.getByRole('menuitem', { name: /unarchive/i })).toBeInTheDocument()
-    expect(screen.queryByRole('menuitem', { name: /^archive$/i })).not.toBeInTheDocument()
-  })
-
-  it('ItemsPage should remove item and restore on unarchive failure when status is archived', async () => {
-    const user = userEvent.setup()
-    server.use(
-      http.get('/api/items', () =>
-        HttpResponse.json([mockItem({ id: 'item-001', name: 'Blue Denim Jacket' })])
-      ),
-      http.post('/api/items/:id/unarchive', () =>
-        HttpResponse.json({ error: 'Server error' }, { status: 500 })
-      )
-    )
-    render(<ItemsPage />, { initialEntries: ['/items?status=archived'] })
-
-    await screen.findByText('Blue Denim Jacket')
-    await user.click(screen.getAllByRole('button', { name: /item options/i })[0])
-    await user.click(screen.getByRole('menuitem', { name: /unarchive/i }))
-
-    expect(await screen.findByText('Blue Denim Jacket')).toBeInTheDocument()
-  })
-
   it('ItemsPage should navigate to edit page when edit is selected from context menu', async () => {
     const user = userEvent.setup()
-    let navigatedTo = ''
-    server.use(
-      http.get('/api/items/:id', ({ params }) => {
-        navigatedTo = `/items/${params['id'] as string}/edit`
-        return HttpResponse.json(mockItem({ id: params['id'] as string }))
-      })
-    )
     render(<ItemsPage />)
 
     await screen.findByText('Blue Denim Jacket')
     await user.click(screen.getAllByRole('button', { name: /item options/i })[0])
     await user.click(screen.getByRole('menuitem', { name: /edit/i }))
 
-    // Navigate is called - just verify the menu closes (item options disappears after select)
     await waitFor(() =>
       expect(screen.queryByRole('menuitem', { name: /edit/i })).not.toBeInTheDocument()
     )
@@ -339,51 +376,5 @@ describe('ItemsPage', () => {
     await waitFor(() =>
       expect(screen.queryByRole('menuitem', { name: /dispose/i })).not.toBeInTheDocument()
     )
-  })
-
-  it('ItemsPage should render item card without category label when item has no category_id', async () => {
-    server.use(
-      http.get('/api/items', () =>
-        HttpResponse.json([mockItem({ id: 'item-001', name: 'Uncategorized Item', category_id: null })])
-      )
-    )
-    render(<ItemsPage />)
-
-    await screen.findByText('Uncategorized Item')
-    // No category badge should appear - just verifying the item renders without error
-    expect(screen.getByTestId('item-card')).toBeInTheDocument()
-  })
-
-  it('ItemsPage should clear category filter when All categories is selected', async () => {
-    const user = userEvent.setup()
-    render(<ItemsPage />)
-
-    await screen.findByText('Blue Denim Jacket')
-    await user.selectOptions(screen.getByRole('combobox', { name: /category/i }), 'cat-001')
-    expect(screen.queryByText('Red Wool Coat')).not.toBeInTheDocument()
-
-    await user.selectOptions(screen.getByRole('combobox', { name: /category/i }), '')
-    expect(screen.getByText('Blue Denim Jacket')).toBeInTheDocument()
-    expect(screen.getByText('Red Wool Coat')).toBeInTheDocument()
-  })
-
-  it('ItemsPage should sort items oldest first when sort is set to oldest', async () => {
-    const user = userEvent.setup()
-    server.use(
-      http.get('/api/items', () =>
-        HttpResponse.json([
-          mockItem({ id: 'item-001', name: 'Newer Item', created_at: '2026-04-01T00:00:00Z' }),
-          mockItem({ id: 'item-002', name: 'Older Item', created_at: '2025-01-01T00:00:00Z' }),
-        ])
-      )
-    )
-    render(<ItemsPage />)
-
-    await screen.findByText('Newer Item')
-    await user.selectOptions(screen.getByRole('combobox', { name: /sort/i }), 'oldest')
-
-    const cards = screen.getAllByTestId('item-card')
-    expect(cards[0]).toHaveTextContent('Older Item')
-    expect(cards[1]).toHaveTextContent('Newer Item')
   })
 })
