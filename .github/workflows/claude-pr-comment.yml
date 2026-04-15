@@ -30,29 +30,17 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Create MCP config
-        run: |
-          cat > /tmp/mcp-config.json << 'EOF'
-          {
-            "mcpServers": {
-              "context7": {
-                "command": "npx",
-                "args": ["-y", "@upstash/context7-mcp@latest"]
-              }
-            }
-          }
-          EOF
-
       - name: Run Claude PR Comment Fix
         uses: anthropics/claude-code-action@v1
         with:
           path_to_bun_executable: ~/.bun/bin/bun
           path_to_claude_code_executable: /home/maxime/.local/bin/claude
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          claude_args: |
-            --add-dir /home/maxime/actions-runner/_work/Outfitte/Outfitte
-            --mcp-config /tmp/mcp-config.json
-            --allowedTools "mcp__context7__resolve-library-id,mcp__context7__get-library-docs,WebSearch"
+          claude_args: "--add-dir /home/maxime/actions-runner/_work/Outfitte/Outfitte"
+          plugin_marketplaces: |
+            https://github.com/anthropics/claude-plugins-official.git
+          plugins: |
+            context7@claude-plugins-official
           settings: |
             {
               "permissions": {
@@ -64,8 +52,6 @@ jobs:
                   "Read(*)",
                   "Write(*)",
                   "Edit(*)",
-                  "mcp__context7__resolve-library-id",
-                  "mcp__context7__get-library-docs",
                   "WebSearch"
                 ],
                 "deny": [
@@ -107,29 +93,17 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Create MCP config
-        run: |
-          cat > /tmp/mcp-config.json << 'EOF'
-          {
-            "mcpServers": {
-              "context7": {
-                "command": "npx",
-                "args": ["-y", "@upstash/context7-mcp@latest"]
-              }
-            }
-          }
-          EOF
-
       - name: Run Claude PR Comment Fix
         uses: anthropics/claude-code-action@v1
         with:
           path_to_bun_executable: ~/.bun/bin/bun
           path_to_claude_code_executable: /home/maxime/.local/bin/claude
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          claude_args: |
-            --add-dir /home/maxime/actions-runner/_work/Outfitte/Outfitte
-            --mcp-config /tmp/mcp-config.json
-            --allowedTools "mcp__context7__resolve-library-id,mcp__context7__get-library-docs,WebSearch"
+          claude_args: "--add-dir /home/maxime/actions-runner/_work/Outfitte/Outfitte"
+          plugin_marketplaces: |
+            https://github.com/anthropics/claude-plugins-official.git
+          plugins: |
+            context7@claude-plugins-official
           settings: |
             {
               "permissions": {
@@ -141,8 +115,6 @@ jobs:
                   "Read(*)",
                   "Write(*)",
                   "Edit(*)",
-                  "mcp__context7__resolve-library-id",
-                  "mcp__context7__get-library-docs",
                   "WebSearch"
                 ],
                 "deny": [
