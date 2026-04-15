@@ -98,23 +98,22 @@ export const handlers = [
 
   // --- Item location assignment ---
 
-  http.patch('/api/items/:id/location', async ({ params, request }) => {
-    const body = await request.json() as { location_id: string | null }
-    return HttpResponse.json(mockItem({ id: params['id'] as string, location_id: body.location_id }))
+  http.patch('/api/items/:id/location', () => {
+    return new HttpResponse(null, { status: 204 })
   }),
 
   // --- Item lifecycle ---
 
-  http.post('/api/items/:id/archive', ({ params }) => {
-    return HttpResponse.json(mockItem({ id: params['id'] as string }))
+  http.post('/api/items/:id/archive', () => {
+    return new HttpResponse(null, { status: 204 })
   }),
 
-  http.post('/api/items/:id/unarchive', ({ params }) => {
-    return HttpResponse.json(mockItem({ id: params['id'] as string }))
+  http.post('/api/items/:id/unarchive', () => {
+    return new HttpResponse(null, { status: 204 })
   }),
 
-  http.post('/api/items/:id/dispose', ({ params }) => {
-    return HttpResponse.json(mockItem({ id: params['id'] as string }))
+  http.post('/api/items/:id/dispose', () => {
+    return new HttpResponse(null, { status: 204 })
   }),
 
   // --- Wear logs ---
