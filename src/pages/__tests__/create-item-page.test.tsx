@@ -35,6 +35,64 @@ describe('CreateItemPage', () => {
     expect(await screen.findByText(/name is required/i)).toBeInTheDocument()
   })
 
+  it('CreateItemPage should show validation error when price is not a valid number', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await user.type(screen.getByLabelText(/^name/i), 'Test Item')
+    await user.type(screen.getByLabelText(/price/i), 'abc')
+    await user.type(screen.getByLabelText(/currency/i), 'USD')
+    await user.click(screen.getByRole('button', { name: /save/i }))
+
+    expect(await screen.findByText(/enter a valid price/i)).toBeInTheDocument()
+  })
+
+  it('CreateItemPage should show validation error when currency is not 3 letters', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await user.type(screen.getByLabelText(/^name/i), 'Test Item')
+    await user.type(screen.getByLabelText(/price/i), '49.99')
+    await user.type(screen.getByLabelText(/currency/i), 'US')
+    await user.click(screen.getByRole('button', { name: /save/i }))
+
+    expect(await screen.findByText(/enter a 3-letter currency code/i)).toBeInTheDocument()
+  })
+
+  it('CreateItemPage should show validation error when seller url is not a valid URL', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await user.type(screen.getByLabelText(/^name/i), 'Test Item')
+    await user.type(screen.getByLabelText(/seller url/i), 'not-a-url')
+    await user.click(screen.getByRole('button', { name: /save/i }))
+
+    expect(await screen.findByText(/enter a valid url/i)).toBeInTheDocument()
+  })
+
+  it('CreateItemPage should navigate to detail page even if photo upload fails', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.post('/api/items', () =>
+        HttpResponse.json({ id: 'item-new-001', name: 'Test' }, { status: 201 })
+      ),
+      http.post('/api/items/:id/photos', () =>
+        HttpResponse.json({ error: 'Upload failed' }, { status: 500 })
+      )
+    )
+    renderPage()
+
+    const file = new File(['bytes'], 'photo.jpg', { type: 'image/jpeg' })
+    const input = screen.getByLabelText(/add photos/i)
+    await user.upload(input, file)
+    await screen.findByAltText(/photo 1/i)
+
+    await user.type(screen.getByLabelText(/^name/i), 'Test')
+    await user.click(screen.getByRole('button', { name: /save/i }))
+
+    expect(await screen.findByTestId('item-detail-page')).toBeInTheDocument()
+  })
+
   it('CreateItemPage should show validation error when price is set without currency', async () => {
     const user = userEvent.setup()
     renderPage()
@@ -307,6 +365,26 @@ describe('CreateItemPage', () => {
     await user.click(screen.getByRole('button', { name: /save/i }))
 
     await waitFor(() => expect(uploadedItemIds).toContain('item-new-001'))
+  })
+
+  it('CreateItemPage should include seller_url in submission when filled', async () => {
+    const user = userEvent.setup()
+    let capturedBody: Record<string, unknown> = {}
+    server.use(
+      http.post('/api/items', async ({ request }) => {
+        capturedBody = await request.json() as Record<string, unknown>
+        return HttpResponse.json({ id: 'item-new-001', name: 'Test' }, { status: 201 })
+      })
+    )
+    renderPage()
+
+    await user.type(screen.getByLabelText(/^name/i), 'Test')
+    await user.type(screen.getByLabelText(/seller url/i), 'https://example.com/jacket')
+    await user.click(screen.getByRole('button', { name: /save/i }))
+
+    await waitFor(() =>
+      expect(capturedBody['seller_url']).toBe('https://example.com/jacket')
+    )
   })
 
   it('CreateItemPage should navigate to /items when Cancel button is clicked', async () => {

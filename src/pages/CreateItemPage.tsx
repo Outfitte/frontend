@@ -37,8 +37,18 @@ const schema = z
     category_id: z.string().optional(),
     color: z.string().optional(),
     location_id: z.string().optional(),
-    purchase_price: z.string().optional(),
-    purchase_currency: z.string().optional(),
+    purchase_price: z
+      .string()
+      .refine((v) => !v || /^\d+(\.\d+)?$/.test(v), {
+        error: 'Enter a valid price (e.g. 9.99)',
+      })
+      .optional(),
+    purchase_currency: z
+      .string()
+      .refine((v) => !v || /^[A-Z]{3}$/.test(v), {
+        error: 'Enter a 3-letter currency code (e.g. USD)',
+      })
+      .optional(),
     purchase_date: z
       .string()
       .optional()
@@ -49,7 +59,12 @@ const schema = z
         },
         { error: 'Purchase date cannot be in the future' }
       ),
-    seller_url: z.string().optional(),
+    seller_url: z
+      .string()
+      .refine((v) => !v || /^https?:\/\//i.test(v), {
+        error: 'Enter a valid URL (e.g. https://example.com)',
+      })
+      .optional(),
     metadata: z.array(metadataRowSchema).optional(),
   })
   .refine(
@@ -63,6 +78,13 @@ const schema = z
 
 type FormValues = z.infer<typeof schema>
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface QueuedPhoto {
+  file: File
+  preview: string
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export function CreateItemPage() {
@@ -72,21 +94,18 @@ export function CreateItemPage() {
   const { mutateAsync: createItem } = useCreateItem()
   const { mutateAsync: uploadPhoto } = useUploadPhoto()
 
-  // Photo queue stored in component state (not in form)
-  const [queuedPhotos, setQueuedPhotos] = useState<File[]>([])
-  const [photoPreviews, setPhotoPreviews] = useState<string[]>([])
+  // Photo queue: single source of truth for file + preview URL
+  const [queuedPhotos, setQueuedPhotos] = useState<QueuedPhoto[]>([])
 
   // Category hint rows stored separately from the dynamic field array
   const [currentHints, setCurrentHints] = useState<FieldHint[]>([])
   const [hintValues, setHintValues] = useState<Record<string, string>>({})
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
   const {
     register,
     handleSubmit,
     control,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     setValue,
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -108,42 +127,36 @@ export function CreateItemPage() {
 
   const flatLocations = flattenTree(buildLocationTree(locations))
 
-  // Category select: track selected hints separately so they don't interfere with RHF field array
+  // Category select: call RHF's onChange then update hint state
+  const catRegProps = register('category_id')
   function handleCategoryChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const catId = e.target.value
-    setValue('category_id', catId)
-    const cat = categories.find((c) => c.id === catId)
+    catRegProps.onChange(e)
+    const cat = categories.find((c) => c.id === e.target.value)
     setCurrentHints(cat?.field_hints ?? [])
     setHintValues({})
   }
 
-  // Currency normalise: call setValue to update form state with uppercase value
+  // Currency normalise: store uppercase via setValue; no need to call register's onChange
   const currencyRegProps = register('purchase_currency')
   function handleCurrencyChange(e: React.ChangeEvent<HTMLInputElement>) {
     const upper = e.target.value.toUpperCase()
-    setValue('purchase_currency', upper)
-    currencyRegProps.onChange({ ...e, target: { ...e.target, value: upper } })
+    setValue('purchase_currency', upper, { shouldValidate: true, shouldDirty: true, shouldTouch: true })
   }
 
   function handlePhotoInput(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
     if (files.length === 0) return
-    setQueuedPhotos((prev) => [...prev, ...files])
-    files.forEach((file) => {
-      const url = URL.createObjectURL(file)
-      setPhotoPreviews((prev) => [...prev, url])
-    })
+    const newPhotos = files.map((file) => ({ file, preview: URL.createObjectURL(file) }))
+    setQueuedPhotos((prev) => [...prev, ...newPhotos])
     e.target.value = ''
   }
 
   function removeQueuedPhoto(idx: number) {
-    URL.revokeObjectURL(photoPreviews[idx])
+    URL.revokeObjectURL(queuedPhotos[idx].preview)
     setQueuedPhotos((prev) => prev.filter((_, i) => i !== idx))
-    setPhotoPreviews((prev) => prev.filter((_, i) => i !== idx))
   }
 
   async function onSubmit(values: FormValues) {
-    setIsSubmitting(true)
     try {
       const metadata = buildMetadata(values.metadata ?? [], currentHints, hintValues)
 
@@ -160,15 +173,14 @@ export function CreateItemPage() {
         metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
       })
 
-      for (const photo of queuedPhotos) {
-        await uploadPhoto({ itemId: item.id, photo })
+      // Upload photos sequentially; failures are toasted by the hook but don't block navigation
+      for (const { file } of queuedPhotos) {
+        await uploadPhoto({ itemId: item.id, photo: file }).catch(() => {})
       }
 
       navigate(`/items/${item.id}`)
     } catch {
-      // Error already handled by hook's onError (toast shown there); stay on form
-    } finally {
-      setIsSubmitting(false)
+      // Item creation failed — the hook's onError already shows a toast; stay on form
     }
   }
 
@@ -201,7 +213,7 @@ export function CreateItemPage() {
               <select
                 id="category_id"
                 aria-label="Category"
-                {...register('category_id')}
+                {...catRegProps}
                 onChange={handleCategoryChange}
                 className="mt-1 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none"
               >
@@ -248,21 +260,26 @@ export function CreateItemPage() {
               <div className="flex-1">
                 <Label htmlFor="purchase_price">Price</Label>
                 <Input id="purchase_price" {...register('purchase_price')} className="mt-1" />
+                {errors.purchase_price && (
+                  <p className="mt-1 text-xs text-destructive">{errors.purchase_price.message}</p>
+                )}
               </div>
               <div className="w-28">
                 <Label htmlFor="purchase_currency">Currency</Label>
                 <Input
                   id="purchase_currency"
                   maxLength={3}
-                  {...currencyRegProps}
+                  name={currencyRegProps.name}
+                  ref={currencyRegProps.ref}
+                  onBlur={currencyRegProps.onBlur}
                   onChange={handleCurrencyChange}
                   className="mt-1"
                 />
+                {errors.purchase_currency && (
+                  <p className="mt-1 text-xs text-destructive">{errors.purchase_currency.message}</p>
+                )}
               </div>
             </div>
-            {errors.purchase_price && (
-              <p className="text-xs text-destructive">{errors.purchase_price.message}</p>
-            )}
 
             <div>
               <Label htmlFor="purchase_date">Purchase Date</Label>
@@ -280,6 +297,9 @@ export function CreateItemPage() {
             <div>
               <Label htmlFor="seller_url">Seller URL</Label>
               <Input id="seller_url" type="url" {...register('seller_url')} className="mt-1" />
+              {errors.seller_url && (
+                <p className="mt-1 text-xs text-destructive">{errors.seller_url.message}</p>
+              )}
             </div>
           </div>
         </section>
@@ -316,12 +336,12 @@ export function CreateItemPage() {
               <div key={field.id} className="flex gap-2">
                 <Input
                   placeholder="Key"
-                  {...register(`metadata.${idx}.key` as const)}
+                  {...register(`metadata.${idx}.key`)}
                   className="w-40"
                 />
                 <Input
                   placeholder="Value"
-                  {...register(`metadata.${idx}.value` as const)}
+                  {...register(`metadata.${idx}.value`)}
                   className="flex-1"
                 />
                 <Button
@@ -375,12 +395,12 @@ export function CreateItemPage() {
               />
             </div>
 
-            {photoPreviews.length > 0 && (
+            {queuedPhotos.length > 0 && (
               <div className="flex flex-wrap gap-3">
-                {photoPreviews.map((src, idx) => (
-                  <div key={idx} className="relative">
+                {queuedPhotos.map((photo, idx) => (
+                  <div key={photo.preview} className="relative">
                     <img
-                      src={src}
+                      src={photo.preview}
                       alt={`Photo ${idx + 1}`}
                       className="h-20 w-20 rounded-lg object-cover border"
                     />
