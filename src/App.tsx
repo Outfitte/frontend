@@ -8,6 +8,7 @@ import { DashboardPage } from '@/pages/DashboardPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
 import { ItemsPage } from '@/pages/ItemsPage'
+import { CreateItemPage } from '@/pages/CreateItemPage'
 import { ItemDetailPage } from '@/pages/ItemDetailPage'
 import { OutfitsPage } from '@/pages/OutfitsPage'
 import { CalendarPage } from '@/pages/CalendarPage'
@@ -59,6 +60,7 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/items" element={<ItemsPage />} />
+            <Route path="/items/new" element={<CreateItemPage />} />
             <Route path="/items/:id" element={<ItemDetailPage />} />
             <Route path="/outfits" element={<OutfitsPage />} />
             <Route path="/calendar" element={<CalendarPage />} />

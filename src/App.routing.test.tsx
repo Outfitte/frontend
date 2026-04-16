@@ -139,6 +139,19 @@ describe('Routing', () => {
     expect(screen.getByTestId('items-page')).toBeInTheDocument()
   })
 
+  it('App should render create item page when authenticated user visits /items/new', () => {
+    useAuthStore.setState({
+      accessToken: 'access-token-abc123',
+      refreshToken: 'refresh-token-xyz789',
+      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      isAuthenticated: true,
+      isHydrating: false,
+      hydrateFromStorage: async () => {},
+    })
+    render(<AppWithLocation />, { initialEntries: ['/items/new'] })
+    expect(screen.getByTestId('create-item-page')).toBeInTheDocument()
+  })
+
   it('App should render item detail page when authenticated user visits /items/:id', async () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
