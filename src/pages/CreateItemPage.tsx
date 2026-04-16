@@ -336,10 +336,10 @@ export function CreateItemPage() {
               </div>
             ))}
 
-            {fields.map((_, idx) => {
+            {fields.map((field, idx) => {
               const err = errors.metadata?.[idx]?.key
               return err ? (
-                <p key={idx} className="text-xs text-destructive">
+                <p key={field.id} className="text-xs text-destructive">
                   {err.message}
                 </p>
               ) : null
