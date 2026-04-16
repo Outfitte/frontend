@@ -1,6 +1,6 @@
 export type { ApiErrorBody } from './api'
 export type { Category, FieldHint } from './category'
-export type { Item, Photo } from './item'
+export type { Item, Photo, ItemStatus } from './item'
 export type { Location } from './location'
 export type { Outfit, OutfitItem, OutfitLog } from './outfit'
 export type { AppSettings } from './settings'

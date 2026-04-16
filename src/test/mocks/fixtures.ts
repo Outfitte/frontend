@@ -48,6 +48,7 @@ export function mockItem(overrides: Partial<Item> = {}): Item {
     brand: 'Levi\'s',
     category_id: 'cat-001',
     color: 'blue',
+    status: 'active',
     metadata: { condition: 'good', size: 'M' },
     photos: [mockPhoto()],
     location_id: 'loc-001',

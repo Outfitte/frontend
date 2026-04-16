@@ -6,7 +6,7 @@ import type { Item } from '@/types'
 
 export type ItemStatus = 'active' | 'archived' | 'all'
 
-type DisposeReason = 'donated' | 'sold' | 'discarded' | 'lost' | 'other'
+export type DisposeReason = 'donated' | 'sold' | 'discarded' | 'lost' | 'other'
 
 interface CreateItemVars {
   name: string
