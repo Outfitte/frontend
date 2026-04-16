@@ -280,8 +280,9 @@ describe('ItemsPage', () => {
     const woreButtons = screen.getAllByRole('button', { name: /wore today/i })
     await user.click(woreButtons[0])
 
+    const today = new Date().toLocaleDateString('en-CA')
     await waitFor(() =>
-      expect(capturedBody).toMatchObject({ worn_on: '2026-04-15' })
+      expect(capturedBody).toMatchObject({ worn_on: today })
     )
   })
 
