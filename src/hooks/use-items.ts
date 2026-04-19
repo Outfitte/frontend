@@ -77,13 +77,15 @@ export function useUpdateItem() {
   const queryClient = useQueryClient()
   return useMutation<Item, ApiError, UpdateItemVars>({
     mutationFn: ({ id, data }) => api.patch<Item>(`/items/${id}`, data),
-    onSuccess: (_, { id }) => {
+    onSuccess: () => {
       toast.success('Item updated')
-      queryClient.invalidateQueries({ queryKey: queryKeys.items.all })
-      queryClient.invalidateQueries({ queryKey: queryKeys.items.detail(id) })
     },
     onError: (error) => {
       toast.error(error.message)
+    },
+    onSettled: (_, __, { id }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.items.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.items.detail(id) })
     },
   })
 }

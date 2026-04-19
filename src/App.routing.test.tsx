@@ -165,6 +165,19 @@ describe('Routing', () => {
     expect(await screen.findByTestId('item-detail-page')).toBeInTheDocument()
   })
 
+  it('App should render edit item page when authenticated user visits /items/:id/edit', async () => {
+    useAuthStore.setState({
+      accessToken: 'access-token-abc123',
+      refreshToken: 'refresh-token-xyz789',
+      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      isAuthenticated: true,
+      isHydrating: false,
+      hydrateFromStorage: async () => {},
+    })
+    render(<AppWithLocation />, { initialEntries: ['/items/item-001/edit'] })
+    expect(await screen.findByTestId('edit-item-page')).toBeInTheDocument()
+  })
+
   it('App should render outfits page when authenticated user visits /outfits', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',

@@ -51,10 +51,12 @@ export function EditItemPage() {
     }
   }
 
+  const itemId = item.id
+
   async function handleSave(payload: ItemFormPayload, queuedPhotos: File[]) {
     try {
       await updateItem({
-        id: item!.id,
+        id: itemId,
         data: {
           name: payload.name,
           brand: payload.brand || null,
@@ -70,10 +72,10 @@ export function EditItemPage() {
       })
 
       for (const file of queuedPhotos) {
-        await uploadPhoto({ itemId: item!.id, photo: file }).catch(() => {})
+        await uploadPhoto({ itemId, photo: file }).catch(() => {})
       }
 
-      navigate(`/items/${item!.id}`)
+      navigate(`/items/${itemId}`)
     } catch {
       // hook's onError already shows a toast; stay on form
     }
@@ -102,9 +104,9 @@ export function EditItemPage() {
         defaultHintValues={defaultHintValues}
         defaultCategoryHints={category?.field_hints}
         existingPhotos={item.photos}
-        itemId={item.id}
+        itemId={itemId}
         onSave={handleSave}
-        onCancel={() => navigate(`/items/${item!.id}`)}
+        onCancel={() => navigate(`/items/${itemId}`)}
       />
     </div>
   )

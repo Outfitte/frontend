@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -161,12 +161,12 @@ export function ItemForm({
 
   // Auto-clear currency when price is cleared (edit mode pair constraint)
   const purchasePrice = watch('purchase_price')
-  if (mode === 'edit' && purchasePrice === '') {
-    const currentCurrency = watch('purchase_currency')
-    if (currentCurrency) {
+  const purchaseCurrency = watch('purchase_currency')
+  useEffect(() => {
+    if (mode === 'edit' && purchasePrice === '' && purchaseCurrency) {
       setValue('purchase_currency', '', { shouldValidate: false, shouldDirty: true })
     }
-  }
+  }, [mode, purchasePrice, purchaseCurrency, setValue])
 
   const catRegProps = register('category_id')
   function handleCategoryChange(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -304,7 +304,6 @@ export function ItemForm({
                 ref={currencyRegProps.ref}
                 onBlur={currencyRegProps.onBlur}
                 onChange={handleCurrencyChange}
-                defaultValue={defaultValues?.purchase_currency ?? ''}
                 className="mt-1"
               />
               {errors.purchase_currency && (
