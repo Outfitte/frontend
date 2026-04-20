@@ -229,4 +229,17 @@ describe('Routing', () => {
     render(<AppWithLocation />, { initialEntries: ['/settings'] })
     expect(screen.getByTestId('settings-page')).toBeInTheDocument()
   })
+
+  it('App should render locations page when authenticated user visits /locations', async () => {
+    useAuthStore.setState({
+      accessToken: 'access-token-abc123',
+      refreshToken: 'refresh-token-xyz789',
+      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      isAuthenticated: true,
+      isHydrating: false,
+      hydrateFromStorage: async () => {},
+    })
+    render(<AppWithLocation />, { initialEntries: ['/locations'] })
+    expect(await screen.findByTestId('locations-page')).toBeInTheDocument()
+  })
 })
