@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useMatch } from 'react-router'
+import { NavLink, Outlet, useLocation } from 'react-router'
 import {
   CalendarIcon,
   HomeIcon,
@@ -48,7 +48,8 @@ const NAV_ITEMS = [
 
 function NavItem({ to, label, icon: Icon }: { to: string; label: string; icon: React.ElementType }) {
   const end = to === '/'
-  const isActive = !!useMatch({ path: to, end })
+  const { pathname } = useLocation()
+  const isActive = end ? pathname === to : pathname === to || pathname.startsWith(to + '/')
 
   return (
     <SidebarMenuItem>
