@@ -22,20 +22,22 @@ function computeWardrobeValue(items: Item[]): string {
   const currencyGroups = new Map<string, number>()
   for (const item of priced) {
     const currency = item.purchase_currency ?? 'USD'
-    currencyGroups.set(currency, (currencyGroups.get(currency) ?? 0) + parseFloat(item.purchase_price!))
+    const cents = Math.round(parseFloat(item.purchase_price!) * 100)
+    currencyGroups.set(currency, (currencyGroups.get(currency) ?? 0) + cents)
+  }
+
+  const formatCurrency = (currency: string, cents: number) => {
+    const symbol = CURRENCY_SYMBOLS[currency] ?? currency
+    return `${symbol}${(cents / 100).toFixed(2)}`
   }
 
   if (currencyGroups.size === 1) {
-    const [[currency, total]] = [...currencyGroups]
-    const symbol = CURRENCY_SYMBOLS[currency] ?? currency
-    return `${symbol}${total.toFixed(2)}`
+    const [[currency, cents]] = [...currencyGroups]
+    return formatCurrency(currency, cents)
   }
 
   return [...currencyGroups.entries()]
-    .map(([currency, total]) => {
-      const symbol = CURRENCY_SYMBOLS[currency] ?? currency
-      return `${symbol}${total.toFixed(2)}`
-    })
+    .map(([currency, cents]) => formatCurrency(currency, cents))
     .join(' + ')
 }
 

@@ -34,8 +34,6 @@ describe('DashboardPage', () => {
     expect(screen.getAllByTestId('stat-card-skeleton').length).toBeGreaterThan(0)
   })
 
-  // --- Happy path ---
-
   it('DashboardPage should show zero counts when API returns an error', async () => {
     server.use(
       http.get('/api/items', () => HttpResponse.json({ error: 'server error' }, { status: 500 })),
@@ -60,6 +58,36 @@ describe('DashboardPage', () => {
 
     expect(await screen.findByText(/no items yet/i)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /add your first item/i })).toBeInTheDocument()
+  })
+
+  it('DashboardPage should not render user email when user is null', () => {
+    render(<DashboardPage />)
+
+    expect(screen.queryByText('alice@example.com')).not.toBeInTheDocument()
+  })
+
+  // --- Happy path ---
+
+  it('DashboardPage should render welcome heading when user is null', () => {
+    render(<DashboardPage />)
+
+    expect(screen.getByRole('heading', { name: /welcome to outfitte/i })).toBeInTheDocument()
+  })
+
+  it('DashboardPage should render user email in welcome heading when user is set', () => {
+    useAuthStore.setState({
+      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' },
+    })
+
+    render(<DashboardPage />)
+
+    expect(screen.getByText('alice@example.com')).toBeInTheDocument()
+  })
+
+  it('DashboardPage should show quick action link to add a new item', () => {
+    render(<DashboardPage />)
+
+    expect(screen.getByRole('link', { name: /add item/i })).toHaveAttribute('href', '/items/new')
   })
 
   it('DashboardPage should show total active item count when items are loaded', async () => {
@@ -140,13 +168,6 @@ describe('DashboardPage', () => {
     expect(card).toHaveTextContent(/wardrobe value/i)
   })
 
-  it('DashboardPage should show quick action link to add a new item', async () => {
-    render(<DashboardPage />)
-
-    const link = await screen.findByRole('link', { name: /add item/i })
-    expect(link).toHaveAttribute('href', '/items/new')
-  })
-
   it('DashboardPage should show per-currency totals when items have mixed currencies', async () => {
     server.use(
       http.get('/api/items', ({ request }) => {
@@ -219,27 +240,5 @@ describe('DashboardPage', () => {
 
     const card = await screen.findByTestId('stat-wardrobe-value')
     expect(card).toHaveTextContent('CHF100.00 + $50.00')
-  })
-
-  it('DashboardPage should not render user email when user is null', () => {
-    render(<DashboardPage />)
-
-    expect(screen.queryByText('alice@example.com')).not.toBeInTheDocument()
-  })
-
-  it('DashboardPage should render user email in welcome heading when user is set', () => {
-    useAuthStore.setState({
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' },
-    })
-
-    render(<DashboardPage />)
-
-    expect(screen.getByText('alice@example.com')).toBeInTheDocument()
-  })
-
-  it('DashboardPage should render welcome heading when user is null', () => {
-    render(<DashboardPage />)
-
-    expect(screen.getByRole('heading', { name: /welcome to outfitte/i })).toBeInTheDocument()
   })
 })
