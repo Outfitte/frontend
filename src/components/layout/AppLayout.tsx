@@ -1,7 +1,8 @@
-import { NavLink, Outlet } from 'react-router'
+import { NavLink, Outlet, useMatch } from 'react-router'
 import {
   CalendarIcon,
   HomeIcon,
+  MapPinIcon,
   ShirtIcon,
   ShareIcon,
   SettingsIcon,
@@ -38,11 +39,28 @@ import { Button } from '@/components/ui/button'
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: HomeIcon },
   { to: '/items', label: 'Items', icon: TagIcon },
+  { to: '/locations', label: 'Locations', icon: MapPinIcon },
   { to: '/outfits', label: 'Outfits', icon: ShirtIcon },
   { to: '/calendar', label: 'Calendar', icon: CalendarIcon },
   { to: '/shared', label: 'Shared', icon: ShareIcon },
   { to: '/settings', label: 'Settings', icon: SettingsIcon },
 ]
+
+function NavItem({ to, label, icon: Icon }: { to: string; label: string; icon: React.ElementType }) {
+  const end = to === '/'
+  const isActive = !!useMatch({ path: to, end })
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild isActive={isActive} tooltip={label}>
+        <NavLink to={to} end={end}>
+          <Icon />
+          <span>{label}</span>
+        </NavLink>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  )
+}
 
 function DarkModeToggle() {
   const { theme, setTheme } = useThemeStore()
@@ -115,15 +133,8 @@ export function AppLayout() {
             <SidebarGroup>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
-                    <SidebarMenuItem key={to}>
-                      <SidebarMenuButton asChild tooltip={label}>
-                        <NavLink to={to} end={to === '/'}>
-                          <Icon />
-                          <span>{label}</span>
-                        </NavLink>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                  {NAV_ITEMS.map((item) => (
+                    <NavItem key={item.to} {...item} />
                   ))}
                 </SidebarMenu>
               </SidebarGroupContent>
