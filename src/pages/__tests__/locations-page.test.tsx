@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/mocks/server'
@@ -176,22 +176,6 @@ describe('LocationsPage', () => {
     expect(screen.getByText(/are you sure/i)).toBeInTheDocument()
   })
 
-  it('LocationsPage should delete location and close dialog on confirmation', async () => {
-    const user = userEvent.setup()
-    render(<LocationsPage />)
-
-    await screen.findByText('Main Closet')
-    await user.click(screen.getByTestId('context-menu-loc-001'))
-    await user.click(screen.getByRole('menuitem', { name: /delete/i }))
-
-    await screen.findByRole('alertdialog')
-    await user.click(screen.getByRole('button', { name: /^delete$/i }))
-
-    await waitFor(() => {
-      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
-    })
-  })
-
   it('LocationsPage should show 409 error message when delete fails because location has children or items', async () => {
     const user = userEvent.setup()
     server.use(
@@ -212,6 +196,22 @@ describe('LocationsPage', () => {
     await user.click(screen.getByRole('button', { name: /^delete$/i }))
 
     expect(await screen.findByText(/cannot delete location with children or assigned items/i)).toBeInTheDocument()
+  })
+
+  it('LocationsPage should delete location and close dialog on confirmation', async () => {
+    const user = userEvent.setup()
+    render(<LocationsPage />)
+
+    await screen.findByText('Main Closet')
+    await user.click(screen.getByTestId('context-menu-loc-001'))
+    await user.click(screen.getByRole('menuitem', { name: /delete/i }))
+
+    await screen.findByRole('alertdialog')
+    await user.click(screen.getByRole('button', { name: /^delete$/i }))
+
+    await waitFor(() => {
+      expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+    })
   })
 
   // --- Move ---
@@ -290,6 +290,38 @@ describe('LocationsPage', () => {
     expect(screen.getByTestId('rename-input-loc-001')).toBeInTheDocument()
   })
 
+  it('LocationsPage should not submit rename when Enter pressed with empty input', async () => {
+    const user = userEvent.setup()
+    render(<LocationsPage />)
+
+    await screen.findByText('Main Closet')
+    await user.click(screen.getByTestId('context-menu-loc-001'))
+    await user.click(screen.getByRole('menuitem', { name: /rename/i }))
+
+    const input = screen.getByTestId('rename-input-loc-001')
+    await user.clear(input)
+    await user.keyboard('{Enter}')
+
+    expect(screen.getByTestId('rename-input-loc-001')).toBeInTheDocument()
+  })
+
+  it('LocationsPage should cancel inline rename without saving when Escape pressed', async () => {
+    const user = userEvent.setup()
+    render(<LocationsPage />)
+
+    await screen.findByText('Main Closet')
+    await user.click(screen.getByTestId('context-menu-loc-001'))
+    await user.click(screen.getByRole('menuitem', { name: /rename/i }))
+
+    const input = screen.getByTestId('rename-input-loc-001')
+    await user.clear(input)
+    await user.type(input, 'Something else')
+    await user.keyboard('{Escape}')
+
+    expect(screen.queryByTestId('rename-input-loc-001')).not.toBeInTheDocument()
+    expect(within(screen.getByTestId('tree-node-loc-001')).getByText('Main Closet')).toBeInTheDocument()
+  })
+
   it('LocationsPage should submit rename and close inline edit when Enter pressed', async () => {
     const user = userEvent.setup()
     server.use(
@@ -312,39 +344,6 @@ describe('LocationsPage', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('rename-input-loc-001')).not.toBeInTheDocument()
     })
-  })
-
-  it('LocationsPage should not submit rename when Enter pressed with empty input', async () => {
-    const user = userEvent.setup()
-    render(<LocationsPage />)
-
-    await screen.findByText('Main Closet')
-    await user.click(screen.getByTestId('context-menu-loc-001'))
-    await user.click(screen.getByRole('menuitem', { name: /rename/i }))
-
-    const input = screen.getByTestId('rename-input-loc-001')
-    await user.clear(input)
-    await user.keyboard('{Enter}')
-
-    expect(screen.getByTestId('rename-input-loc-001')).toBeInTheDocument()
-  })
-
-  it('LocationsPage should cancel inline rename without saving when Escape pressed', async () => {
-    const user = userEvent.setup()
-    const { within } = await import('@testing-library/react')
-    render(<LocationsPage />)
-
-    await screen.findByText('Main Closet')
-    await user.click(screen.getByTestId('context-menu-loc-001'))
-    await user.click(screen.getByRole('menuitem', { name: /rename/i }))
-
-    const input = screen.getByTestId('rename-input-loc-001')
-    await user.clear(input)
-    await user.type(input, 'Something else')
-    await user.keyboard('{Escape}')
-
-    expect(screen.queryByTestId('rename-input-loc-001')).not.toBeInTheDocument()
-    expect(within(screen.getByTestId('tree-node-loc-001')).getByText('Main Closet')).toBeInTheDocument()
   })
 
   it('LocationsPage should add created location to tree and close dialog on success', async () => {

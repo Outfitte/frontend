@@ -85,7 +85,7 @@ function TreeNode({
     <>
       <div
         data-testid={`tree-node-${node.id}`}
-        className={`flex items-center gap-1 py-1 rounded cursor-pointer ${isSelected ? 'bg-muted' : 'hover:bg-muted'}`}
+        className={`group flex items-center gap-1 py-1 rounded cursor-pointer ${isSelected ? 'bg-muted' : 'hover:bg-muted'}`}
         style={{ paddingLeft: depth * 16 + 8 }}
         onClick={() => onSelect(node.id)}
       >
