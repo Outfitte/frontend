@@ -29,6 +29,18 @@ describe('CategoryBrowser', () => {
     expect(screen.getByTestId('category-browser-skeleton')).toBeInTheDocument()
   })
 
+  it('CategoryBrowser should show only Uncategorised option when categories fail to load', async () => {
+    server.use(
+      http.get('/api/categories', () => HttpResponse.json('error', { status: 500 }))
+    )
+    renderBrowser()
+
+    const select = await screen.findByRole('combobox', { name: /category/i })
+    const options = select.querySelectorAll('option')
+    expect(options).toHaveLength(1)
+    expect(options[0]).toHaveTextContent(/uncategorised/i)
+  })
+
   // --- Happy path ---
 
   it('CategoryBrowser should render Uncategorised option', async () => {
