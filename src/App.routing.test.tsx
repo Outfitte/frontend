@@ -44,6 +44,31 @@ describe('Routing', () => {
     expect(screen.getByTestId('location')).toHaveTextContent('/login?next=%2Fsettings')
   })
 
+  it('App should redirect to /login when unauthenticated user visits /items', () => {
+    render(<AppWithLocation />, { initialEntries: ['/items'] })
+    expect(screen.getByTestId('login-page')).toBeInTheDocument()
+  })
+
+  it('App should redirect to /login when unauthenticated user visits /items/new', () => {
+    render(<AppWithLocation />, { initialEntries: ['/items/new'] })
+    expect(screen.getByTestId('login-page')).toBeInTheDocument()
+  })
+
+  it('App should redirect to /login when unauthenticated user visits /items/:id', () => {
+    render(<AppWithLocation />, { initialEntries: ['/items/item-001'] })
+    expect(screen.getByTestId('login-page')).toBeInTheDocument()
+  })
+
+  it('App should redirect to /login when unauthenticated user visits /items/:id/edit', () => {
+    render(<AppWithLocation />, { initialEntries: ['/items/item-001/edit'] })
+    expect(screen.getByTestId('login-page')).toBeInTheDocument()
+  })
+
+  it('App should redirect to /login when unauthenticated user visits /locations', () => {
+    render(<AppWithLocation />, { initialEntries: ['/locations'] })
+    expect(screen.getByTestId('login-page')).toBeInTheDocument()
+  })
+
   it('App should redirect to / when authenticated user visits /login', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',

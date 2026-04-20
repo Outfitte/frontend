@@ -13,6 +13,8 @@ function renderLayout(initialEntries?: string[]) {
       <Route element={<AppLayout />}>
         <Route path="/" element={<div>dashboard content</div>} />
         <Route path="/items" element={<div>items content</div>} />
+        <Route path="/items/:id" element={<div>item detail content</div>} />
+        <Route path="/locations" element={<div>locations content</div>} />
         <Route path="/settings" element={<div>settings content</div>} />
       </Route>
     </Routes>,
@@ -59,6 +61,7 @@ describe('AppLayout', () => {
 
     expect(screen.getByRole('link', { name: /dashboard/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /items/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /locations/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /outfits/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /calendar/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /shared/i })).toBeInTheDocument()
@@ -70,6 +73,20 @@ describe('AppLayout', () => {
 
     const itemsLink = screen.getByRole('link', { name: /items/i })
     expect(itemsLink).toHaveAttribute('aria-current', 'page')
+  })
+
+  it('AppLayout should set data-active true on items nav button when on items route', () => {
+    renderLayout(['/items'])
+
+    const itemsLink = screen.getByRole('link', { name: /items/i })
+    expect(itemsLink).toHaveAttribute('data-active', 'true')
+  })
+
+  it('AppLayout should set data-active true on items nav button when on items sub-route', () => {
+    renderLayout(['/items/item-001'])
+
+    const itemsLink = screen.getByRole('link', { name: /items/i })
+    expect(itemsLink).toHaveAttribute('data-active', 'true')
   })
 
   it('AppLayout should show Settings and Log out in user dropdown when opened', async () => {
