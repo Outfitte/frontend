@@ -96,6 +96,24 @@ describe('AppLayout', () => {
     expect(locationsLink).toHaveAttribute('data-active', 'true')
   })
 
+  it('AppLayout should navigate to /items when Items link is clicked', async () => {
+    const user = userEvent.setup()
+    renderLayout(['/'])
+
+    await user.click(screen.getByRole('link', { name: /items/i }))
+
+    expect(screen.getByText('items content')).toBeInTheDocument()
+  })
+
+  it('AppLayout should navigate to /locations when Locations link is clicked', async () => {
+    const user = userEvent.setup()
+    renderLayout(['/'])
+
+    await user.click(screen.getByRole('link', { name: /locations/i }))
+
+    expect(screen.getByText('locations content')).toBeInTheDocument()
+  })
+
   it('AppLayout should show Settings and Log out in user dropdown when opened', async () => {
     const user = userEvent.setup()
     renderLayout()
