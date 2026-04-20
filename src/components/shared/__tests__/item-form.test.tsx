@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { render } from '@/test/utils'
@@ -49,6 +49,10 @@ function renderEdit(overrides: Partial<React.ComponentProps<typeof ItemForm>> = 
 }
 
 describe('ItemForm', () => {
+  beforeEach(() => {
+    noop.mockReset()
+  })
+
   // --- Failure / validation cases ---
 
   it('ItemForm should show validation error when name is empty in create mode', async () => {
@@ -91,16 +95,6 @@ describe('ItemForm', () => {
     await user.click(screen.getByRole('button', { name: /save changes/i }))
 
     expect(await screen.findByText(/both price and currency are required/i)).toBeInTheDocument()
-  })
-
-  it('ItemForm should fire onCancel callback when Cancel button is clicked', async () => {
-    const user = userEvent.setup()
-    const onCancel = vi.fn()
-    renderCreate({ onCancel })
-
-    await user.click(screen.getByRole('button', { name: /cancel/i }))
-
-    expect(onCancel).toHaveBeenCalledOnce()
   })
 
   // --- Happy path ---
@@ -282,9 +276,9 @@ describe('ItemForm', () => {
     await screen.findByRole('button', { name: /delete photo photo-001/i })
     await user.click(screen.getByRole('button', { name: /delete photo photo-001/i }))
 
-    await new Promise((r) => setTimeout(r, 50))
-    expect(deletedKeys.length).toBe(0)
+    // The button remains visible because the no-op guard leaves the photo in place
     expect(screen.getByRole('button', { name: /delete photo photo-001/i })).toBeInTheDocument()
+    expect(deletedKeys.length).toBe(0)
   })
 
   it('ItemForm should delete existing photo via API and remove it from view', async () => {
@@ -308,7 +302,17 @@ describe('ItemForm', () => {
     expect(screen.queryByRole('button', { name: /delete photo photo-001/i })).not.toBeInTheDocument()
   })
 
-  it('ItemForm should call onSave with correct payload shape when form is submitted', async () => {
+  it('ItemForm should fire onCancel callback when Cancel button is clicked', async () => {
+    const user = userEvent.setup()
+    const onCancel = vi.fn()
+    renderCreate({ onCancel })
+
+    await user.click(screen.getByRole('button', { name: /cancel/i }))
+
+    expect(onCancel).toHaveBeenCalledOnce()
+  })
+
+  it('ItemForm should call onSave with correct payload shape when form is submitted in create mode', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn().mockResolvedValue(undefined)
     renderCreate({ onSave })
@@ -322,6 +326,23 @@ describe('ItemForm', () => {
     const [payload, photos] = onSave.mock.calls[0] as [ItemFormPayload, File[]]
     expect(payload.name).toBe('My Jacket')
     expect(payload.brand).toBe('Nike')
+    expect(payload.metadata).toEqual({})
+    expect(photos).toEqual([])
+  })
+
+  it('ItemForm should call onSave with correct payload shape when form is submitted in edit mode', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn().mockResolvedValue(undefined)
+    renderEdit({ onSave })
+
+    await screen.findByDisplayValue('Blue Denim Jacket')
+    await user.click(screen.getByRole('button', { name: /save changes/i }))
+
+    await vi.waitFor(() => expect(onSave).toHaveBeenCalledOnce())
+
+    const [payload, photos] = onSave.mock.calls[0] as [ItemFormPayload, File[]]
+    expect(payload.name).toBe('Blue Denim Jacket')
+    expect(payload.brand).toBe("Levi's")
     expect(payload.metadata).toEqual({})
     expect(photos).toEqual([])
   })
