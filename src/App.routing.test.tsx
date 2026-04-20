@@ -67,6 +67,7 @@ describe('Routing', () => {
   it('App should redirect to /login when unauthenticated user visits /locations', () => {
     render(<AppWithLocation />, { initialEntries: ['/locations'] })
     expect(screen.getByTestId('login-page')).toBeInTheDocument()
+    expect(screen.getByTestId('location')).toHaveTextContent('/login?next=%2Flocations')
   })
 
   it('App should redirect to / when authenticated user visits /login', () => {

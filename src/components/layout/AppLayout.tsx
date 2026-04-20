@@ -48,7 +48,7 @@ const NAV_ITEMS = [
 
 function NavItem({ to, label, icon: Icon }: { to: string; label: string; icon: React.ElementType }) {
   const end = to === '/'
-  const isActive = !!useMatch({ path: to, end }) || (!end && !!useMatch({ path: `${to}/*` }))
+  const isActive = !!useMatch({ path: to, end })
 
   return (
     <SidebarMenuItem>

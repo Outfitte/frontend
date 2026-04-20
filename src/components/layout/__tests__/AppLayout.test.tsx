@@ -89,6 +89,13 @@ describe('AppLayout', () => {
     expect(itemsLink).toHaveAttribute('data-active', 'true')
   })
 
+  it('AppLayout should set data-active true on locations nav button when on locations route', () => {
+    renderLayout(['/locations'])
+
+    const locationsLink = screen.getByRole('link', { name: /locations/i })
+    expect(locationsLink).toHaveAttribute('data-active', 'true')
+  })
+
   it('AppLayout should show Settings and Log out in user dropdown when opened', async () => {
     const user = userEvent.setup()
     renderLayout()
