@@ -96,6 +96,13 @@ describe('AppLayout', () => {
     expect(locationsLink).toHaveAttribute('data-active', 'true')
   })
 
+  it('AppLayout should not set data-active true on Items link when on locations route', () => {
+    renderLayout(['/locations'])
+
+    const itemsLink = screen.getByRole('link', { name: /items/i })
+    expect(itemsLink).not.toHaveAttribute('data-active', 'true')
+  })
+
   it('AppLayout should navigate to /items when Items link is clicked', async () => {
     const user = userEvent.setup()
     renderLayout(['/'])
