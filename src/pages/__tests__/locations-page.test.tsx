@@ -71,6 +71,49 @@ describe('LocationsPage', () => {
     expect(childPadding).toBeGreaterThan(rootPadding)
   })
 
+  it('LocationsPage should re-expand children when expand toggle clicked twice', async () => {
+    const user = userEvent.setup()
+    render(<LocationsPage />)
+
+    await screen.findByText('Main Closet')
+    await user.click(screen.getByTestId('toggle-loc-001'))
+    expect(screen.queryByText('Top Shelf')).not.toBeInTheDocument()
+
+    await user.click(screen.getByTestId('toggle-loc-001'))
+    expect(screen.getByText('Top Shelf')).toBeInTheDocument()
+  })
+
+  it('LocationsPage should open and then close create dialog when create button clicked in empty state', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.get('/api/locations', () => HttpResponse.json([]))
+    )
+    render(<LocationsPage />)
+
+    await screen.findByText(/no locations yet/i)
+    await user.click(screen.getByRole('button', { name: /create location/i }))
+
+    await screen.findByRole('dialog')
+    await user.click(screen.getByRole('button', { name: /cancel/i }))
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+  })
+
+  it('LocationsPage should show validation error when create form submitted with empty label', async () => {
+    const user = userEvent.setup()
+    render(<LocationsPage />)
+
+    await screen.findByText('Main Closet')
+    await user.click(screen.getByRole('button', { name: /create location/i }))
+    await screen.findByRole('dialog')
+
+    await user.click(screen.getByRole('button', { name: /^create$/i }))
+
+    expect(await screen.findByText(/label is required/i)).toBeInTheDocument()
+  })
+
   it('LocationsPage should collapse children when expand toggle is clicked', async () => {
     const user = userEvent.setup()
     render(<LocationsPage />)
@@ -189,6 +232,22 @@ describe('LocationsPage', () => {
     expect(screen.getByTestId('move-option-loc-002')).toBeDisabled()
   })
 
+  it('LocationsPage should move location to root when Root option clicked in move dialog', async () => {
+    const user = userEvent.setup()
+    render(<LocationsPage />)
+
+    await screen.findByText('Top Shelf')
+    await user.click(screen.getByTestId('context-menu-loc-002'))
+    await user.click(screen.getByRole('menuitem', { name: /move/i }))
+
+    await screen.findByRole('dialog')
+    await user.click(screen.getByTestId('move-option-root'))
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+  })
+
   it('LocationsPage should call move API and close dialog when location picked in move dialog', async () => {
     const user = userEvent.setup()
     server.use(
@@ -253,6 +312,21 @@ describe('LocationsPage', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('rename-input-loc-001')).not.toBeInTheDocument()
     })
+  })
+
+  it('LocationsPage should not submit rename when Enter pressed with empty input', async () => {
+    const user = userEvent.setup()
+    render(<LocationsPage />)
+
+    await screen.findByText('Main Closet')
+    await user.click(screen.getByTestId('context-menu-loc-001'))
+    await user.click(screen.getByRole('menuitem', { name: /rename/i }))
+
+    const input = screen.getByTestId('rename-input-loc-001')
+    await user.clear(input)
+    await user.keyboard('{Enter}')
+
+    expect(screen.getByTestId('rename-input-loc-001')).toBeInTheDocument()
   })
 
   it('LocationsPage should cancel inline rename without saving when Escape pressed', async () => {
