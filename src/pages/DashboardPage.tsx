@@ -1,16 +1,76 @@
+import { Link } from 'react-router'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useAuthStore } from '@/stores/auth'
+import { useItems } from '@/hooks/use-items'
+import { useLocations } from '@/hooks/use-locations'
+import type { Item } from '@/types'
 
-function StatCard({ label }: { label: string }) {
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: '$',
+  EUR: '€',
+  GBP: '£',
+  JPY: '¥',
+  CAD: 'C$',
+  AUD: 'A$',
+}
+
+function computeWardrobeValue(items: Item[]): string {
+  const priced = items.filter((i) => i.purchase_price !== null)
+  if (priced.length === 0) return '—'
+
+  const currencyGroups = new Map<string, number>()
+  for (const item of priced) {
+    const currency = item.purchase_currency ?? 'USD'
+    const cents = Math.round(parseFloat(item.purchase_price!) * 100)
+    currencyGroups.set(currency, (currencyGroups.get(currency) ?? 0) + cents)
+  }
+
+  const formatCurrency = (currency: string, cents: number) => {
+    const symbol = CURRENCY_SYMBOLS[currency] ?? currency
+    return `${symbol}${(cents / 100).toFixed(2)}`
+  }
+
+  if (currencyGroups.size === 1) {
+    const [[currency, cents]] = [...currencyGroups]
+    return formatCurrency(currency, cents)
+  }
+
+  return [...currencyGroups.entries()]
+    .map(([currency, cents]) => formatCurrency(currency, cents))
+    .join(' + ')
+}
+
+function StatCardSkeleton() {
   return (
-    <div className="rounded-lg border bg-card p-6 text-card-foreground opacity-50">
+    <div data-testid="stat-card-skeleton" className="rounded-lg border bg-card p-6">
+      <Skeleton className="h-4 w-24" />
+      <Skeleton className="mt-2 h-9 w-12" />
+    </div>
+  )
+}
+
+function StatCard({ label, value, testId }: { label: string; value: string | number; testId?: string }) {
+  return (
+    <div data-testid={testId} className="rounded-lg border bg-card p-6 text-card-foreground">
       <p className="text-sm font-medium text-muted-foreground">{label}</p>
-      <p className="mt-2 text-3xl font-bold">—</p>
+      <p className="mt-2 text-3xl font-bold">{value}</p>
     </div>
   )
 }
 
 export function DashboardPage() {
   const user = useAuthStore((s) => s.user)
+  const { isLoading: itemsLoading, data: activeItems } = useItems('active')
+  const { isLoading: locationsLoading, data: locations } = useLocations()
+
+  const isLoading = itemsLoading || locationsLoading
+
+  const recentlyAdded = activeItems
+    ? [...activeItems].sort((a, b) => b.created_at.localeCompare(a.created_at))[0]
+    : undefined
+
+  const wardrobeValue = computeWardrobeValue(activeItems ?? [])
 
   return (
     <div data-testid="dashboard-page">
@@ -19,10 +79,48 @@ export function DashboardPage() {
           <>, <span>{user.email}</span></>
         ) : null}
       </h1>
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <StatCard label="Total items" />
-        <StatCard label="Recent outfits" />
+      <div className="mt-6 flex gap-3">
+        <Button asChild variant="outline">
+          <Link to="/items/new">Add item</Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link to="/items">Log wear</Link>
+        </Button>
       </div>
+
+      {!isLoading && activeItems?.length === 0 ? (
+        <div className="mt-8 text-center">
+          <p className="text-muted-foreground">No items yet</p>
+          <Link
+            to="/items/new"
+            className="mt-4 inline-block text-sm font-medium underline"
+          >
+            Add your first item
+          </Link>
+        </div>
+      ) : (
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {isLoading ? (
+            <>
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
+            </>
+          ) : (
+            <>
+              <StatCard label="Total items" value={activeItems?.length ?? 0} testId="stat-total-items" />
+              <StatCard label="Total locations" value={locations?.length ?? 0} testId="stat-total-locations" />
+              <StatCard
+                label="Recently added"
+                value={recentlyAdded?.name ?? '—'}
+                testId="stat-recently-added"
+              />
+              <StatCard label="Wardrobe value" value={wardrobeValue} testId="stat-wardrobe-value" />
+            </>
+          )}
+        </div>
+      )}
     </div>
   )
 }
