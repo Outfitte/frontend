@@ -99,7 +99,7 @@ describe('ItemsPage', () => {
     const user = userEvent.setup()
     server.use(
       http.get('/api/items', () =>
-        HttpResponse.json([mockItem({ id: 'item-001', name: 'Blue Denim Jacket' })])
+        HttpResponse.json([mockItem({ id: 'item-001', name: 'Blue Denim Jacket', status: 'archived' })])
       ),
       http.post('/api/items/:id/unarchive', () =>
         HttpResponse.json({ error: 'Server error' }, { status: 500 })
@@ -323,7 +323,7 @@ describe('ItemsPage', () => {
     const user = userEvent.setup()
     server.use(
       http.get('/api/items', () =>
-        HttpResponse.json([mockItem({ id: 'item-001', name: 'Blue Denim Jacket' })])
+        HttpResponse.json([mockItem({ id: 'item-001', name: 'Blue Denim Jacket', status: 'archived' })])
       )
     )
     render(<ItemsPage />, { initialEntries: ['/items?status=archived'] })
@@ -377,5 +377,47 @@ describe('ItemsPage', () => {
     await waitFor(() =>
       expect(screen.queryByRole('menuitem', { name: /dispose/i })).not.toBeInTheDocument()
     )
+  })
+
+  it('ItemsPage should show Unarchive for archived item when status filter is all', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.get('/api/items', () =>
+        HttpResponse.json([mockItem({ id: 'item-001', name: 'Archived Jacket', status: 'archived' })])
+      )
+    )
+    render(<ItemsPage />, { initialEntries: ['/items?status=all'] })
+
+    await screen.findByText('Archived Jacket')
+    await user.click(screen.getAllByRole('button', { name: /item options/i })[0])
+
+    expect(screen.getByRole('menuitem', { name: /unarchive/i })).toBeInTheDocument()
+    expect(screen.queryByRole('menuitem', { name: /^archive$/i })).not.toBeInTheDocument()
+  })
+
+  it('ItemsPage should show archived badge on archived item when status filter is all', async () => {
+    server.use(
+      http.get('/api/items', () =>
+        HttpResponse.json([mockItem({ id: 'item-001', name: 'Archived Jacket', status: 'archived' })])
+      )
+    )
+    render(<ItemsPage />, { initialEntries: ['/items?status=all'] })
+
+    await screen.findByText('Archived Jacket')
+
+    expect(screen.getByTestId('item-status-badge')).toHaveTextContent('Archived')
+  })
+
+  it('ItemsPage should show disposed badge on disposed item when status filter is all', async () => {
+    server.use(
+      http.get('/api/items', () =>
+        HttpResponse.json([mockItem({ id: 'item-001', name: 'Disposed Sneakers', status: 'disposed' })])
+      )
+    )
+    render(<ItemsPage />, { initialEntries: ['/items?status=all'] })
+
+    await screen.findByText('Disposed Sneakers')
+
+    expect(screen.getByTestId('item-status-badge')).toHaveTextContent('Disposed')
   })
 })
