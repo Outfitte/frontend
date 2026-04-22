@@ -97,6 +97,18 @@ describe('ItemForm', () => {
     expect(await screen.findByText(/both price and currency are required/i)).toBeInTheDocument()
   })
 
+  it('ItemForm should show validation error when currency code has more than 3 characters in create mode', async () => {
+    const user = userEvent.setup()
+    renderCreate()
+
+    await user.type(screen.getByLabelText(/^name/i), 'Jacket')
+    await user.type(screen.getByLabelText(/price/i), '49.99')
+    await user.type(screen.getByLabelText(/currency/i), 'USDX')
+    await user.click(screen.getByRole('button', { name: /^save$/i }))
+
+    expect(await screen.findByText(/enter a 3-letter currency code/i)).toBeInTheDocument()
+  })
+
   // --- Happy path ---
 
   it('ItemForm should render all sections when mode is create with empty defaults', () => {
