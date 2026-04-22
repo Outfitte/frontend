@@ -48,6 +48,14 @@ export function ItemCard({ item, categoryLabel, isArchived, onWoreToday, onActio
                 {categoryLabel}
               </span>
             )}
+            {item.status !== 'active' && (
+              <span
+                data-testid="item-status-badge"
+                className="mt-1 inline-block rounded-full bg-amber-100 px-2 py-0.5 text-xs capitalize text-amber-800"
+              >
+                {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+              </span>
+            )}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

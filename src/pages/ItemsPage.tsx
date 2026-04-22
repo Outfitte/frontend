@@ -195,7 +195,7 @@ export function ItemsPage() {
               key={item.id}
               item={item}
               categoryLabel={item.category_id ? categoryMap[item.category_id] : undefined}
-              isArchived={status === 'archived'}
+              isArchived={item.status !== 'active'}
               onWoreToday={handleWoreToday}
               onAction={handleAction}
             />
