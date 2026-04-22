@@ -299,7 +299,6 @@ export function ItemForm({
               <Label htmlFor="purchase_currency">Currency</Label>
               <Input
                 id="purchase_currency"
-                maxLength={3}
                 name={currencyRegProps.name}
                 ref={currencyRegProps.ref}
                 onBlur={currencyRegProps.onBlur}
