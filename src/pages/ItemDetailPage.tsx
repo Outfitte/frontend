@@ -359,6 +359,14 @@ export function ItemDetailPage() {
             </div>
           )}
 
+          {/* Disposal reason */}
+          {item.dispose_reason && (
+            <div data-testid="item-dispose-reason">
+              <p className="mb-1 text-sm font-medium text-muted-foreground">Disposal reason</p>
+              <p className="text-sm">{item.dispose_reason}</p>
+            </div>
+          )}
+
           {/* Purchase section */}
           {hasPurchaseData && (
             <div data-testid="purchase-section">

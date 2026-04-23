@@ -22,5 +22,6 @@ export interface Item {
   purchase_currency: string | null
   purchase_date: string | null
   seller_url: string | null
+  dispose_reason: string | null
   created_at: string
 }

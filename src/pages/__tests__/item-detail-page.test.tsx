@@ -192,6 +192,30 @@ describe('ItemDetailPage', () => {
     await waitFor(() => expect(deletedLogId).toBe('wearlog-002'))
   })
 
+  it('ItemDetailPage should not render disposal reason section when dispose_reason is null', async () => {
+    server.use(
+      http.get('/api/items/:id', () =>
+        HttpResponse.json(mockItem({ id: ITEM_ID, status: 'disposed', dispose_reason: null }))
+      )
+    )
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    expect(screen.queryByTestId('item-dispose-reason')).not.toBeInTheDocument()
+  })
+
+  it('ItemDetailPage should render disposal reason when item is disposed with a reason', async () => {
+    server.use(
+      http.get('/api/items/:id', () =>
+        HttpResponse.json(mockItem({ id: ITEM_ID, status: 'disposed', dispose_reason: 'Donated' }))
+      )
+    )
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    expect(screen.getByTestId('item-dispose-reason')).toHaveTextContent('Donated')
+  })
+
   // --- Happy path ---
 
   it('ItemDetailPage should have data-testid item-detail-page on root element', async () => {

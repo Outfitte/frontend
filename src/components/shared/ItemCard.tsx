@@ -56,6 +56,11 @@ export function ItemCard({ item, categoryLabel, isArchived, onWoreToday, onActio
                 {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
               </span>
             )}
+            {item.status === 'disposed' && item.dispose_reason && (
+              <p data-testid="item-card-dispose-reason" className="mt-0.5 text-xs text-muted-foreground">
+                {item.dispose_reason}
+              </p>
+            )}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
