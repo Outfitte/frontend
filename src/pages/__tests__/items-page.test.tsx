@@ -54,6 +54,28 @@ describe('ItemsPage', () => {
     expect(screen.getByRole('link', { name: /add your first item/i })).toBeInTheDocument()
   })
 
+  it('ItemsPage should show no-match message without CTA when category filter is active and no items match', async () => {
+    render(<ItemsPage />, { initialEntries: ['/items?category=cat-999'] })
+
+    expect(await screen.findByText(/no items match your filters/i)).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /add your first item/i })).not.toBeInTheDocument()
+  })
+
+  it('ItemsPage should show no-match message without CTA when location filter is active and no items match', async () => {
+    render(<ItemsPage />, { initialEntries: ['/items?location=loc-999'] })
+
+    expect(await screen.findByText(/no items match your filters/i)).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /add your first item/i })).not.toBeInTheDocument()
+  })
+
+  it('ItemsPage should show no-match message without CTA when status filter is non-default and no items match', async () => {
+    server.use(http.get('/api/items', () => HttpResponse.json([])))
+    render(<ItemsPage />, { initialEntries: ['/items?status=archived'] })
+
+    expect(await screen.findByText(/no items match your filters/i)).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /add your first item/i })).not.toBeInTheDocument()
+  })
+
   it('ItemsPage should show placeholder when item has no photos', async () => {
     server.use(
       http.get('/api/items', () =>
