@@ -76,6 +76,14 @@ describe('ItemsPage', () => {
     expect(screen.queryByRole('link', { name: /add your first item/i })).not.toBeInTheDocument()
   })
 
+  it('ItemsPage should show empty state with create CTA when status is all and API returns no items', async () => {
+    server.use(http.get('/api/items', () => HttpResponse.json([])))
+    render(<ItemsPage />, { initialEntries: ['/items?status=all'] })
+
+    expect(await screen.findByText(/no items yet/i)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /add your first item/i })).toBeInTheDocument()
+  })
+
   it('ItemsPage should show placeholder when item has no photos', async () => {
     server.use(
       http.get('/api/items', () =>

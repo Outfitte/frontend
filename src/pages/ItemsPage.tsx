@@ -51,7 +51,7 @@ export function ItemsPage() {
 
   const categoryMap = Object.fromEntries((categories ?? []).map((c) => [c.id, c.label]))
 
-  const hasActiveFilters = categoryFilter !== '' || locationFilter !== '' || status !== 'active'
+  const hasActiveFilters = categoryFilter !== '' || locationFilter !== '' || status === 'archived'
 
   const filteredItems = sortItems(
     (items ?? []).filter((item) => {
