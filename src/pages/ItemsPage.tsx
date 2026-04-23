@@ -51,6 +51,8 @@ export function ItemsPage() {
 
   const categoryMap = Object.fromEntries((categories ?? []).map((c) => [c.id, c.label]))
 
+  const hasActiveFilters = categoryFilter !== '' || locationFilter !== '' || status === 'archived'
+
   const filteredItems = sortItems(
     (items ?? []).filter((item) => {
       if (optimisticallyRemovedIds.has(item.id)) return false
@@ -180,7 +182,12 @@ export function ItemsPage() {
           ))}
         </div>
       )}
-      {!isLoading && filteredItems.length === 0 && (
+      {!isLoading && filteredItems.length === 0 && hasActiveFilters && (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <p className="text-lg text-muted-foreground">No items match your filters</p>
+        </div>
+      )}
+      {!isLoading && filteredItems.length === 0 && !hasActiveFilters && (
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <p className="mb-4 text-lg text-muted-foreground">No items yet</p>
           <Button asChild>
