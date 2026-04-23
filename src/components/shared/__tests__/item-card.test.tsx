@@ -17,7 +17,18 @@ describe('ItemCard', () => {
       />
     )
 
-    expect(screen.queryByTestId('item-dispose-reason')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('item-card-dispose-reason')).not.toBeInTheDocument()
+  })
+
+  it('ItemCard should not render disposal reason when item is active with a non-null dispose_reason', () => {
+    render(
+      <ItemCard
+        item={mockItem({ status: 'active', dispose_reason: 'Donated' })}
+        onAction={vi.fn()}
+      />
+    )
+
+    expect(screen.queryByTestId('item-card-dispose-reason')).not.toBeInTheDocument()
   })
 
   it('ItemCard should render dispose_reason when item is disposed with a reason', () => {
@@ -28,6 +39,6 @@ describe('ItemCard', () => {
       />
     )
 
-    expect(screen.getByTestId('item-dispose-reason')).toHaveTextContent('Donated')
+    expect(screen.getByTestId('item-card-dispose-reason')).toHaveTextContent('Donated')
   })
 })
