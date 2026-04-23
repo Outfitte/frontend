@@ -68,7 +68,7 @@ describe('ItemsPage', () => {
     expect(screen.queryByRole('link', { name: /add your first item/i })).not.toBeInTheDocument()
   })
 
-  it('ItemsPage should show no-match message without CTA when status filter is non-default and no items match', async () => {
+  it('ItemsPage should show no-match message without CTA when status filter is archived and API returns no items', async () => {
     server.use(http.get('/api/items', () => HttpResponse.json([])))
     render(<ItemsPage />, { initialEntries: ['/items?status=archived'] })
 
