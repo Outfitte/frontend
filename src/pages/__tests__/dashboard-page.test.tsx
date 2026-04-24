@@ -148,6 +148,46 @@ describe('DashboardPage', () => {
     expect(card).toHaveTextContent(/recently added/i)
   })
 
+  it('DashboardPage should show dash for recently worn when no items have been worn', async () => {
+    server.use(
+      http.get('/api/items', ({ request }) => {
+        const url = new URL(request.url)
+        if (url.searchParams.get('status') === 'active') {
+          return HttpResponse.json([
+            mockItem({ id: 'item-001', name: 'Blue Denim Jacket', last_worn_on: null }),
+          ])
+        }
+        return HttpResponse.json([])
+      })
+    )
+    render(<DashboardPage />)
+
+    const card = await screen.findByTestId('stat-recently-worn')
+    expect(card).toHaveTextContent('—')
+    expect(card).toHaveTextContent(/recently worn/i)
+  })
+
+  it('DashboardPage should show most recently worn item name when wear logs exist', async () => {
+    server.use(
+      http.get('/api/items', ({ request }) => {
+        const url = new URL(request.url)
+        if (url.searchParams.get('status') === 'active') {
+          return HttpResponse.json([
+            mockItem({ id: 'item-001', name: 'Blue Denim Jacket', last_worn_on: '2026-03-10' }),
+            mockItem({ id: 'item-002', name: 'White Sneakers', last_worn_on: '2026-04-20' }),
+            mockItem({ id: 'item-003', name: 'Red Wool Coat', last_worn_on: null }),
+          ])
+        }
+        return HttpResponse.json([])
+      })
+    )
+    render(<DashboardPage />)
+
+    const card = await screen.findByTestId('stat-recently-worn')
+    expect(card).toHaveTextContent('White Sneakers')
+    expect(card).toHaveTextContent(/recently worn/i)
+  })
+
   it('DashboardPage should show wardrobe value summed from active item purchase prices', async () => {
     server.use(
       http.get('/api/items', ({ request }) => {

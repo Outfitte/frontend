@@ -23,5 +23,6 @@ export interface Item {
   purchase_date: string | null
   seller_url: string | null
   dispose_reason: string | null
+  last_worn_on: string | null
   created_at: string
 }

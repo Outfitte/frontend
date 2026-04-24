@@ -70,6 +70,12 @@ export function DashboardPage() {
     ? [...activeItems].sort((a, b) => b.created_at.localeCompare(a.created_at))[0]
     : undefined
 
+  const recentlyWorn = activeItems
+    ? [...activeItems]
+        .filter((i) => i.last_worn_on !== null)
+        .sort((a, b) => b.last_worn_on!.localeCompare(a.last_worn_on!))[0]
+    : undefined
+
   const wardrobeValue = computeWardrobeValue(activeItems ?? [])
 
   return (
@@ -106,6 +112,7 @@ export function DashboardPage() {
               <StatCardSkeleton />
               <StatCardSkeleton />
               <StatCardSkeleton />
+              <StatCardSkeleton />
             </>
           ) : (
             <>
@@ -115,6 +122,11 @@ export function DashboardPage() {
                 label="Recently added"
                 value={recentlyAdded?.name ?? '—'}
                 testId="stat-recently-added"
+              />
+              <StatCard
+                label="Recently worn"
+                value={recentlyWorn?.name ?? '—'}
+                testId="stat-recently-worn"
               />
               <StatCard label="Wardrobe value" value={wardrobeValue} testId="stat-wardrobe-value" />
             </>
