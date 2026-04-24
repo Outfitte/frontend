@@ -378,4 +378,14 @@ describe('ItemForm', () => {
     expect(photos).toHaveLength(1)
     expect(photos[0].name).toBe('photo.jpg')
   })
+
+  it('ItemForm should use /media/ path for existing photo src', async () => {
+    renderEdit({
+      existingPhotos: [mockPhoto({ id: 'photo-001', media_key: 'uploads/photo-001.jpg' })],
+      itemId: 'item-001',
+    })
+
+    const img = await screen.findByAltText('Existing photo photo-001')
+    expect(img).toHaveAttribute('src', '/media/uploads/photo-001.jpg')
+  })
 })

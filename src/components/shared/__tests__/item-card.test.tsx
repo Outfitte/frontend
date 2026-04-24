@@ -41,4 +41,15 @@ describe('ItemCard', () => {
 
     expect(screen.getByTestId('item-card-dispose-reason')).toHaveTextContent('Donated')
   })
+
+  it('ItemCard should use /media/ path for the photo src', () => {
+    render(
+      <ItemCard
+        item={mockItem({ photos: [{ id: 'photo-001', media_key: 'uploads/photo-001.jpg', position: 0, created_at: '2026-01-01T00:00:00Z' }] })}
+        onAction={vi.fn()}
+      />
+    )
+
+    expect(screen.getByRole('img')).toHaveAttribute('src', '/media/uploads/photo-001.jpg')
+  })
 })

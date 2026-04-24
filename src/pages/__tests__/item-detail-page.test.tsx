@@ -598,4 +598,11 @@ describe('ItemDetailPage', () => {
 
     await waitFor(() => expect(deletedId).toBe(ITEM_ID))
   })
+
+  it('ItemDetailPage should use /media/ path for main photo src', async () => {
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', '/media/uploads/photo-001.jpg')
+  })
 })
