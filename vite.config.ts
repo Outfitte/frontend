@@ -13,7 +13,7 @@ export default defineConfig({
   },
   server: {
     proxy: process.env.BACKEND_URL
-      ? { '/api': process.env.BACKEND_URL }
+      ? { '/api': process.env.BACKEND_URL, '/media': process.env.BACKEND_URL }
       : undefined,
   },
 })

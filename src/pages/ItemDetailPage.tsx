@@ -42,7 +42,6 @@ import { useWearLogs, useLogWear, useDeleteWearLog } from '@/hooks/use-wear-logs
 import { useLocations } from '@/hooks/use-locations'
 import { useCategories } from '@/hooks/use-categories'
 import { getAncestors } from '@/lib/location-tree'
-import { BASE_URL } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
 const wearLogSchema = z.strictObject({
@@ -270,7 +269,7 @@ export function ItemDetailPage() {
               <div className="relative aspect-square overflow-hidden rounded-xl border bg-muted">
                 <img
                   data-testid="main-photo"
-                  src={`${BASE_URL}/photos/${activePhoto.media_key}`}
+                  src={`/media/${activePhoto.media_key}`}
                   alt={item.name}
                   className="h-full w-full object-cover"
                 />
@@ -311,7 +310,7 @@ export function ItemDetailPage() {
                       )}
                     >
                       <img
-                        src={`${BASE_URL}/photos/${photo.media_key}`}
+                        src={`/media/${photo.media_key}`}
                         alt={`Photo ${idx + 1}`}
                         className="h-16 w-16 object-cover"
                       />

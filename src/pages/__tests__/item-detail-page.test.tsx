@@ -233,6 +233,13 @@ describe('ItemDetailPage', () => {
     expect(screen.getByText('Jackets')).toBeInTheDocument()
   })
 
+  it('ItemDetailPage should use /media/ path for main photo src when the item has a photo', async () => {
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', '/media/uploads/photo-001.jpg')
+  })
+
   it('ItemDetailPage should render photo gallery with main photo and thumbnail strip', async () => {
     renderPage()
 

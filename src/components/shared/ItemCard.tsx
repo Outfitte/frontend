@@ -7,7 +7,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { BASE_URL } from '@/lib/constants'
 import type { Item } from '@/types'
 
 export type ItemAction = 'edit' | 'archive' | 'unarchive' | 'dispose' | 'delete'
@@ -28,7 +27,7 @@ export function ItemCard({ item, categoryLabel, isArchived, onWoreToday, onActio
       <Link to={`/items/${item.id}`} aria-label={`View ${item.name}`} className="block aspect-square bg-muted">
         {firstPhoto ? (
           <img
-            src={`${BASE_URL}/photos/${firstPhoto.media_key}`}
+            src={`/media/${firstPhoto.media_key}`}
             alt={item.name}
             className="h-full w-full object-cover"
           />

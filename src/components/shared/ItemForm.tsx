@@ -416,7 +416,7 @@ export function ItemForm({
               {currentPhotos.map((photo) => (
                 <div key={photo.id} className="relative">
                   <img
-                    src={`/api/photos/${photo.media_key}`}
+                    src={`/media/${photo.media_key}`}
                     alt={`Existing photo ${photo.id}`}
                     className="h-20 w-20 rounded-lg object-cover border"
                   />
