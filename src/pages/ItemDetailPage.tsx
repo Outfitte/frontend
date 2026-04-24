@@ -42,7 +42,6 @@ import { useWearLogs, useLogWear, useDeleteWearLog } from '@/hooks/use-wear-logs
 import { useLocations } from '@/hooks/use-locations'
 import { useCategories } from '@/hooks/use-categories'
 import { getAncestors } from '@/lib/location-tree'
-
 import { cn } from '@/lib/utils'
 
 const wearLogSchema = z.strictObject({

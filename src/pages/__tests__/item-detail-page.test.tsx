@@ -233,6 +233,13 @@ describe('ItemDetailPage', () => {
     expect(screen.getByText('Jackets')).toBeInTheDocument()
   })
 
+  it('ItemDetailPage should use /media/ path for main photo src when the item has a photo', async () => {
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', '/media/uploads/photo-001.jpg')
+  })
+
   it('ItemDetailPage should render photo gallery with main photo and thumbnail strip', async () => {
     renderPage()
 
@@ -597,12 +604,5 @@ describe('ItemDetailPage', () => {
     await user.click(screen.getByRole('button', { name: /confirm delete/i }))
 
     await waitFor(() => expect(deletedId).toBe(ITEM_ID))
-  })
-
-  it('ItemDetailPage should use /media/ path for main photo src', async () => {
-    renderPage()
-
-    await screen.findByText('Blue Denim Jacket')
-    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', '/media/uploads/photo-001.jpg')
   })
 })
