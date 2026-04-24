@@ -57,6 +57,7 @@ export function mockItem(overrides: Partial<Item> = {}): Item {
     purchase_date: '2025-03-15',
     seller_url: 'https://example.com/jacket',
     dispose_reason: null,
+    last_worn_on: null,
     created_at: '2026-01-01T00:00:00Z',
     ...overrides,
   }
