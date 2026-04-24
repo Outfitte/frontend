@@ -21,8 +21,8 @@ server {
         add_header Cache-Control "public, immutable";
     }
 
-    # Proxy /api/ to backend
-    location /api/ {
+    # Proxy /api/ to backend — trailing slash on proxy_pass strips the /api/ prefix intentionally
+    location ^~ /api/ {
         proxy_pass ${BACKEND_URL}/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -31,7 +31,7 @@ server {
     }
 
     # Proxy /media/ to backend
-    location /media/ {
+    location ^~ /media/ {
         proxy_pass ${BACKEND_URL}/media/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
