@@ -1,10 +1,13 @@
 import { Link } from 'react-router'
+import { useQueries } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAuthStore } from '@/stores/auth'
 import { useItems } from '@/hooks/use-items'
 import { useLocations } from '@/hooks/use-locations'
-import type { Item } from '@/types'
+import { api } from '@/lib/api'
+import { queryKeys } from '@/lib/query-keys'
+import type { Item, WearLog } from '@/types'
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   USD: '$',
@@ -41,6 +44,40 @@ function computeWardrobeValue(items: Item[]): string {
     .join(' + ')
 }
 
+function pickMostRecentlyWorn(items: Item[], wearLogSets: (WearLog[] | undefined)[]): Item | undefined {
+  let recentItem: Item | undefined
+  let recentDate = ''
+  for (let i = 0; i < items.length; i++) {
+    const logs = wearLogSets[i]
+    if (logs && logs.length > 0) {
+      const mostRecent = logs[0].worn_on
+      if (mostRecent > recentDate) {
+        recentDate = mostRecent
+        recentItem = items[i]
+      }
+    }
+  }
+  return recentItem
+}
+
+function useRecentlyWornItem(items: Item[] | undefined): { item: Item | undefined; isLoading: boolean } {
+  const results = useQueries({
+    queries: (items ?? []).map((item) => ({
+      queryKey: queryKeys.items.wearLogs(item.id),
+      queryFn: () =>
+        api
+          .get<WearLog[]>(`/items/${item.id}/wear-logs`)
+          .then((logs) => logs.sort((a, b) => b.worn_on.localeCompare(a.worn_on))),
+    })),
+  })
+
+  const isLoading = results.some((r) => r.isLoading)
+
+  if (!items || isLoading) return { item: undefined, isLoading }
+
+  return { item: pickMostRecentlyWorn(items, results.map((r) => r.data)), isLoading: false }
+}
+
 function StatCardSkeleton() {
   return (
     <div data-testid="stat-card-skeleton" className="rounded-lg border bg-card p-6">
@@ -63,17 +100,12 @@ export function DashboardPage() {
   const user = useAuthStore((s) => s.user)
   const { isLoading: itemsLoading, data: activeItems } = useItems('active')
   const { isLoading: locationsLoading, data: locations } = useLocations()
+  const { item: recentlyWorn, isLoading: wearLogsLoading } = useRecentlyWornItem(activeItems)
 
-  const isLoading = itemsLoading || locationsLoading
+  const isLoading = itemsLoading || locationsLoading || wearLogsLoading
 
   const recentlyAdded = activeItems
     ? [...activeItems].sort((a, b) => b.created_at.localeCompare(a.created_at))[0]
-    : undefined
-
-  const recentlyWorn = activeItems
-    ? [...activeItems]
-        .filter((i) => i.last_worn_on !== null)
-        .sort((a, b) => b.last_worn_on!.localeCompare(a.last_worn_on!))[0]
     : undefined
 
   const wardrobeValue = computeWardrobeValue(activeItems ?? [])

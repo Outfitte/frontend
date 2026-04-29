@@ -20,6 +20,25 @@ describe('DashboardPage', () => {
 
   // --- Failure / loading / edge cases ---
 
+  it('DashboardPage should not crash when 2+ active items are returned without last_worn_on', async () => {
+    server.use(
+      http.get('/api/items', ({ request }) => {
+        const url = new URL(request.url)
+        if (url.searchParams.get('status') === 'active') {
+          const { last_worn_on: _1, ...item1 } = mockItem({ id: 'item-001', name: 'Blue Denim Jacket' })
+          const { last_worn_on: _2, ...item2 } = mockItem({ id: 'item-002', name: 'Red Wool Coat' })
+          return HttpResponse.json([item1, item2])
+        }
+        return HttpResponse.json([])
+      }),
+      http.get('/api/items/:id/wear-logs', () => HttpResponse.json([]))
+    )
+    render(<DashboardPage />)
+
+    const card = await screen.findByTestId('stat-recently-worn')
+    expect(card).toHaveTextContent('—')
+  })
+
   it('DashboardPage should show loading skeletons while data is fetching', () => {
     server.use(
       http.get('/api/items', async () => {
@@ -148,17 +167,16 @@ describe('DashboardPage', () => {
     expect(card).toHaveTextContent(/recently added/i)
   })
 
-  it('DashboardPage should show dash for recently worn when no items have been worn', async () => {
+  it('DashboardPage should show dash for recently worn when no items have wear logs', async () => {
     server.use(
       http.get('/api/items', ({ request }) => {
         const url = new URL(request.url)
         if (url.searchParams.get('status') === 'active') {
-          return HttpResponse.json([
-            mockItem({ id: 'item-001', name: 'Blue Denim Jacket', last_worn_on: null }),
-          ])
+          return HttpResponse.json([mockItem({ id: 'item-001', name: 'Blue Denim Jacket' })])
         }
         return HttpResponse.json([])
-      })
+      }),
+      http.get('/api/items/:id/wear-logs', () => HttpResponse.json([]))
     )
     render(<DashboardPage />)
 
@@ -173,13 +191,20 @@ describe('DashboardPage', () => {
         const url = new URL(request.url)
         if (url.searchParams.get('status') === 'active') {
           return HttpResponse.json([
-            mockItem({ id: 'item-001', name: 'Blue Denim Jacket', last_worn_on: '2026-03-10' }),
-            mockItem({ id: 'item-002', name: 'White Sneakers', last_worn_on: '2026-04-20' }),
-            mockItem({ id: 'item-003', name: 'Red Wool Coat', last_worn_on: null }),
+            mockItem({ id: 'item-001', name: 'Blue Denim Jacket' }),
+            mockItem({ id: 'item-002', name: 'White Sneakers' }),
+            mockItem({ id: 'item-003', name: 'Red Wool Coat' }),
           ])
         }
         return HttpResponse.json([])
-      })
+      }),
+      http.get('/api/items/item-001/wear-logs', () =>
+        HttpResponse.json([{ id: 'wl-1', item_id: 'item-001', owner_id: 'user-001', worn_on: '2026-03-10', notes: null, created_at: '2026-03-10T08:00:00Z' }])
+      ),
+      http.get('/api/items/item-002/wear-logs', () =>
+        HttpResponse.json([{ id: 'wl-2', item_id: 'item-002', owner_id: 'user-001', worn_on: '2026-04-20', notes: null, created_at: '2026-04-20T08:00:00Z' }])
+      ),
+      http.get('/api/items/item-003/wear-logs', () => HttpResponse.json([]))
     )
     render(<DashboardPage />)
 
