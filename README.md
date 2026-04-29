@@ -1,3 +1,7 @@
+[![CI](https://github.com/Outfitte/frontend/actions/workflows/ci.yml/badge.svg)](https://github.com/Outfitte/frontend/actions/workflows/ci.yml)
+[![Dependabot Updates](https://github.com/Outfitte/frontend/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/Outfitte/frontend/actions/workflows/dependabot/dependabot-updates)
+[![codecov](https://codecov.io/gh/Outfitte/frontend/graph/badge.svg?token=MV4MNYG4PT)](https://codecov.io/gh/Outfitte/frontend)
+
 # Outfitte Frontend
 
 Web frontend for [Outfitte](https://github.com/Outfitte).
