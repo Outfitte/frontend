@@ -50,7 +50,7 @@ function pickMostRecentlyWorn(items: Item[], wearLogSets: (WearLog[] | undefined
   for (let i = 0; i < items.length; i++) {
     const logs = wearLogSets[i]
     if (logs && logs.length > 0) {
-      const mostRecent = logs[0].worn_on
+      const mostRecent = logs.reduce((best, log) => (log.worn_on > best.worn_on ? log : best)).worn_on
       if (mostRecent > recentDate) {
         recentDate = mostRecent
         recentItem = items[i]

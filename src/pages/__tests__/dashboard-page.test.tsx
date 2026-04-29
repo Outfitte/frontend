@@ -25,12 +25,14 @@ describe('DashboardPage', () => {
       http.get('/api/items', ({ request }) => {
         const url = new URL(request.url)
         if (url.searchParams.get('status') === 'active') {
-          const { last_worn_on: _1, ...item1 } = mockItem({ id: 'item-001', name: 'Blue Denim Jacket' })
-          const { last_worn_on: _2, ...item2 } = mockItem({ id: 'item-002', name: 'Red Wool Coat' })
-          return HttpResponse.json([item1, item2])
+          return HttpResponse.json([
+            mockItem({ id: 'item-001', name: 'Blue Denim Jacket' }),
+            mockItem({ id: 'item-002', name: 'Red Wool Coat' }),
+          ])
         }
         return HttpResponse.json([])
       }),
+      // wildcard: covers all item IDs — no item has been worn
       http.get('/api/items/:id/wear-logs', () => HttpResponse.json([]))
     )
     render(<DashboardPage />)
