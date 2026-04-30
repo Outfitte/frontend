@@ -57,7 +57,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   publish:
-    runs-on: ubuntu-latest
+    runs-on: builder
     needs: [build-and-test, docker-build]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
