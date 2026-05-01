@@ -132,6 +132,24 @@ describe('useLogin', () => {
     expect(toast.error).not.toHaveBeenCalled()
   })
 
+  it('useLogin should not call options.onSuccess when login request fails', async () => {
+    server.use(
+      http.post('/api/auth/login', () =>
+        HttpResponse.json({ error: 'Invalid credentials' }, { status: 401 })
+      )
+    )
+    const onSuccess = vi.fn()
+    const { result } = renderHook(() => useLogin({ onSuccess }), { wrapper: makeWrapper() })
+
+    act(() => {
+      result.current.mutate({ username: 'alice@example.com', password: 'wrongpassword' })
+    })
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
+
+    expect(onSuccess).not.toHaveBeenCalled()
+  })
+
   it('useLogin should set user in auth store when GET /users/me returns user data after successful login', async () => {
     const user = { id: 'user-001', email: 'alice@example.com', role: 'user' as const, created_at: '2024-01-01T00:00:00Z' }
     server.use(
@@ -156,24 +174,6 @@ describe('useLogin', () => {
     expect(state.refreshToken).toBe('refresh-token-xyz789')
     expect(state.isAuthenticated).toBe(true)
     expect(state.user).toEqual(user)
-  })
-
-  it('useLogin should not call options.onSuccess when login request fails', async () => {
-    server.use(
-      http.post('/api/auth/login', () =>
-        HttpResponse.json({ error: 'Invalid credentials' }, { status: 401 })
-      )
-    )
-    const onSuccess = vi.fn()
-    const { result } = renderHook(() => useLogin({ onSuccess }), { wrapper: makeWrapper() })
-
-    act(() => {
-      result.current.mutate({ username: 'alice@example.com', password: 'wrongpassword' })
-    })
-
-    await waitFor(() => expect(result.current.isError).toBe(true))
-
-    expect(onSuccess).not.toHaveBeenCalled()
   })
 
   it('useLogin should call options.onSuccess after tokens and user are set when login succeeds', async () => {
