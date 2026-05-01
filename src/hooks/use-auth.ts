@@ -50,7 +50,7 @@ async function fetchMe(): Promise<User | null> {
   return api.get<User>('/users/me').catch(() => null)
 }
 
-export function useLogin() {
+export function useLogin(options?: { onSuccess?: () => void }) {
   const { setTokens, setUser } = useAuthStore()
 
   return useMutation<TokenPair, ApiError, Credentials>({
@@ -59,6 +59,7 @@ export function useLogin() {
       setTokens(data.access_token, data.refresh_token)
       const user = await fetchMe()
       if (user) setUser(user)
+      options?.onSuccess?.()
     },
     onError: showError,
   })

@@ -21,7 +21,9 @@ type LoginFormValues = z.infer<typeof loginSchema>
 export function LoginPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const login = useLogin()
+  const next = searchParams.get('next')
+  const safePath = next && next.startsWith('/') && !next.startsWith('//') ? next : '/'
+  const login = useLogin({ onSuccess: () => navigate(safePath) })
 
   const {
     register,
@@ -32,12 +34,7 @@ export function LoginPage() {
   })
 
   function onSubmit(values: LoginFormValues) {
-    const next = searchParams.get('next')
-    const safePath = next && next.startsWith('/') && !next.startsWith('//') ? next : '/'
-    login.mutate(
-      { username: values.email, password: values.password },
-      { onSuccess: () => navigate(safePath) }
-    )
+    login.mutate({ username: values.email, password: values.password })
   }
 
   return (
