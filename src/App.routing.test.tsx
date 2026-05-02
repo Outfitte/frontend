@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { act } from 'react'
+import userEvent from '@testing-library/user-event'
 import { useLocation } from 'react-router'
 import { render, screen } from '@/test/utils'
 import { useAuthStore } from '@/stores/auth'
@@ -267,5 +268,20 @@ describe('Routing', () => {
     })
     render(<AppWithLocation />, { initialEntries: ['/locations'] })
     expect(await screen.findByTestId('locations-page')).toBeInTheDocument()
+  })
+
+  it('App should redirect to /items after login when unauthenticated user was redirected from /items', async () => {
+    const user = userEvent.setup()
+    render(<AppWithLocation />, { initialEntries: ['/items'] })
+
+    expect(screen.getByTestId('login-page')).toBeInTheDocument()
+    expect(screen.getByTestId('location')).toHaveTextContent('/login?next=%2Fitems')
+
+    await user.type(screen.getByLabelText(/email/i), 'alice@example.com')
+    await user.type(screen.getByLabelText(/password/i), 'secret123')
+    await user.click(screen.getByRole('button', { name: /sign in/i }))
+
+    expect(await screen.findByTestId('items-page')).toBeInTheDocument()
+    expect(screen.getByTestId('location')).toHaveTextContent('/items')
   })
 })

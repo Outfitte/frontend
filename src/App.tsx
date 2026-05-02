@@ -22,8 +22,6 @@ function ProtectedRoute() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const location = useLocation()
   if (!isAuthenticated) {
-    // TODO: LoginPage must validate that `next` starts with '/' before
-    // navigating, to prevent an open-redirect attack (e.g. //evil.com/).
     return <Navigate to={`/login?next=${encodeURIComponent(location.pathname)}`} replace />
   }
   return <Outlet />
