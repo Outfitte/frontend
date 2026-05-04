@@ -12,7 +12,7 @@ export function useUsers() {
 
 export function useMe() {
   return useQuery<User, ApiError>({
-    queryKey: ['me'],
+    queryKey: queryKeys.users.me(),
     queryFn: () => api.get<User>('/users/me'),
   })
 }

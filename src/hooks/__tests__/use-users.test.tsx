@@ -6,10 +6,6 @@ import { server } from '@/test/mocks/server'
 import { mockUserSummary } from '@/test/mocks/fixtures'
 import { useUsers, useMe } from '@/hooks/use-users'
 
-vi.mock('@/lib/toast', () => ({
-  toast: { error: vi.fn(), success: vi.fn(), info: vi.fn() },
-}))
-
 function makeWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -55,20 +51,10 @@ describe('useUsers', () => {
     expect(result.current.error?.status).toBe(401)
   })
 
-  it('useUsers should reflect loading state initially then return UserSummary[]', async () => {
+  it('useUsers should reflect loading state initially then return UserSummary[] when GET /users succeeds', async () => {
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useUsers(), { wrapper })
     expect(result.current.isLoading).toBe(true)
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data).toEqual([
-      mockUserSummary({ id: 'user-001' }),
-      mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
-    ])
-  })
-
-  it('useUsers should return UserSummary[] from GET /users on success', async () => {
-    const { wrapper } = makeWrapper()
-    const { result } = renderHook(() => useUsers(), { wrapper })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(result.current.data).toEqual([
       mockUserSummary({ id: 'user-001' }),
@@ -84,21 +70,20 @@ describe('useMe', () => {
     vi.clearAllMocks()
   })
 
-  it('useMe should reflect loading state initially then return User', async () => {
+  it('useMe should return error when GET /users/me returns 500', async () => {
+    server.use(
+      http.get('/api/users/me', () => new HttpResponse(null, { status: 500 }))
+    )
+    const { wrapper } = makeWrapper()
+    const { result } = renderHook(() => useMe(), { wrapper })
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(result.current.error?.status).toBe(500)
+  })
+
+  it('useMe should reflect loading state initially then return authenticated User when GET /users/me succeeds', async () => {
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useMe(), { wrapper })
     expect(result.current.isLoading).toBe(true)
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data).toMatchObject({
-      id: 'user-001',
-      email: 'user@example.com',
-      role: 'user',
-    })
-  })
-
-  it('useMe should return authenticated User from GET /users/me on success', async () => {
-    const { wrapper } = makeWrapper()
-    const { result } = renderHook(() => useMe(), { wrapper })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(result.current.data).toMatchObject({
       id: 'user-001',

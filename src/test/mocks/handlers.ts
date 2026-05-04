@@ -44,13 +44,6 @@ export const handlers = [
     return HttpResponse.json({ registration_enabled: body.registration_enabled })
   }),
 
-  http.get('/api/users', () => {
-    return HttpResponse.json([
-      mockUserSummary({ id: 'user-001' }),
-      mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
-    ])
-  }),
-
   http.get('/api/users/me', () => {
     return HttpResponse.json({
       id: 'user-001',
@@ -58,6 +51,13 @@ export const handlers = [
       role: 'user',
       created_at: '2026-01-01T00:00:00Z',
     })
+  }),
+
+  http.get('/api/users', () => {
+    return HttpResponse.json([
+      mockUserSummary({ id: 'user-001' }),
+      mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+    ])
   }),
 
   // --- Items ---
