@@ -14,4 +14,22 @@ export const queryKeys = {
     all: ['categories'] as const,
     list: () => ['categories', 'list'] as const,
   },
+  outfits: {
+    all: ['outfits'] as const,
+    list: (filter?: { from?: string; to?: string }) => ['outfits', 'list', filter] as const,
+    detail: (id: string) => ['outfits', 'detail', id] as const,
+    logs: (id: string) => ['outfits', id, 'logs'] as const,
+  },
+  outfitLogs: {
+    all: ['outfit-logs'] as const,
+    range: (from: string, to: string) => ['outfit-logs', 'range', { from, to }] as const,
+  },
+  users: {
+    all: ['users'] as const,
+    list: () => ['users', 'list'] as const,
+  },
+  shares: {
+    outgoing: ['shares'] as const,
+    withMe: ['shares', 'with-me'] as const,
+  },
 }

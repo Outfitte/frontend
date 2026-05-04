@@ -48,6 +48,50 @@ describe('queryKeys', () => {
     expect(queryKeys.categories.list()).not.toEqual(queryKeys.categories.all)
   })
 
+  it('queryKeys.outfits.all should not collide with queryKeys.items.all', () => {
+    expect(queryKeys.outfits.all).not.toEqual(queryKeys.items.all)
+  })
+
+  it('queryKeys.outfits.all should not collide with queryKeys.locations.all', () => {
+    expect(queryKeys.outfits.all).not.toEqual(queryKeys.locations.all)
+  })
+
+  it('queryKeys.outfits.all should not collide with queryKeys.categories.all', () => {
+    expect(queryKeys.outfits.all).not.toEqual(queryKeys.categories.all)
+  })
+
+  it('queryKeys.outfits.list should not collide with queryKeys.outfits.all', () => {
+    expect(queryKeys.outfits.list()).not.toEqual(queryKeys.outfits.all)
+  })
+
+  it('queryKeys.outfits.list should produce different keys when given different date ranges', () => {
+    expect(queryKeys.outfits.list({ from: '2026-01-01', to: '2026-01-31' })).not.toEqual(
+      queryKeys.outfits.list({ from: '2026-02-01', to: '2026-02-28' }),
+    )
+  })
+
+  it('queryKeys.outfits.detail should produce different keys when given different ids', () => {
+    expect(queryKeys.outfits.detail('outfit-001')).not.toEqual(queryKeys.outfits.detail('outfit-002'))
+  })
+
+  it('queryKeys.outfits.logs should not collide with queryKeys.outfits.detail for same id', () => {
+    expect(queryKeys.outfits.logs('outfit-001')).not.toEqual(queryKeys.outfits.detail('outfit-001'))
+  })
+
+  it('queryKeys.outfitLogs.range should produce different keys when given different date pairs', () => {
+    expect(queryKeys.outfitLogs.range('2026-01-01', '2026-01-31')).not.toEqual(
+      queryKeys.outfitLogs.range('2026-02-01', '2026-02-28'),
+    )
+  })
+
+  it('queryKeys.users.all should not collide with queryKeys.users.list', () => {
+    expect(queryKeys.users.all).not.toEqual(queryKeys.users.list())
+  })
+
+  it('queryKeys.shares.outgoing should not collide with queryKeys.shares.withMe', () => {
+    expect(queryKeys.shares.outgoing).not.toEqual(queryKeys.shares.withMe)
+  })
+
   // --- Happy path: correct key structures ---
 
   it('queryKeys.items.all should return the base items key', () => {
@@ -92,5 +136,53 @@ describe('queryKeys', () => {
 
   it('queryKeys.categories.list should return scoped list key', () => {
     expect(queryKeys.categories.list()).toEqual(['categories', 'list'])
+  })
+
+  it('queryKeys.outfits.all should return the base outfits key', () => {
+    expect(queryKeys.outfits.all).toEqual(['outfits'])
+  })
+
+  it('queryKeys.outfits.list should return scoped list key when given no filter', () => {
+    expect(queryKeys.outfits.list()).toEqual(['outfits', 'list', undefined])
+  })
+
+  it('queryKeys.outfits.list should return scoped list key with dates when given a date range', () => {
+    expect(queryKeys.outfits.list({ from: '2026-01-01', to: '2026-01-31' })).toEqual([
+      'outfits',
+      'list',
+      { from: '2026-01-01', to: '2026-01-31' },
+    ])
+  })
+
+  it('queryKeys.outfits.detail should return scoped detail key when given outfit id', () => {
+    expect(queryKeys.outfits.detail('outfit-abc')).toEqual(['outfits', 'detail', 'outfit-abc'])
+  })
+
+  it('queryKeys.outfits.logs should return scoped logs key when given outfit id', () => {
+    expect(queryKeys.outfits.logs('outfit-abc')).toEqual(['outfits', 'outfit-abc', 'logs'])
+  })
+
+  it('queryKeys.outfitLogs.range should return scoped range key when given date range', () => {
+    expect(queryKeys.outfitLogs.range('2026-01-01', '2026-01-31')).toEqual([
+      'outfit-logs',
+      'range',
+      { from: '2026-01-01', to: '2026-01-31' },
+    ])
+  })
+
+  it('queryKeys.users.all should return the base users key', () => {
+    expect(queryKeys.users.all).toEqual(['users'])
+  })
+
+  it('queryKeys.users.list should return scoped list key', () => {
+    expect(queryKeys.users.list()).toEqual(['users', 'list'])
+  })
+
+  it('queryKeys.shares.outgoing should return the outgoing shares key', () => {
+    expect(queryKeys.shares.outgoing).toEqual(['shares'])
+  })
+
+  it('queryKeys.shares.withMe should return the with-me shares key', () => {
+    expect(queryKeys.shares.withMe).toEqual(['shares', 'with-me'])
   })
 })
