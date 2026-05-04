@@ -46,10 +46,12 @@ export function useCreateOutfit() {
     mutationFn: (data) => api.post<Outfit>('/outfits', data),
     onSuccess: () => {
       toast.success('Outfit created')
-      queryClient.invalidateQueries({ queryKey: queryKeys.outfits.all })
     },
     onError: (error) => {
       toast.error(error.message)
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.outfits.all })
     },
   })
 }
@@ -77,10 +79,12 @@ export function useDeleteOutfit() {
     mutationFn: (id) => api.delete<void>(`/outfits/${id}`),
     onSuccess: () => {
       toast.success('Outfit deleted')
-      queryClient.invalidateQueries({ queryKey: queryKeys.outfits.all })
     },
     onError: (error) => {
       toast.error(error.message)
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.outfits.all })
     },
   })
 }

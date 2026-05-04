@@ -80,6 +80,21 @@ describe('useOutfit', () => {
     vi.clearAllMocks()
   })
 
+  it('useOutfit should stay idle and not fetch when id is empty string', async () => {
+    let requested = false
+    server.use(
+      http.get('/api/outfits/:id', () => {
+        requested = true
+        return HttpResponse.json(mockOutfit())
+      })
+    )
+    const { wrapper } = makeWrapper()
+    const { result } = renderHook(() => useOutfit(''), { wrapper })
+    await new Promise((r) => setTimeout(r, 50))
+    expect(result.current.fetchStatus).toBe('idle')
+    expect(requested).toBe(false)
+  })
+
   it('useOutfit should return 404 error when outfit not found', async () => {
     server.use(
       http.get('/api/outfits/:id', () =>
