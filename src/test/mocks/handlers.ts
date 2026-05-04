@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw'
-import { mockItem, mockCategory, mockLocation, mockChildLocation, mockWearLog, mockPhoto } from './fixtures'
+import { mockItem, mockCategory, mockLocation, mockChildLocation, mockWearLog, mockPhoto, mockUserSummary } from './fixtures'
 
 export const handlers = [
   http.get('/api/health', () => {
@@ -42,6 +42,13 @@ export const handlers = [
   http.patch('/api/admin/settings', async ({ request }) => {
     const body = await request.json() as { registration_enabled: boolean }
     return HttpResponse.json({ registration_enabled: body.registration_enabled })
+  }),
+
+  http.get('/api/users', () => {
+    return HttpResponse.json([
+      mockUserSummary({ id: 'user-001' }),
+      mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+    ])
   }),
 
   http.get('/api/users/me', () => {
