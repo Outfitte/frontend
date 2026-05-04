@@ -1,4 +1,7 @@
 import type { Category, FieldHint, Item, Location, Photo, WearLog } from '@/types'
+import type { Outfit, OutfitItem, OutfitLog } from '@/types'
+import type { Share, ShareView, SharedItem, SharedLocation, SharedOutfit } from '@/types'
+import type { UserSummary } from '@/types'
 
 export interface MockUser {
   id: string
@@ -112,6 +115,96 @@ export function mockWearLog(overrides: Partial<WearLog> = {}): WearLog {
     worn_on: '2026-04-10',
     notes: 'Wore to work',
     created_at: '2026-04-10T08:00:00Z',
+    ...overrides,
+  }
+}
+
+export function mockOutfitItem(overrides: Partial<OutfitItem> = {}): OutfitItem {
+  return {
+    outfit_id: 'outfit-001',
+    item_id: 'item-001',
+    position: 0,
+    ...overrides,
+  }
+}
+
+export function mockOutfit(overrides: Partial<Outfit> = {}): Outfit {
+  return {
+    id: 'outfit-001',
+    owner_id: 'user-001',
+    name: 'Casual Friday',
+    notes: null,
+    items: [],
+    photos: [],
+    created_at: '2026-01-01T00:00:00Z',
+    ...overrides,
+  }
+}
+
+export function mockOutfitLog(overrides: Partial<OutfitLog> = {}): OutfitLog {
+  return {
+    id: 'outfitlog-001',
+    outfit_id: 'outfit-001',
+    owner_id: 'user-001',
+    worn_on: '2026-04-10',
+    notes: null,
+    wear_log_ids: [],
+    created_at: '2026-04-10T08:00:00Z',
+    ...overrides,
+  }
+}
+
+export function mockUserSummary(overrides: Partial<UserSummary> = {}): UserSummary {
+  return {
+    id: 'user-001',
+    email: 'user@example.com',
+    ...overrides,
+  }
+}
+
+export function mockShare(overrides: Partial<Share> = {}): Share {
+  return {
+    id: 'share-001',
+    recipient_id: 'user-001',
+    target_type: 'item',
+    target_id: 'item-001',
+    created_at: '2026-01-01T00:00:00Z',
+    ...overrides,
+  }
+}
+
+export function mockShareView(overrides: Partial<ShareView> = {}): ShareView {
+  return {
+    id: 'share-001',
+    recipient: mockUserSummary(),
+    target_type: 'item',
+    target_id: 'item-001',
+    created_at: '2026-01-01T00:00:00Z',
+    ...overrides,
+  }
+}
+
+export function mockSharedItem(overrides: Partial<SharedItem> = {}): SharedItem {
+  return {
+    ...mockItem(),
+    shared_by: mockUserSummary(),
+    ...overrides,
+  }
+}
+
+export function mockSharedOutfit(overrides: Partial<SharedOutfit> = {}): SharedOutfit {
+  return {
+    ...mockOutfit(),
+    shared_by: mockUserSummary(),
+    ...overrides,
+  }
+}
+
+export function mockSharedLocation(overrides: Partial<SharedLocation> = {}): SharedLocation {
+  return {
+    location: mockLocation(),
+    items: [],
+    shared_by: mockUserSummary(),
     ...overrides,
   }
 }
