@@ -27,6 +27,7 @@ export const queryKeys = {
   users: {
     all: ['users'] as const,
     list: () => ['users', 'list'] as const,
+    me: () => ['users', 'me'] as const,
   },
   shares: {
     outgoing: ['shares'] as const,

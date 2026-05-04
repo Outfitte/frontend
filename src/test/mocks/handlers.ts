@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw'
-import { mockItem, mockCategory, mockLocation, mockChildLocation, mockWearLog, mockPhoto } from './fixtures'
+import { mockItem, mockCategory, mockLocation, mockChildLocation, mockWearLog, mockPhoto, mockUserSummary } from './fixtures'
 
 export const handlers = [
   http.get('/api/health', () => {
@@ -51,6 +51,13 @@ export const handlers = [
       role: 'user',
       created_at: '2026-01-01T00:00:00Z',
     })
+  }),
+
+  http.get('/api/users', () => {
+    return HttpResponse.json([
+      mockUserSummary({ id: 'user-001' }),
+      mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+    ])
   }),
 
   // --- Items ---
