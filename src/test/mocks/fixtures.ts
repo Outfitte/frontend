@@ -1,7 +1,20 @@
-import type { Category, FieldHint, Item, Location, Photo, WearLog } from '@/types'
-import type { Outfit, OutfitItem, OutfitLog } from '@/types'
-import type { Share, ShareView, SharedItem, SharedLocation, SharedOutfit } from '@/types'
-import type { UserSummary } from '@/types'
+import type {
+  Category,
+  FieldHint,
+  Item,
+  Location,
+  Outfit,
+  OutfitItem,
+  OutfitLog,
+  Photo,
+  Share,
+  ShareView,
+  SharedItem,
+  SharedLocation,
+  SharedOutfit,
+  UserSummary,
+  WearLog,
+} from '@/types'
 
 export interface MockUser {
   id: string
@@ -123,7 +136,7 @@ export function mockOutfitItem(overrides: Partial<OutfitItem> = {}): OutfitItem 
   return {
     outfit_id: 'outfit-001',
     item_id: 'item-001',
-    position: 0,
+    position: 1,
     ...overrides,
   }
 }
@@ -133,7 +146,7 @@ export function mockOutfit(overrides: Partial<Outfit> = {}): Outfit {
     id: 'outfit-001',
     owner_id: 'user-001',
     name: 'Casual Friday',
-    notes: null,
+    notes: 'Weekend look',
     items: [],
     photos: [],
     created_at: '2026-01-01T00:00:00Z',
@@ -147,7 +160,7 @@ export function mockOutfitLog(overrides: Partial<OutfitLog> = {}): OutfitLog {
     outfit_id: 'outfit-001',
     owner_id: 'user-001',
     worn_on: '2026-04-10',
-    notes: null,
+    notes: 'Felt great',
     wear_log_ids: [],
     created_at: '2026-04-10T08:00:00Z',
     ...overrides,
