@@ -44,7 +44,7 @@ describe('useAddOutfitItem', () => {
     expect(toast.error).toHaveBeenCalledWith('Item not owned')
   })
 
-  it('useAddOutfitItem should post { item_id } to /outfits/:id/items and invalidate outfits cache on success', async () => {
+  it('useAddOutfitItem should call toast.success and post { item_id } to /outfits/:id/items and invalidate outfits cache when POST returns 204', async () => {
     let capturedBody: Record<string, unknown> | undefined
     server.use(
       http.post('/api/outfits/:id/items', async ({ request }) => {
@@ -58,6 +58,8 @@ describe('useAddOutfitItem', () => {
     act(() => { result.current.mutate({ outfitId: 'outfit-001', itemId: 'item-002' }) })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(capturedBody).toEqual({ item_id: 'item-002' })
+    const { toast } = await import('@/lib/toast')
+    expect(toast.success).toHaveBeenCalled()
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.all })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.detail('outfit-001') })
   })
@@ -84,7 +86,7 @@ describe('useRemoveOutfitItem', () => {
     expect(toast.error).toHaveBeenCalledWith('Item not found in outfit')
   })
 
-  it('useRemoveOutfitItem should delete /outfits/:id/items/:itemId and invalidate outfits cache on success', async () => {
+  it('useRemoveOutfitItem should call toast.success and delete /outfits/:id/items/:itemId and invalidate outfits cache when DELETE returns 204', async () => {
     let capturedPath: string | undefined
     server.use(
       http.delete('/api/outfits/:id/items/:itemId', ({ params }) => {
@@ -98,6 +100,8 @@ describe('useRemoveOutfitItem', () => {
     act(() => { result.current.mutate({ outfitId: 'outfit-001', itemId: 'item-002' }) })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(capturedPath).toBe('/outfits/outfit-001/items/item-002')
+    const { toast } = await import('@/lib/toast')
+    expect(toast.success).toHaveBeenCalled()
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.all })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.detail('outfit-001') })
   })
