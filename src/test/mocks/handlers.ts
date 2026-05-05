@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw'
-import { mockItem, mockCategory, mockLocation, mockChildLocation, mockWearLog, mockPhoto, mockUserSummary } from './fixtures'
+import { mockItem, mockCategory, mockLocation, mockChildLocation, mockWearLog, mockPhoto, mockUserSummary, mockOutfit } from './fixtures'
 
 export const handlers = [
   http.get('/api/health', () => {
@@ -177,6 +177,36 @@ export const handlers = [
   http.patch('/api/locations/:id/move', async ({ params, request }) => {
     const body = await request.json() as { parent_id: string | null }
     return HttpResponse.json(mockLocation({ id: params['id'] as string, parent_id: body.parent_id }))
+  }),
+
+  // --- Outfits ---
+
+  http.get('/api/outfits', () => {
+    return HttpResponse.json([
+      mockOutfit({ id: 'outfit-001' }),
+      mockOutfit({ id: 'outfit-002', name: 'Smart Casual' }),
+    ])
+  }),
+
+  http.post('/api/outfits', async ({ request }) => {
+    const body = await request.json() as Record<string, unknown>
+    return HttpResponse.json(
+      mockOutfit({ id: 'outfit-new-001', name: body['name'] as string, notes: body['notes'] as string }),
+      { status: 201 }
+    )
+  }),
+
+  http.get('/api/outfits/:id', ({ params }) => {
+    return HttpResponse.json(mockOutfit({ id: params['id'] as string }))
+  }),
+
+  http.patch('/api/outfits/:id', async ({ params, request }) => {
+    const body = await request.json() as Record<string, unknown>
+    return HttpResponse.json(mockOutfit({ id: params['id'] as string, ...body }))
+  }),
+
+  http.delete('/api/outfits/:id', () => {
+    return new HttpResponse(null, { status: 204 })
   }),
 
   // --- Categories ---
