@@ -209,6 +209,16 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 })
   }),
 
+  // --- Outfit items ---
+
+  http.post('/api/outfits/:id/items', () => {
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  http.delete('/api/outfits/:id/items/:itemId', () => {
+    return new HttpResponse(null, { status: 204 })
+  }),
+
   // --- Categories ---
 
   http.get('/api/categories', () => {
