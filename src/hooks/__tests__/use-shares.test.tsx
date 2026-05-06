@@ -3,7 +3,7 @@ import { renderHook, act, waitFor } from '@/test/utils'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/mocks/server'
-import { mockShare, mockShareView, mockUserSummary } from '@/test/mocks/fixtures'
+import { mockShare, mockShareView } from '@/test/mocks/fixtures'
 import { queryKeys } from '@/lib/query-keys'
 import { toast } from '@/lib/toast'
 import {
@@ -81,7 +81,7 @@ describe('useCreateShare', () => {
     expect(toast.error).toHaveBeenCalledWith('Target not found')
   })
 
-  it('useCreateShare should invalidate shares.outgoing on success', async () => {
+  it('useCreateShare should invalidate shares.outgoing when POST /shares returns 201', async () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useCreateShare(), { wrapper })
