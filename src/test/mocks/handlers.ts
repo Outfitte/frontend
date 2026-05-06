@@ -219,6 +219,19 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 })
   }),
 
+  // --- Outfit photos ---
+
+  http.post('/api/outfits/:id/photos', ({ params }) => {
+    return HttpResponse.json(
+      mockPhoto({ id: 'photo-new-001', media_key: `uploads/${params['id'] as string}/photo-new-001.jpg` }),
+      { status: 201 }
+    )
+  }),
+
+  http.delete('/api/outfits/:id/photos/:key', () => {
+    return new HttpResponse(null, { status: 204 })
+  }),
+
   // --- Categories ---
 
   http.get('/api/categories', () => {
