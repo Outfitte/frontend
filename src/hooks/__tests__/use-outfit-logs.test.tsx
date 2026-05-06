@@ -189,6 +189,21 @@ describe('useOutfitLogsByRange', () => {
     expect(result.current.data).toBeUndefined()
   })
 
+  it('useOutfitLogsByRange should set isError when GET /outfit-logs returns 422 invalid range', async () => {
+    server.use(
+      http.get('/api/outfit-logs', () =>
+        HttpResponse.json({ error: 'to must be after from' }, { status: 422 })
+      )
+    )
+    const { wrapper } = makeWrapper()
+    const { result } = renderHook(
+      () => useOutfitLogsByRange('2026-04-30', '2026-04-01'),
+      { wrapper }
+    )
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(result.current.error?.message).toBe('to must be after from')
+  })
+
   it('useOutfitLogsByRange should return OutfitLog[] when GET /outfit-logs?from=...&to=... succeeds', async () => {
     const logs = [
       mockOutfitLog({ id: 'outfitlog-001', outfit_id: 'outfit-001', worn_on: '2026-04-15' }),

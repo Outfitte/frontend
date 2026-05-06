@@ -18,7 +18,10 @@ export function useOutfitLogs(outfitId?: string) {
 export function useOutfitLogsByRange(from?: string, to?: string) {
   return useQuery<OutfitLog[], ApiError>({
     queryKey: queryKeys.outfitLogs.range(from!, to!),
-    queryFn: () => api.get<OutfitLog[]>(`/outfit-logs?from=${from}&to=${to}`),
+    queryFn: () => {
+      const params = new URLSearchParams({ from: from!, to: to! })
+      return api.get<OutfitLog[]>(`/outfit-logs?${params}`)
+    },
     enabled: !!from && !!to,
   })
 }
