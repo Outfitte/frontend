@@ -21,6 +21,9 @@ export function useCreateShare() {
   const queryClient = useQueryClient()
   return useMutation<Share, ApiError, CreateShareVars>({
     mutationFn: (data) => api.post<Share>('/shares', data),
+    onSuccess: () => {
+      toast.success('Share created')
+    },
     onError: (error) => {
       toast.error(error.message)
     },
@@ -34,6 +37,9 @@ export function useRevokeShare() {
   const queryClient = useQueryClient()
   return useMutation<void, ApiError, string>({
     mutationFn: (id) => api.delete<void>(`/shares/${id}`),
+    onSuccess: () => {
+      toast.success('Share revoked')
+    },
     onError: (error) => {
       toast.error(error.message)
     },

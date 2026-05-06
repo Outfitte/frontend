@@ -81,7 +81,7 @@ describe('useCreateShare', () => {
     expect(toast.error).toHaveBeenCalledWith('Target not found')
   })
 
-  it('useCreateShare should invalidate shares.outgoing when POST /shares returns 201', async () => {
+  it('useCreateShare should call toast.success and invalidate shares.outgoing when POST /shares returns 201', async () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useCreateShare(), { wrapper })
@@ -89,6 +89,7 @@ describe('useCreateShare', () => {
       result.current.mutate({ recipient_id: 'user-002', target_type: 'item', target_id: 'item-001' })
     })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(toast.success).toHaveBeenCalled()
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.shares.outgoing })
   })
 
@@ -147,13 +148,14 @@ describe('useRevokeShare', () => {
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.shares.outgoing })
   })
 
-  it('useRevokeShare should invalidate shares.outgoing and return void when DELETE /shares/:id returns 204', async () => {
+  it('useRevokeShare should call toast.success and invalidate shares.outgoing when DELETE /shares/:id returns 204', async () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useRevokeShare(), { wrapper })
     act(() => { result.current.mutate('share-001') })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(result.current.data).toBeUndefined()
+    expect(toast.success).toHaveBeenCalled()
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.shares.outgoing })
   })
 })
