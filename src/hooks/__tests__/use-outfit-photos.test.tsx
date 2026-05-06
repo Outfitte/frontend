@@ -5,6 +5,7 @@ import { http, HttpResponse } from 'msw'
 import { server } from '@/test/mocks/server'
 import { mockPhoto } from '@/test/mocks/fixtures'
 import { queryKeys } from '@/lib/query-keys'
+import { useAuthStore } from '@/stores/auth'
 import { useUploadOutfitPhoto, useDeleteOutfitPhoto } from '@/hooks/use-outfit-photos'
 
 vi.mock('@/lib/toast', () => ({
@@ -24,69 +25,12 @@ function makeWrapper() {
   return { queryClient, wrapper }
 }
 
-// ─── useDeleteOutfitPhoto ─────────────────────────────────────────────────────
-
-describe('useDeleteOutfitPhoto', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
-  it('useDeleteOutfitPhoto should call toast.error when DELETE /outfits/:id/photos/:key returns 404 photo not found', async () => {
-    server.use(
-      http.delete('/api/outfits/:id/photos/:key', () =>
-        HttpResponse.json({ error: 'Photo not found' }, { status: 404 })
-      )
-    )
-    const { wrapper } = makeWrapper()
-    const { result } = renderHook(() => useDeleteOutfitPhoto(), { wrapper })
-    act(() => {
-      result.current.mutate({ outfitId: 'outfit-001', mediaKey: 'uploads/outfit-001/photo-001.jpg' })
-    })
-    await waitFor(() => expect(result.current.isError).toBe(true))
-    const { toast } = await import('@/lib/toast')
-    expect(toast.error).toHaveBeenCalledWith('Photo not found')
-  })
-
-  it('useDeleteOutfitPhoto should invalidate outfit detail when delete fails', async () => {
-    server.use(
-      http.delete('/api/outfits/:id/photos/:key', () =>
-        HttpResponse.json({ error: 'Photo not found' }, { status: 404 })
-      )
-    )
-    const { queryClient, wrapper } = makeWrapper()
-    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
-    const { result } = renderHook(() => useDeleteOutfitPhoto(), { wrapper })
-    act(() => {
-      result.current.mutate({ outfitId: 'outfit-001', mediaKey: 'uploads/outfit-001/photo-001.jpg' })
-    })
-    await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.detail('outfit-001') })
-  })
-
-  it('useDeleteOutfitPhoto should call toast.success and invalidate outfit detail when DELETE /outfits/:id/photos/:key returns 204', async () => {
-    server.use(
-      http.delete('/api/outfits/:id/photos/:key', () =>
-        new HttpResponse(null, { status: 204 })
-      )
-    )
-    const { queryClient, wrapper } = makeWrapper()
-    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
-    const { result } = renderHook(() => useDeleteOutfitPhoto(), { wrapper })
-    act(() => {
-      result.current.mutate({ outfitId: 'outfit-001', mediaKey: 'uploads/outfit-001/photo-001.jpg' })
-    })
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    const { toast } = await import('@/lib/toast')
-    expect(toast.success).toHaveBeenCalledWith('Photo deleted')
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.detail('outfit-001') })
-  })
-})
-
 // ─── useUploadOutfitPhoto ─────────────────────────────────────────────────────
 
 describe('useUploadOutfitPhoto', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    useAuthStore.setState({ accessToken: null })
   })
 
   it('useUploadOutfitPhoto should call toast.error when POST /outfits/:id/photos returns 413 file too large', async () => {
@@ -108,7 +52,26 @@ describe('useUploadOutfitPhoto', () => {
     expect(toast.error).toHaveBeenCalledWith('File too large')
   })
 
-  it('useUploadOutfitPhoto should invalidate outfit detail when upload fails', async () => {
+  it('useUploadOutfitPhoto should call toast.error when POST /outfits/:id/photos returns 404 outfit not found', async () => {
+    server.use(
+      http.post('/api/outfits/:id/photos', () =>
+        HttpResponse.json({ error: 'Outfit not found' }, { status: 404 })
+      )
+    )
+    const { wrapper } = makeWrapper()
+    const { result } = renderHook(() => useUploadOutfitPhoto(), { wrapper })
+    act(() => {
+      result.current.mutate({
+        outfitId: 'outfit-missing',
+        photo: new File(['img'], 'photo.jpg', { type: 'image/jpeg' }),
+      })
+    })
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    const { toast } = await import('@/lib/toast')
+    expect(toast.error).toHaveBeenCalledWith('Outfit not found')
+  })
+
+  it('useUploadOutfitPhoto should invalidate outfit queries when upload fails', async () => {
     server.use(
       http.post('/api/outfits/:id/photos', () =>
         HttpResponse.json({ error: 'File too large' }, { status: 413 })
@@ -124,10 +87,58 @@ describe('useUploadOutfitPhoto', () => {
       })
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.all })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.detail('outfit-001') })
   })
 
-  it('useUploadOutfitPhoto should return new Photo, call toast.success, and invalidate outfit detail when POST /outfits/:id/photos returns 201', async () => {
+  it('useUploadOutfitPhoto should include Authorization header when access token is set', async () => {
+    let capturedAuthHeader: string | null | undefined
+    server.use(
+      http.post('/api/outfits/:id/photos', ({ request }) => {
+        capturedAuthHeader = request.headers.get('Authorization')
+        return HttpResponse.json(
+          mockPhoto({ id: 'photo-new-001', media_key: 'uploads/outfit-001/photo-new-001.jpg' }),
+          { status: 201 }
+        )
+      })
+    )
+    useAuthStore.setState({ accessToken: 'test-token-abc' })
+    const { wrapper } = makeWrapper()
+    const { result } = renderHook(() => useUploadOutfitPhoto(), { wrapper })
+    act(() => {
+      result.current.mutate({
+        outfitId: 'outfit-001',
+        photo: new File(['img'], 'photo.jpg', { type: 'image/jpeg' }),
+      })
+    })
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(capturedAuthHeader).toBe('Bearer test-token-abc')
+  })
+
+  it('useUploadOutfitPhoto should omit Authorization header when no access token is set', async () => {
+    let capturedAuthHeader: string | null | undefined
+    server.use(
+      http.post('/api/outfits/:id/photos', ({ request }) => {
+        capturedAuthHeader = request.headers.get('Authorization')
+        return HttpResponse.json(
+          mockPhoto({ id: 'photo-new-001', media_key: 'uploads/outfit-001/photo-new-001.jpg' }),
+          { status: 201 }
+        )
+      })
+    )
+    const { wrapper } = makeWrapper()
+    const { result } = renderHook(() => useUploadOutfitPhoto(), { wrapper })
+    act(() => {
+      result.current.mutate({
+        outfitId: 'outfit-001',
+        photo: new File(['img'], 'photo.jpg', { type: 'image/jpeg' }),
+      })
+    })
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(capturedAuthHeader).toBeNull()
+  })
+
+  it('useUploadOutfitPhoto should return new Photo, call toast.success, and invalidate outfit queries when POST /outfits/:id/photos returns 201', async () => {
     server.use(
       http.post('/api/outfits/:id/photos', ({ params }) =>
         HttpResponse.json(
@@ -151,6 +162,68 @@ describe('useUploadOutfitPhoto', () => {
     )
     const { toast } = await import('@/lib/toast')
     expect(toast.success).toHaveBeenCalledWith('Photo uploaded')
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.detail('outfit-001') })
+  })
+})
+
+// ─── useDeleteOutfitPhoto ─────────────────────────────────────────────────────
+
+describe('useDeleteOutfitPhoto', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    useAuthStore.setState({ accessToken: null })
+  })
+
+  it('useDeleteOutfitPhoto should call toast.error when DELETE /outfits/:id/photos/:key returns 404 photo not found', async () => {
+    server.use(
+      http.delete('/api/outfits/:id/photos/:key', () =>
+        HttpResponse.json({ error: 'Photo not found' }, { status: 404 })
+      )
+    )
+    const { wrapper } = makeWrapper()
+    const { result } = renderHook(() => useDeleteOutfitPhoto(), { wrapper })
+    act(() => {
+      result.current.mutate({ outfitId: 'outfit-001', mediaKey: 'uploads/outfit-001/photo-001.jpg' })
+    })
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    const { toast } = await import('@/lib/toast')
+    expect(toast.error).toHaveBeenCalledWith('Photo not found')
+  })
+
+  it('useDeleteOutfitPhoto should invalidate outfit queries when delete fails', async () => {
+    server.use(
+      http.delete('/api/outfits/:id/photos/:key', () =>
+        HttpResponse.json({ error: 'Photo not found' }, { status: 404 })
+      )
+    )
+    const { queryClient, wrapper } = makeWrapper()
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    const { result } = renderHook(() => useDeleteOutfitPhoto(), { wrapper })
+    act(() => {
+      result.current.mutate({ outfitId: 'outfit-001', mediaKey: 'uploads/outfit-001/photo-001.jpg' })
+    })
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.detail('outfit-001') })
+  })
+
+  it('useDeleteOutfitPhoto should call toast.success and invalidate outfit queries when DELETE /outfits/:id/photos/:key returns 204', async () => {
+    server.use(
+      http.delete('/api/outfits/:id/photos/:key', () =>
+        new HttpResponse(null, { status: 204 })
+      )
+    )
+    const { queryClient, wrapper } = makeWrapper()
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    const { result } = renderHook(() => useDeleteOutfitPhoto(), { wrapper })
+    act(() => {
+      result.current.mutate({ outfitId: 'outfit-001', mediaKey: 'uploads/outfit-001/photo-001.jpg' })
+    })
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    const { toast } = await import('@/lib/toast')
+    expect(toast.success).toHaveBeenCalledWith('Photo deleted')
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.all })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.detail('outfit-001') })
   })
 })

@@ -29,6 +29,7 @@ export function useUploadOutfitPhoto() {
       toast.error(error.message)
     },
     onSettled: (_, __, { outfitId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.outfits.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.outfits.detail(outfitId) })
     },
   })
@@ -46,6 +47,7 @@ export function useDeleteOutfitPhoto() {
       toast.error(error.message)
     },
     onSettled: (_, __, { outfitId }) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.outfits.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.outfits.detail(outfitId) })
     },
   })
