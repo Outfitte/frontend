@@ -56,7 +56,7 @@ export function OutfitCard({ outfit, onAction, isReadOnly, sharedByEmail }: Outf
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  aria-label="outfit options"
+                  aria-label="Outfit options"
                   className="flex-shrink-0 rounded p-0.5 hover:bg-muted"
                 >
                   <MoreVerticalIcon className="h-4 w-4" />

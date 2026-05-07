@@ -5,10 +5,6 @@ import { render } from '@/test/utils'
 import { mockOutfit, mockPhoto } from '@/test/mocks/fixtures'
 import { OutfitCard } from '@/components/shared/OutfitCard'
 
-vi.mock('@/lib/toast', () => ({
-  toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
-}))
-
 describe('OutfitCard', () => {
   it('OutfitCard should render "Untitled outfit" placeholder when name is null', () => {
     render(
@@ -18,20 +14,28 @@ describe('OutfitCard', () => {
     expect(screen.getByText('Untitled outfit')).toBeInTheDocument()
   })
 
-  it('OutfitCard should not render context menu when isReadOnly is true', () => {
-    render(
-      <OutfitCard outfit={mockOutfit()} onAction={vi.fn()} isReadOnly />
-    )
-
-    expect(screen.queryByRole('button', { name: 'outfit options' })).not.toBeInTheDocument()
-  })
-
-  it('OutfitCard should render outfit-photo-placeholder when outfit has no photos', () => {
+  it('OutfitCard should render a photo placeholder when outfit has no photos', () => {
     render(
       <OutfitCard outfit={mockOutfit({ photos: [] })} onAction={vi.fn()} />
     )
 
     expect(screen.getByTestId('outfit-photo-placeholder')).toBeInTheDocument()
+  })
+
+  it('OutfitCard should not render context menu when isReadOnly is true', () => {
+    render(
+      <OutfitCard outfit={mockOutfit()} onAction={vi.fn()} isReadOnly />
+    )
+
+    expect(screen.queryByRole('button', { name: 'Outfit options' })).not.toBeInTheDocument()
+  })
+
+  it('OutfitCard should not render shared badge when sharedByEmail is set but isReadOnly is false', () => {
+    render(
+      <OutfitCard outfit={mockOutfit()} onAction={vi.fn()} sharedByEmail="alice@example.com" />
+    )
+
+    expect(screen.queryByTestId('outfit-shared-badge')).not.toBeInTheDocument()
   })
 
   it('OutfitCard should render outfit name when set', () => {
@@ -91,7 +95,7 @@ describe('OutfitCard', () => {
       <OutfitCard outfit={mockOutfit()} onAction={vi.fn()} />
     )
 
-    expect(screen.getByRole('button', { name: 'outfit options' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Outfit options' })).toBeInTheDocument()
   })
 
   it('OutfitCard should show Edit, Log wear, Delete in context menu when onAction is provided', async () => {
@@ -100,7 +104,7 @@ describe('OutfitCard', () => {
       <OutfitCard outfit={mockOutfit()} onAction={vi.fn()} />
     )
 
-    await user.click(screen.getByRole('button', { name: 'outfit options' }))
+    await user.click(screen.getByRole('button', { name: 'Outfit options' }))
 
     expect(screen.getByText('Edit')).toBeInTheDocument()
     expect(screen.getByText('Log wear')).toBeInTheDocument()
@@ -114,7 +118,7 @@ describe('OutfitCard', () => {
       <OutfitCard outfit={mockOutfit({ id: 'outfit-001' })} onAction={onAction} />
     )
 
-    await user.click(screen.getByRole('button', { name: 'outfit options' }))
+    await user.click(screen.getByRole('button', { name: 'Outfit options' }))
     await user.click(screen.getByText('Edit'))
 
     expect(onAction).toHaveBeenCalledWith('edit', 'outfit-001')
@@ -127,7 +131,7 @@ describe('OutfitCard', () => {
       <OutfitCard outfit={mockOutfit({ id: 'outfit-001' })} onAction={onAction} />
     )
 
-    await user.click(screen.getByRole('button', { name: 'outfit options' }))
+    await user.click(screen.getByRole('button', { name: 'Outfit options' }))
     await user.click(screen.getByText('Log wear'))
 
     expect(onAction).toHaveBeenCalledWith('logWear', 'outfit-001')
@@ -140,7 +144,7 @@ describe('OutfitCard', () => {
       <OutfitCard outfit={mockOutfit({ id: 'outfit-001' })} onAction={onAction} />
     )
 
-    await user.click(screen.getByRole('button', { name: 'outfit options' }))
+    await user.click(screen.getByRole('button', { name: 'Outfit options' }))
     await user.click(screen.getByText('Delete'))
 
     expect(onAction).toHaveBeenCalledWith('delete', 'outfit-001')
