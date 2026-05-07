@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -67,6 +67,12 @@ function EditOutfitForm({ outfit, outfitId }: EditOutfitFormProps) {
   const [queuedPhotos, setQueuedPhotos] = useState<Array<{ file: File; preview: string }>>([])
   const [currentPhotos, setCurrentPhotos] = useState<Photo[]>(outfit.photos)
 
+  useEffect(() => {
+    return () => {
+      queuedPhotos.forEach((p) => URL.revokeObjectURL(p.preview))
+    }
+  }, [queuedPhotos])
+
   const {
     register,
     handleSubmit,
@@ -95,7 +101,7 @@ function EditOutfitForm({ outfit, outfitId }: EditOutfitFormProps) {
       })
 
       for (const queued of queuedPhotos) {
-        await uploadPhoto({ outfitId, photo: queued.file }).catch(() => {})
+        await uploadPhoto({ outfitId, photo: queued.file })
       }
 
       navigate(`/outfits/${outfitId}`)

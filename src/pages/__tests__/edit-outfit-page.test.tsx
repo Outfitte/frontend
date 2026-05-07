@@ -61,7 +61,7 @@ describe('EditOutfitPage', () => {
     renderPage()
 
     await screen.findByDisplayValue('Casual Friday')
-    await userEvent.click(screen.getByRole('button', { name: /save changes/i }))
+    await user.click(screen.getByRole('button', { name: /save changes/i }))
 
     await waitFor(() => expect(toast.error).toHaveBeenCalled())
     expect(screen.getByTestId('edit-outfit-page')).toBeInTheDocument()
@@ -338,9 +338,7 @@ describe('EditOutfitPage', () => {
     await user.click(screen.getByRole('button', { name: /add item/i }))
     await screen.findByRole('dialog')
 
-    expect(screen.queryByRole('button', { name: /^add$/i, hidden: false })).toBeInTheDocument()
-    const addButtons = screen.queryAllByRole('button', { name: /^add$/i })
-    expect(addButtons).toHaveLength(1)
+    expect(screen.queryAllByRole('button', { name: /^add$/i })).toHaveLength(1)
   })
 
   // --- Photos section ---
@@ -409,6 +407,32 @@ describe('EditOutfitPage', () => {
     await user.upload(input, file)
 
     expect(await screen.findByAltText(/photo 1/i)).toBeInTheDocument()
+  })
+
+  it('EditOutfitPage should stay on page when queued photo upload fails', async () => {
+    const { toast } = await import('@/lib/toast')
+    const user = userEvent.setup()
+    server.use(
+      http.get('/api/outfits/:id', () =>
+        HttpResponse.json(mockOutfit({ id: 'outfit-001', name: 'Casual Friday', photos: [] }))
+      ),
+      http.patch('/api/outfits/:id', () =>
+        HttpResponse.json(mockOutfit({ id: 'outfit-001' }))
+      ),
+      http.post('/api/outfits/:id/photos', () =>
+        HttpResponse.json({ error: 'Upload failed' }, { status: 500 })
+      )
+    )
+    renderPage()
+
+    await screen.findByTestId('edit-outfit-page')
+    const file = new File(['bytes'], 'photo.jpg', { type: 'image/jpeg' })
+    await user.upload(screen.getByLabelText(/add photos/i), file)
+    await screen.findByAltText(/photo 1/i)
+    await user.click(screen.getByRole('button', { name: /save changes/i }))
+
+    await waitFor(() => expect(toast.error).toHaveBeenCalled())
+    expect(screen.getByTestId('edit-outfit-page')).toBeInTheDocument()
   })
 
   it('EditOutfitPage should upload queued photos sequentially on Save Changes', async () => {

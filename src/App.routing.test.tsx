@@ -231,6 +231,24 @@ describe('Routing', () => {
     expect(screen.getByTestId('create-outfit-page')).toBeInTheDocument()
   })
 
+  it('App should redirect to /login when unauthenticated user visits /outfits/:id/edit', () => {
+    render(<AppWithLocation />, { initialEntries: ['/outfits/outfit-001/edit'] })
+    expect(screen.getByTestId('login-page')).toBeInTheDocument()
+  })
+
+  it('App should render edit outfit page when authenticated user visits /outfits/:id/edit', async () => {
+    useAuthStore.setState({
+      accessToken: 'access-token-abc123',
+      refreshToken: 'refresh-token-xyz789',
+      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      isAuthenticated: true,
+      isHydrating: false,
+      hydrateFromStorage: async () => {},
+    })
+    render(<AppWithLocation />, { initialEntries: ['/outfits/outfit-001/edit'] })
+    expect(await screen.findByTestId('edit-outfit-page')).toBeInTheDocument()
+  })
+
   it('App should render calendar page when authenticated user visits /calendar', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
