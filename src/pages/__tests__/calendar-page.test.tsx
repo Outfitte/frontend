@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { Route, Routes } from 'react-router'
 import { http, HttpResponse } from 'msw'
 import { format, startOfMonth, endOfMonth, subMonths, addMonths } from 'date-fns'
 import { server } from '@/test/mocks/server'
@@ -198,11 +199,28 @@ describe('CalendarPage', () => {
         HttpResponse.json([mockOutfit({ id: 'outfit-001', name: 'Casual Friday' })])
       )
     )
-    render(<CalendarPage />, { initialEntries: ['/calendar'] })
+    render(
+      <Routes>
+        <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/outfits/:id" element={<div data-testid="outfit-detail-page" />} />
+      </Routes>,
+      { initialEntries: ['/calendar'] }
+    )
 
-    const logEntry = await screen.findByRole('button', { name: 'Casual Friday' })
-    await user.click(logEntry)
+    await user.click(await screen.findByRole('button', { name: 'Casual Friday' }))
 
-    // After click, navigation to /outfits/outfit-001 is triggered — no crash expected
+    expect(await screen.findByTestId('outfit-detail-page')).toBeInTheDocument()
+  })
+
+  it('CalendarPage should show an empty grid when the outfit-logs request fails', async () => {
+    server.use(
+      http.get('/api/outfit-logs', () => HttpResponse.json({}, { status: 500 }))
+    )
+    render(<CalendarPage />)
+
+    await waitFor(() => expect(screen.queryByTestId('calendar-skeleton')).not.toBeInTheDocument())
+
+    expect(screen.getAllByTestId(/^calendar-day/).length).toBeGreaterThan(0)
+    expect(screen.queryByRole('button', { name: /outfit/i })).not.toBeInTheDocument()
   })
 })

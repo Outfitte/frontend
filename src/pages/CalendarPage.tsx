@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useOutfitLogsByRange } from '@/hooks/use-outfit-logs'
 import { useOutfits } from '@/hooks/use-outfits'
-import type { OutfitLog } from '@/types'
+import type { Outfit, OutfitLog } from '@/types'
 import { cn } from '@/lib/utils'
 
 // Week starts on Monday (ISO week convention)
@@ -30,18 +30,14 @@ function buildGridDays(viewedMonth: Date): Date[] {
   return eachDayOfInterval({ start: gridStart, end: gridEnd })
 }
 
-function resolveOutfitName(
-  outfitId: string,
-  outfits: { id: string; name: string | null }[]
-): string {
+function resolveOutfitName(outfitId: string, outfits: Outfit[]): string {
   const outfit = outfits.find((o) => o.id === outfitId)
   return outfit?.name ?? 'Outfit'
 }
 
 function groupLogsByDate(logs: OutfitLog[]): Record<string, OutfitLog[]> {
   return logs.reduce<Record<string, OutfitLog[]>>((acc, log) => {
-    const key = log.worn_on
-    acc[key] = acc[key] ? [...acc[key], log] : [log]
+    ;(acc[log.worn_on] ??= []).push(log)
     return acc
   }, {})
 }
@@ -99,7 +95,7 @@ export function CalendarPage() {
 
       {isLoading ? (
         <div className="grid grid-cols-7 gap-px">
-          {Array.from({ length: 35 }).map((_, i) => (
+          {Array.from({ length: gridDays.length }).map((_, i) => (
             <Skeleton key={i} data-testid="calendar-skeleton" className="h-20" />
           ))}
         </div>
@@ -114,23 +110,24 @@ export function CalendarPage() {
               <div
                 key={day.toISOString()}
                 data-testid={inMonth ? 'calendar-day' : 'calendar-day-outside'}
-                className={cn(
-                  'min-h-20 p-1',
-                  !inMonth && 'text-muted-foreground'
-                )}
+                className={cn('min-h-20 p-1', !inMonth && 'text-muted-foreground')}
               >
                 <span className="block text-right text-sm">{format(day, 'd')}</span>
                 <div className="mt-1 flex flex-col gap-0.5">
-                  {dayLogs.map((log) => (
-                    <button
-                      key={log.id}
-                      aria-label={resolveOutfitName(log.outfit_id, outfits)}
-                      className="truncate rounded bg-primary/10 px-1 py-0.5 text-left text-xs hover:bg-primary/20"
-                      onClick={() => navigate(`/outfits/${log.outfit_id}`)}
-                    >
-                      {resolveOutfitName(log.outfit_id, outfits)}
-                    </button>
-                  ))}
+                  {dayLogs.map((log) => {
+                    const outfitName = resolveOutfitName(log.outfit_id, outfits)
+                    return (
+                      <button
+                        key={log.id}
+                        type="button"
+                        aria-label={outfitName}
+                        className="truncate rounded bg-primary/10 px-1 py-0.5 text-left text-xs hover:bg-primary/20"
+                        onClick={() => navigate(`/outfits/${log.outfit_id}`)}
+                      >
+                        {outfitName}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             )
