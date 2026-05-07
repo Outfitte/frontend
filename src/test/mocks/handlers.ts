@@ -232,6 +232,24 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 })
   }),
 
+  // --- Outfit logs ---
+
+  http.get('/api/outfits/:id/logs', () => {
+    return HttpResponse.json([])
+  }),
+
+  http.post('/api/outfits/:id/logs', async ({ params, request }) => {
+    const body = await request.json() as Record<string, unknown>
+    return HttpResponse.json(
+      mockOutfitLog({ id: 'outfitlog-new-001', outfit_id: params['id'] as string, worn_on: body['worn_on'] as string }),
+      { status: 201 }
+    )
+  }),
+
+  http.delete('/api/outfits/:id/logs/:logId', () => {
+    return new HttpResponse(null, { status: 204 })
+  }),
+
   // --- Shares ---
 
   http.get('/api/shares', () => {
