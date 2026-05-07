@@ -42,6 +42,17 @@ describe('CreateOutfitPage', () => {
     expect(screen.getByTestId('create-outfit-page')).toBeInTheDocument()
   })
 
+  it('CreateOutfitPage should show validation error when name exceeds 200 characters', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await user.type(screen.getByLabelText(/name/i), 'a'.repeat(201))
+    await user.click(screen.getByRole('button', { name: /save/i }))
+
+    expect(await screen.findByText(/200 characters or fewer/i)).toBeInTheDocument()
+    expect(screen.getByTestId('create-outfit-page')).toBeInTheDocument()
+  })
+
   // --- Happy path ---
 
   it('CreateOutfitPage should have data-testid create-outfit-page on root element', () => {
@@ -66,17 +77,6 @@ describe('CreateOutfitPage', () => {
     await user.click(screen.getByRole('button', { name: /cancel/i }))
 
     expect(await screen.findByTestId('outfits-page')).toBeInTheDocument()
-  })
-
-  it('CreateOutfitPage should show validation error when name exceeds 200 characters', async () => {
-    const user = userEvent.setup()
-    renderPage()
-
-    await user.type(screen.getByLabelText(/name/i), 'a'.repeat(201))
-    await user.click(screen.getByRole('button', { name: /save/i }))
-
-    expect(await screen.findByText(/200 characters or fewer/i)).toBeInTheDocument()
-    expect(screen.getByTestId('create-outfit-page')).toBeInTheDocument()
   })
 
   it('CreateOutfitPage should succeed and navigate to edit page when saved with empty name', async () => {

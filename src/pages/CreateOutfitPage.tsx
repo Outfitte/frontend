@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 
 const schema = z.strictObject({
-  name: z.string().max(200, { error: 'Name must be 200 characters or fewer' }).or(z.literal('')).optional(),
+  name: z.string().max(200, { error: 'Name must be 200 characters or fewer' }).optional(),
   notes: z.string().optional(),
 })
 
@@ -17,7 +17,7 @@ type FormValues = z.infer<typeof schema>
 
 export function CreateOutfitPage() {
   const navigate = useNavigate()
-  const { mutateAsync: createOutfit } = useCreateOutfit()
+  const { mutateAsync: createOutfit, isPending } = useCreateOutfit()
 
   const {
     register,
@@ -61,7 +61,7 @@ export function CreateOutfitPage() {
         </div>
 
         <div className="flex gap-2">
-          <Button type="submit">Save</Button>
+          <Button type="submit" disabled={isPending}>Save</Button>
           <Button type="button" variant="outline" onClick={() => navigate('/outfits')}>
             Cancel
           </Button>
