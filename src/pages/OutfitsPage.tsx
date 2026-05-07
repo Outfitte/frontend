@@ -25,7 +25,8 @@ export function OutfitsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [optimisticallyRemovedIds, setOptimisticallyRemovedIds] = useState<Set<string>>(new Set())
 
-  const sort = (searchParams.get('sort') as SortOption) ?? 'newest'
+  const rawSort = searchParams.get('sort')
+  const sort: SortOption = rawSort === 'oldest' || rawSort === 'name' ? rawSort : 'newest'
 
   const { isLoading, data: outfits } = useOutfits()
   const { mutate: deleteOutfit } = useDeleteOutfit()
@@ -38,7 +39,11 @@ export function OutfitsPage() {
   function setParam(key: string, value: string) {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev)
-      next.set(key, value)
+      if (value) {
+        next.set(key, value)
+      } else {
+        next.delete(key)
+      }
       return next
     })
   }
