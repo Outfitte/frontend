@@ -253,6 +253,14 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 })
   }),
 
+  http.get('/api/shares/with-me', () => {
+    return HttpResponse.json({
+      items: [],
+      outfits: [],
+      locations: [],
+    })
+  }),
+
   // --- Categories ---
 
   http.get('/api/categories', () => {
