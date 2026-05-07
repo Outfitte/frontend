@@ -1,15 +1,11 @@
-import { describe, it, expect, vi } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { render } from '@/test/utils'
 import { mockItem } from '@/test/mocks/fixtures'
 import { server } from '@/test/mocks/server'
 import { ItemPicker } from '@/components/shared/ItemPicker'
-
-vi.mock('@/lib/toast', () => ({
-  toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
-}))
 
 const baseProps = {
   open: true,
@@ -18,10 +14,87 @@ const baseProps = {
 }
 
 describe('ItemPicker', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
   it('ItemPicker should not render dialog when open is false', () => {
     render(<ItemPicker {...baseProps} open={false} />)
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('ItemPicker should show loading skeleton while items are fetching', async () => {
+    server.use(
+      http.get('/api/items', async () => {
+        await new Promise((resolve) => setTimeout(resolve, 200))
+        return HttpResponse.json([mockItem()])
+      })
+    )
+
+    render(<ItemPicker {...baseProps} />)
+
+    expect(screen.getByTestId('item-picker-loading')).toBeInTheDocument()
+    await screen.findByText('Blue Denim Jacket')
+    expect(screen.queryByTestId('item-picker-loading')).not.toBeInTheDocument()
+  })
+
+  it('ItemPicker should show item-picker-error testid when items fail to load', async () => {
+    server.use(
+      http.get('/api/items', () => HttpResponse.error())
+    )
+
+    render(<ItemPicker {...baseProps} />)
+
+    await screen.findByTestId('item-picker-error')
+  })
+
+  it('ItemPicker should show item-picker-empty testid when no items match search', async () => {
+    const user = userEvent.setup()
+    render(<ItemPicker {...baseProps} />)
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.type(screen.getByPlaceholderText('Search items…'), 'zzznomatch')
+
+    expect(screen.getByTestId('item-picker-empty')).toBeInTheDocument()
+  })
+
+  it('ItemPicker should hide items whose ids are in excludeItemIds', async () => {
+    render(<ItemPicker {...baseProps} excludeItemIds={['item-001']} />)
+
+    await screen.findByText('Red Wool Coat')
+    expect(screen.queryByText('Blue Denim Jacket')).not.toBeInTheDocument()
+  })
+
+  it('ItemPicker should not call onClose on Add click when closeOnSelect is false', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    render(<ItemPicker {...baseProps} onClose={onClose} closeOnSelect={false} />)
+
+    await screen.findByText('Blue Denim Jacket')
+    const addButtons = screen.getAllByRole('button', { name: 'Add' })
+    await user.click(addButtons[0])
+
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
+  it('ItemPicker should match brand-only search against items with null brand gracefully', async () => {
+    server.use(
+      http.get('/api/items', () =>
+        HttpResponse.json([
+          mockItem({ id: 'item-001', name: 'Plain Shirt', brand: null }),
+          mockItem({ id: 'item-002', name: 'Branded Coat', brand: 'Zara' }),
+        ])
+      )
+    )
+    const user = userEvent.setup()
+    render(<ItemPicker {...baseProps} />)
+
+    await screen.findByText('Branded Coat')
+    await user.type(screen.getByPlaceholderText('Search items…'), 'zara')
+
+    expect(screen.getByText('Branded Coat')).toBeInTheDocument()
+    expect(screen.queryByText('Plain Shirt')).not.toBeInTheDocument()
   })
 
   it('ItemPicker should render dialog with search input and item list when open is true', async () => {
@@ -50,13 +123,6 @@ describe('ItemPicker', () => {
     expect(screen.queryByText('Blue Denim Jacket')).not.toBeInTheDocument()
   })
 
-  it('ItemPicker should hide items whose ids are in excludeItemIds', async () => {
-    render(<ItemPicker {...baseProps} excludeItemIds={['item-001']} />)
-
-    await screen.findByText('Red Wool Coat')
-    expect(screen.queryByText('Blue Denim Jacket')).not.toBeInTheDocument()
-  })
-
   it('ItemPicker should call onSelect with the item id when Add is clicked', async () => {
     const user = userEvent.setup()
     const onSelect = vi.fn()
@@ -81,43 +147,6 @@ describe('ItemPicker', () => {
     expect(onClose).toHaveBeenCalled()
   })
 
-  it('ItemPicker should not call onClose on Add click when closeOnSelect is false', async () => {
-    const user = userEvent.setup()
-    const onClose = vi.fn()
-    render(<ItemPicker {...baseProps} onClose={onClose} closeOnSelect={false} />)
-
-    await screen.findByText('Blue Denim Jacket')
-    const addButtons = screen.getAllByRole('button', { name: 'Add' })
-    await user.click(addButtons[0])
-
-    expect(onClose).not.toHaveBeenCalled()
-  })
-
-  it('ItemPicker should show item-picker-empty testid when no items match search', async () => {
-    const user = userEvent.setup()
-    render(<ItemPicker {...baseProps} />)
-
-    await screen.findByText('Blue Denim Jacket')
-    await user.type(screen.getByPlaceholderText('Search items…'), 'zzznomatch')
-
-    expect(screen.getByTestId('item-picker-empty')).toBeInTheDocument()
-  })
-
-  it('ItemPicker should show loading skeleton while items are fetching', async () => {
-    server.use(
-      http.get('/api/items', async () => {
-        await new Promise((resolve) => setTimeout(resolve, 200))
-        return HttpResponse.json([mockItem()])
-      })
-    )
-
-    render(<ItemPicker {...baseProps} />)
-
-    expect(screen.getByTestId('item-picker-loading')).toBeInTheDocument()
-    await screen.findByText('Blue Denim Jacket')
-    expect(screen.queryByTestId('item-picker-loading')).not.toBeInTheDocument()
-  })
-
   it('ItemPicker should call onClose when Cancel is clicked', async () => {
     const user = userEvent.setup()
     const onClose = vi.fn()
@@ -139,23 +168,19 @@ describe('ItemPicker', () => {
     expect(onClose).toHaveBeenCalled()
   })
 
-  it('ItemPicker should match brand-only search against items with null brand gracefully', async () => {
-    server.use(
-      http.get('/api/items', () =>
-        HttpResponse.json([
-          mockItem({ id: 'item-001', name: 'Plain Shirt', brand: null }),
-          mockItem({ id: 'item-002', name: 'Branded Coat', brand: 'Zara' }),
-        ])
-      )
-    )
+  it('ItemPicker should clear search when dialog is closed and reopened', async () => {
     const user = userEvent.setup()
-    render(<ItemPicker {...baseProps} />)
+    const { rerender } = render(<ItemPicker {...baseProps} />)
 
-    await screen.findByText('Branded Coat')
-    await user.type(screen.getByPlaceholderText('Search items…'), 'zara')
+    await screen.findByText('Blue Denim Jacket')
+    await user.type(screen.getByPlaceholderText('Search items…'), 'red')
+    expect(screen.queryByText('Blue Denim Jacket')).not.toBeInTheDocument()
 
-    expect(screen.getByText('Branded Coat')).toBeInTheDocument()
-    expect(screen.queryByText('Plain Shirt')).not.toBeInTheDocument()
+    rerender(<ItemPicker {...baseProps} open={false} />)
+    rerender(<ItemPicker {...baseProps} open={true} />)
+
+    await screen.findByText('Blue Denim Jacket')
+    expect(screen.getByPlaceholderText('Search items…')).toHaveValue('')
   })
 
   it('ItemPicker should render a placeholder when an item has no photos', async () => {

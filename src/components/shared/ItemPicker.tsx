@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -16,6 +16,7 @@ interface ItemPickerProps {
   onSelect: (itemId: string) => void
   excludeItemIds?: string[]
   closeOnSelect?: boolean
+  title?: string
 }
 
 export function ItemPicker({
@@ -24,12 +25,19 @@ export function ItemPicker({
   onSelect,
   excludeItemIds = [],
   closeOnSelect = true,
+  title = 'Add Item',
 }: ItemPickerProps) {
   const [search, setSearch] = useState('')
-  const { data: items, isLoading } = useItems('active')
+  const { data: items, isLoading, isError } = useItems('active')
+
+  useEffect(() => {
+    if (!open) setSearch('')
+  }, [open])
+
+  const excludeSet = useMemo(() => new Set(excludeItemIds), [excludeItemIds])
 
   const filtered = (items ?? []).filter((item) => {
-    if (excludeItemIds.includes(item.id)) return false
+    if (excludeSet.has(item.id)) return false
     const q = search.toLowerCase()
     if (!q) return true
     return (
@@ -47,7 +55,7 @@ export function ItemPicker({
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Item</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <Input
           placeholder="Search items…"
@@ -61,6 +69,10 @@ export function ItemPicker({
                 <Skeleton key={i} className="h-12 w-full" />
               ))}
             </div>
+          ) : isError ? (
+            <p data-testid="item-picker-error" className="py-4 text-center text-sm text-destructive">
+              Failed to load items. Please try again.
+            </p>
           ) : filtered.length === 0 ? (
             <p data-testid="item-picker-empty" className="py-4 text-center text-sm text-muted-foreground">
               No items found
