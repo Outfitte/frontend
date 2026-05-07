@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { format, parseISO, isAfter } from 'date-fns'
 import { useForm } from 'react-hook-form'
@@ -44,7 +44,8 @@ export function OutfitDetailPage() {
   const navigate = useNavigate()
 
   const { data: outfit, isLoading, error } = useOutfit(id!)
-  const { data: outfitLogs = [] } = useOutfitLogs(id)
+  const { data: outfitLogs = [] } = useOutfitLogs(id!)
+  // 'all' shares the cache entry populated by ItemPicker and other pages, avoiding an extra round-trip
   const { data: allItems = [] } = useItems('all')
 
   const { mutate: deleteOutfit } = useDeleteOutfit()
@@ -53,6 +54,10 @@ export function OutfitDetailPage() {
 
   const [activePhotoIdx, setActivePhotoIdx] = useState(0)
   const [showWearForm, setShowWearForm] = useState(false)
+
+  useEffect(() => {
+    setActivePhotoIdx(0)
+  }, [id])
 
   const {
     register,
@@ -130,7 +135,12 @@ export function OutfitDetailPage() {
     <div data-testid="outfit-detail-page">
       {/* Header: name + action buttons */}
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <h1 className="text-2xl font-bold">{outfitName}</h1>
+        <div>
+          <h1 className="text-2xl font-bold">{outfitName}</h1>
+          {outfit.notes && (
+            <p className="mt-1 text-sm text-muted-foreground">{outfit.notes}</p>
+          )}
+        </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline" size="sm">
             <Link to={`/outfits/${id}/edit`}>Edit</Link>

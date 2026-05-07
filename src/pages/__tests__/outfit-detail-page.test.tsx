@@ -7,6 +7,7 @@ import { server } from '@/test/mocks/server'
 import { render } from '@/test/utils'
 import { mockOutfit, mockOutfitLog, mockOutfitItem, mockItem, mockPhoto } from '@/test/mocks/fixtures'
 import { OutfitDetailPage } from '@/pages/OutfitDetailPage'
+import { toast } from '@/lib/toast'
 
 vi.mock('@/lib/toast', () => ({
   toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
@@ -94,12 +95,36 @@ describe('OutfitDetailPage', () => {
     await user.click(screen.getByRole('button', { name: /confirm delete/i }))
 
     expect(await screen.findByTestId('outfit-detail-page')).toBeInTheDocument()
+    await waitFor(() => expect(toast.error).toHaveBeenCalled())
   })
 
   it('OutfitDetailPage should have data-testid outfit-detail-page on root element', async () => {
     renderPage()
 
     expect(await screen.findByTestId('outfit-detail-page')).toBeInTheDocument()
+  })
+
+  it('OutfitDetailPage should display outfit notes when present', async () => {
+    server.use(
+      http.get('/api/outfits/:id', () =>
+        HttpResponse.json(mockOutfit({ id: OUTFIT_ID, name: 'Casual Friday', notes: 'Weekend look' }))
+      )
+    )
+    renderPage()
+
+    expect(await screen.findByText('Weekend look')).toBeInTheDocument()
+  })
+
+  it('OutfitDetailPage should not display notes section when notes is null', async () => {
+    server.use(
+      http.get('/api/outfits/:id', () =>
+        HttpResponse.json(mockOutfit({ id: OUTFIT_ID, name: 'Casual Friday', notes: null }))
+      )
+    )
+    renderPage()
+
+    await screen.findByText('Casual Friday')
+    expect(screen.queryByText('Weekend look')).not.toBeInTheDocument()
   })
 
   it('OutfitDetailPage should render outfit name as heading', async () => {
@@ -381,6 +406,7 @@ describe('OutfitDetailPage', () => {
     renderPage()
 
     await screen.findByText('Second wear')
+    // Logs sorted descending by date; index 0 is outfitlog-002 (2026-04-11)
     await user.click(screen.getAllByRole('button', { name: /delete wear log/i })[0])
 
     await waitFor(() => expect(deletedLogId).toBe('outfitlog-002'))
@@ -429,7 +455,7 @@ describe('OutfitDetailPage', () => {
     expect(screen.queryByLabelText(/date/i)).not.toBeInTheDocument()
   })
 
-  it('OutfitDetailPage should submit wear log and log appears in list', async () => {
+  it('OutfitDetailPage should POST wear log with correct date and close the form on success', async () => {
     const user = userEvent.setup()
     let capturedBody: unknown
     server.use(
@@ -452,5 +478,6 @@ describe('OutfitDetailPage', () => {
     await user.click(screen.getByRole('button', { name: /^save$/i }))
 
     await waitFor(() => expect(capturedBody).toMatchObject({ worn_on: '2026-04-14' }))
+    await waitFor(() => expect(screen.queryByLabelText(/date/i)).not.toBeInTheDocument())
   })
 })
