@@ -127,4 +127,46 @@ describe('ItemPicker', () => {
 
     expect(onClose).toHaveBeenCalled()
   })
+
+  it('ItemPicker should call onClose when dialog is dismissed via Escape key', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    render(<ItemPicker {...baseProps} onClose={onClose} />)
+
+    await screen.findByRole('dialog')
+    await user.keyboard('{Escape}')
+
+    expect(onClose).toHaveBeenCalled()
+  })
+
+  it('ItemPicker should match brand-only search against items with null brand gracefully', async () => {
+    server.use(
+      http.get('/api/items', () =>
+        HttpResponse.json([
+          mockItem({ id: 'item-001', name: 'Plain Shirt', brand: null }),
+          mockItem({ id: 'item-002', name: 'Branded Coat', brand: 'Zara' }),
+        ])
+      )
+    )
+    const user = userEvent.setup()
+    render(<ItemPicker {...baseProps} />)
+
+    await screen.findByText('Branded Coat')
+    await user.type(screen.getByPlaceholderText('Search items…'), 'zara')
+
+    expect(screen.getByText('Branded Coat')).toBeInTheDocument()
+    expect(screen.queryByText('Plain Shirt')).not.toBeInTheDocument()
+  })
+
+  it('ItemPicker should render a placeholder when an item has no photos', async () => {
+    server.use(
+      http.get('/api/items', () =>
+        HttpResponse.json([mockItem({ id: 'item-001', photos: [] })])
+      )
+    )
+    render(<ItemPicker {...baseProps} />)
+
+    await screen.findByText('Blue Denim Jacket')
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+  })
 })
