@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw'
-import { mockItem, mockCategory, mockLocation, mockChildLocation, mockWearLog, mockPhoto, mockUserSummary, mockOutfit } from './fixtures'
+import { mockItem, mockCategory, mockLocation, mockChildLocation, mockWearLog, mockPhoto, mockUserSummary, mockOutfit, mockShareView, mockShare } from './fixtures'
 
 export const handlers = [
   http.get('/api/health', () => {
@@ -229,6 +229,27 @@ export const handlers = [
   }),
 
   http.delete('/api/outfits/:id/photos/:key', () => {
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  // --- Shares ---
+
+  http.get('/api/shares', () => {
+    return HttpResponse.json([
+      mockShareView({ id: 'share-001' }),
+      mockShareView({ id: 'share-002', target_type: 'outfit', target_id: 'outfit-001' }),
+    ])
+  }),
+
+  http.post('/api/shares', async ({ request }) => {
+    const body = await request.json() as Record<string, unknown>
+    return HttpResponse.json(
+      mockShare({ id: 'share-new-001', recipient_id: body['recipient_id'] as string, target_type: body['target_type'] as 'item' | 'outfit' | 'location', target_id: body['target_id'] as string }),
+      { status: 201 }
+    )
+  }),
+
+  http.delete('/api/shares/:id', () => {
     return new HttpResponse(null, { status: 204 })
   }),
 
