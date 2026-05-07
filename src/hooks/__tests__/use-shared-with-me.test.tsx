@@ -46,21 +46,12 @@ describe('useSharedWithMe', () => {
     expect(result.current.error?.status).toBe(401)
   })
 
-  it('useSharedWithMe should reflect loading state then data when GET /shares/with-me succeeds', async () => {
+  it('useSharedWithMe should reflect loading state then return empty arrays when nothing is shared with the user', async () => {
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useSharedWithMe(), { wrapper })
     expect(result.current.isLoading).toBe(true)
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(result.current.data).toEqual({ items: [], outfits: [], locations: [] })
-  })
-
-  it('useSharedWithMe should return empty arrays when nothing is shared with the user', async () => {
-    const { wrapper } = makeWrapper()
-    const { result } = renderHook(() => useSharedWithMe(), { wrapper })
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data?.items).toEqual([])
-    expect(result.current.data?.outfits).toEqual([])
-    expect(result.current.data?.locations).toEqual([])
   })
 
   it('useSharedWithMe should return SharedWithMeResult with items, outfits, locations when GET /shares/with-me returns data', async () => {

@@ -249,16 +249,16 @@ export const handlers = [
     )
   }),
 
-  http.delete('/api/shares/:id', () => {
-    return new HttpResponse(null, { status: 204 })
-  }),
-
   http.get('/api/shares/with-me', () => {
     return HttpResponse.json({
       items: [],
       outfits: [],
       locations: [],
     })
+  }),
+
+  http.delete('/api/shares/:id', () => {
+    return new HttpResponse(null, { status: 204 })
   }),
 
   // --- Categories ---
