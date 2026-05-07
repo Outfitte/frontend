@@ -13,6 +13,7 @@ import { ItemDetailPage } from '@/pages/ItemDetailPage'
 import { EditItemPage } from '@/pages/EditItemPage'
 import { LocationsPage } from '@/pages/LocationsPage'
 import { OutfitsPage } from '@/pages/OutfitsPage'
+import { CreateOutfitPage } from '@/pages/CreateOutfitPage'
 import { CalendarPage } from '@/pages/CalendarPage'
 import { SharedPage } from '@/pages/SharedPage'
 import { SettingsPage } from '@/pages/SettingsPage'
@@ -65,6 +66,7 @@ function App() {
             <Route path="/items/:id/edit" element={<EditItemPage />} />
             <Route path="/locations" element={<LocationsPage />} />
             <Route path="/outfits" element={<OutfitsPage />} />
+            <Route path="/outfits/new" element={<CreateOutfitPage />} />
             <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/shared" element={<SharedPage />} />
             <Route path="/settings" element={<SettingsPage />} />

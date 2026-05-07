@@ -218,6 +218,19 @@ describe('Routing', () => {
     expect(screen.getByTestId('outfits-page')).toBeInTheDocument()
   })
 
+  it('App should render create outfit page when authenticated user visits /outfits/new', () => {
+    useAuthStore.setState({
+      accessToken: 'access-token-abc123',
+      refreshToken: 'refresh-token-xyz789',
+      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      isAuthenticated: true,
+      isHydrating: false,
+      hydrateFromStorage: async () => {},
+    })
+    render(<AppWithLocation />, { initialEntries: ['/outfits/new'] })
+    expect(screen.getByTestId('create-outfit-page')).toBeInTheDocument()
+  })
+
   it('App should render calendar page when authenticated user visits /calendar', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
