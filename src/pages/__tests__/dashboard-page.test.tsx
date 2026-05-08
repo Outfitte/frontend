@@ -20,29 +20,6 @@ describe('DashboardPage', () => {
 
   // --- Failure / loading / edge cases ---
 
-  it('DashboardPage should pick the most recent wear log when item has multiple logs', async () => {
-    server.use(
-      http.get('/api/items', ({ request }) => {
-        const url = new URL(request.url)
-        if (url.searchParams.get('status') === 'active') {
-          return HttpResponse.json([mockItem({ id: 'item-001', name: 'Blue Denim Jacket' })])
-        }
-        return HttpResponse.json([])
-      }),
-      http.get('/api/items/item-001/wear-logs', () =>
-        HttpResponse.json([
-          { id: 'wl-1', item_id: 'item-001', owner_id: 'user-001', worn_on: '2026-04-20', notes: null, created_at: '2026-04-20T08:00:00Z' },
-          { id: 'wl-2', item_id: 'item-001', owner_id: 'user-001', worn_on: '2026-03-10', notes: null, created_at: '2026-03-10T08:00:00Z' },
-        ])
-      )
-    )
-    render(<DashboardPage />)
-
-    const card = await screen.findByTestId('stat-recently-worn')
-    expect(card).toHaveTextContent('Blue Denim Jacket')
-    expect(card).toHaveTextContent(/recently worn/i)
-  })
-
   it('DashboardPage should not crash when 2+ active items are returned without last_worn_on', async () => {
     server.use(
       http.get('/api/items', ({ request }) => {
@@ -136,7 +113,8 @@ describe('DashboardPage', () => {
   it('DashboardPage should show seven stat card skeletons including outfit cards while loading', () => {
     server.use(
       http.get('/api/items', async () => { await new Promise(() => {}) }),
-      http.get('/api/locations', async () => { await new Promise(() => {}) })
+      http.get('/api/locations', async () => { await new Promise(() => {}) }),
+      http.get('/api/outfits', async () => { await new Promise(() => {}) })
     )
     render(<DashboardPage />)
 
@@ -302,6 +280,29 @@ describe('DashboardPage', () => {
 
     const card = await screen.findByTestId('stat-recently-worn')
     expect(card).toHaveTextContent('White Sneakers')
+    expect(card).toHaveTextContent(/recently worn/i)
+  })
+
+  it('DashboardPage should pick the most recent wear log when item has multiple logs', async () => {
+    server.use(
+      http.get('/api/items', ({ request }) => {
+        const url = new URL(request.url)
+        if (url.searchParams.get('status') === 'active') {
+          return HttpResponse.json([mockItem({ id: 'item-001', name: 'Blue Denim Jacket' })])
+        }
+        return HttpResponse.json([])
+      }),
+      http.get('/api/items/item-001/wear-logs', () =>
+        HttpResponse.json([
+          { id: 'wl-1', item_id: 'item-001', owner_id: 'user-001', worn_on: '2026-04-20', notes: null, created_at: '2026-04-20T08:00:00Z' },
+          { id: 'wl-2', item_id: 'item-001', owner_id: 'user-001', worn_on: '2026-03-10', notes: null, created_at: '2026-03-10T08:00:00Z' },
+        ])
+      )
+    )
+    render(<DashboardPage />)
+
+    const card = await screen.findByTestId('stat-recently-worn')
+    expect(card).toHaveTextContent('Blue Denim Jacket')
     expect(card).toHaveTextContent(/recently worn/i)
   })
 
