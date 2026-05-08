@@ -18,6 +18,7 @@ import { OutfitDetailPage } from '@/pages/OutfitDetailPage'
 import { EditOutfitPage } from '@/pages/EditOutfitPage'
 import { CalendarPage } from '@/pages/CalendarPage'
 import { SharedPage } from '@/pages/SharedPage'
+import { SharedItemDetailPage } from '@/pages/SharedItemDetailPage'
 import { OutgoingSharesPage } from '@/pages/OutgoingSharesPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
@@ -74,6 +75,7 @@ function App() {
             <Route path="/outfits/:id/edit" element={<EditOutfitPage />} />
             <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/shared" element={<SharedPage />} />
+            <Route path="/shared/items/:id" element={<SharedItemDetailPage />} />
             <Route path="/shares" element={<OutgoingSharesPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
