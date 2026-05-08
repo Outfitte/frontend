@@ -605,4 +605,45 @@ describe('ItemDetailPage', () => {
 
     await waitFor(() => expect(deletedId).toBe(ITEM_ID))
   })
+
+  it('ItemDetailPage should hide Share button when item is disposed', async () => {
+    server.use(
+      http.get('/api/items/:id', () =>
+        HttpResponse.json(mockItem({ id: ITEM_ID, status: 'disposed', dispose_reason: 'donated' }))
+      )
+    )
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    expect(screen.queryByRole('button', { name: /^share$/i })).not.toBeInTheDocument()
+  })
+
+  it('ItemDetailPage should render Share button in header for active items', async () => {
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    expect(screen.getByRole('button', { name: /^share$/i })).toBeInTheDocument()
+  })
+
+  it('ItemDetailPage should open ShareDialog with targetType item and targetId when Share is clicked', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.click(screen.getByRole('button', { name: /^share$/i }))
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument()
+  })
+
+  it('ItemDetailPage should close ShareDialog when dialog Cancel button is clicked', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.click(screen.getByRole('button', { name: /^share$/i }))
+    await screen.findByRole('dialog')
+    await user.click(screen.getByRole('button', { name: /^cancel$/i }))
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  })
 })

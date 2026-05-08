@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { ChevronLeftIcon, ChevronRightIcon, Trash2Icon } from 'lucide-react'
+import { ShareDialog } from '@/components/shared/ShareDialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -65,6 +66,7 @@ export function ItemDetailPage() {
 
   const [showWearForm, setShowWearForm] = useState(false)
   const [showDisposeDialog, setShowDisposeDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
   const [disposeReason, setDisposeReason] = useState<DisposeReason>('donated')
 
   const { data: item, isLoading, error } = useItem(id!)
@@ -224,6 +226,11 @@ export function ItemDetailPage() {
           ) : (
             <Button variant="outline" size="sm" onClick={handleArchive}>
               Archive
+            </Button>
+          )}
+          {item.status !== 'disposed' && (
+            <Button variant="outline" size="sm" onClick={() => setShowShareDialog(true)}>
+              Share
             </Button>
           )}
           <Button variant="outline" size="sm" onClick={() => setShowDisposeDialog(true)}>
@@ -492,6 +499,14 @@ export function ItemDetailPage() {
           ))}
         </ul>
       </div>
+
+      <ShareDialog
+        open={showShareDialog}
+        onClose={() => setShowShareDialog(false)}
+        targetType="item"
+        targetId={id!}
+        targetLabel={item.name}
+      />
 
       {/* Dispose dialog */}
       <Dialog open={showDisposeDialog} onOpenChange={setShowDisposeDialog}>
