@@ -5,6 +5,7 @@ import {
   MapPinIcon,
   ShirtIcon,
   ShareIcon,
+  Share2Icon,
   SettingsIcon,
   TagIcon,
   MoonIcon,
@@ -39,10 +40,11 @@ import { Button } from '@/components/ui/button'
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: HomeIcon },
   { to: '/items', label: 'Items', icon: TagIcon },
-  { to: '/locations', label: 'Locations', icon: MapPinIcon },
   { to: '/outfits', label: 'Outfits', icon: ShirtIcon },
   { to: '/calendar', label: 'Calendar', icon: CalendarIcon },
-  { to: '/shared', label: 'Shared', icon: ShareIcon },
+  { to: '/locations', label: 'Locations', icon: MapPinIcon },
+  { to: '/shared', label: 'Shared with me', icon: ShareIcon },
+  { to: '/shares', label: 'My shares', icon: Share2Icon },
   { to: '/settings', label: 'Settings', icon: SettingsIcon },
 ]
 
