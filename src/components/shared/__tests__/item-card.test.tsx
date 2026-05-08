@@ -9,50 +9,6 @@ vi.mock('@/lib/toast', () => ({
 }))
 
 describe('ItemCard', () => {
-  it('ItemCard should not render disposal reason when dispose_reason is null', () => {
-    render(
-      <ItemCard
-        item={mockItem({ status: 'disposed', dispose_reason: null })}
-        onAction={vi.fn()}
-      />
-    )
-
-    expect(screen.queryByTestId('item-card-dispose-reason')).not.toBeInTheDocument()
-  })
-
-  it('ItemCard should not render disposal reason when item is active with a non-null dispose_reason', () => {
-    render(
-      <ItemCard
-        item={mockItem({ status: 'active', dispose_reason: 'Donated' })}
-        onAction={vi.fn()}
-      />
-    )
-
-    expect(screen.queryByTestId('item-card-dispose-reason')).not.toBeInTheDocument()
-  })
-
-  it('ItemCard should use /media/ path for the photo src when the item has a photo', () => {
-    render(
-      <ItemCard
-        item={mockItem({ photos: [{ id: 'photo-001', media_key: 'uploads/photo-001.jpg', position: 0, created_at: '2026-01-01T00:00:00Z' }] })}
-        onAction={vi.fn()}
-      />
-    )
-
-    expect(screen.getByRole('img')).toHaveAttribute('src', '/media/uploads/photo-001.jpg')
-  })
-
-  it('ItemCard should render dispose_reason when item is disposed with a reason', () => {
-    render(
-      <ItemCard
-        item={mockItem({ status: 'disposed', dispose_reason: 'Donated' })}
-        onAction={vi.fn()}
-      />
-    )
-
-    expect(screen.getByTestId('item-card-dispose-reason')).toHaveTextContent('Donated')
-  })
-
   it('ItemCard should not render context menu trigger when isReadOnly is true', () => {
     render(
       <ItemCard item={mockItem()} isReadOnly onAction={vi.fn()} />
@@ -77,6 +33,36 @@ describe('ItemCard', () => {
     expect(screen.queryByTestId('item-shared-badge')).not.toBeInTheDocument()
   })
 
+  it('ItemCard should not render shared badge when isReadOnly is true but sharedByEmail is not provided', () => {
+    render(
+      <ItemCard item={mockItem()} isReadOnly onAction={vi.fn()} />
+    )
+
+    expect(screen.queryByTestId('item-shared-badge')).not.toBeInTheDocument()
+  })
+
+  it('ItemCard should not render disposal reason when dispose_reason is null', () => {
+    render(
+      <ItemCard
+        item={mockItem({ status: 'disposed', dispose_reason: null })}
+        onAction={vi.fn()}
+      />
+    )
+
+    expect(screen.queryByTestId('item-card-dispose-reason')).not.toBeInTheDocument()
+  })
+
+  it('ItemCard should not render disposal reason when item is active with a non-null dispose_reason', () => {
+    render(
+      <ItemCard
+        item={mockItem({ status: 'active', dispose_reason: 'Donated' })}
+        onAction={vi.fn()}
+      />
+    )
+
+    expect(screen.queryByTestId('item-card-dispose-reason')).not.toBeInTheDocument()
+  })
+
   it('ItemCard should render item-shared-badge with "shared by <email>" when isReadOnly and sharedByEmail are provided', () => {
     render(
       <ItemCard item={mockItem()} isReadOnly sharedByEmail="alice@example.com" onAction={vi.fn()} />
@@ -85,21 +71,55 @@ describe('ItemCard', () => {
     expect(screen.getByTestId('item-shared-badge')).toHaveTextContent('shared by alice@example.com')
   })
 
-  it('ItemCard should link to /items/:id by default', () => {
+  it('ItemCard should render context menu trigger when isReadOnly is not set', () => {
     render(
-      <ItemCard item={mockItem({ id: 'item-001', name: 'Blue Denim Jacket' })} onAction={vi.fn()} />
+      <ItemCard item={mockItem()} onAction={vi.fn()} />
+    )
+
+    expect(screen.getByRole('button', { name: 'Item options' })).toBeInTheDocument()
+  })
+
+  it('ItemCard should render Wore today button when isReadOnly is not set', () => {
+    render(
+      <ItemCard item={mockItem()} onWoreToday={vi.fn()} onAction={vi.fn()} />
+    )
+
+    expect(screen.getByRole('button', { name: 'Wore today' })).toBeInTheDocument()
+  })
+
+  it('ItemCard should use /media/ path for the photo src when the item has a photo', () => {
+    render(
+      <ItemCard
+        item={mockItem({ photos: [{ id: 'photo-001', media_key: 'uploads/photo-001.jpg', position: 0, created_at: '2026-01-01T00:00:00Z' }] })}
+        onAction={vi.fn()}
+      />
+    )
+
+    expect(screen.getByRole('img')).toHaveAttribute('src', '/media/uploads/photo-001.jpg')
+  })
+
+  it('ItemCard should render dispose_reason when item is disposed with a reason', () => {
+    render(
+      <ItemCard
+        item={mockItem({ status: 'disposed', dispose_reason: 'Donated' })}
+        onAction={vi.fn()}
+      />
+    )
+
+    expect(screen.getByTestId('item-card-dispose-reason')).toHaveTextContent('Donated')
+  })
+
+  it('ItemCard should link to /items/:id when linkTo is not provided', () => {
+    render(
+      <ItemCard item={mockItem()} onAction={vi.fn()} />
     )
 
     expect(screen.getByRole('link', { name: 'View Blue Denim Jacket' })).toHaveAttribute('href', '/items/item-001')
   })
 
-  it('ItemCard should link to linkTo prop when provided', () => {
+  it('ItemCard should link to the linkTo prop value when linkTo is provided', () => {
     render(
-      <ItemCard
-        item={mockItem({ id: 'item-001', name: 'Blue Denim Jacket' })}
-        linkTo="/shared/items/item-001"
-        onAction={vi.fn()}
-      />
+      <ItemCard item={mockItem()} linkTo="/shared/items/item-001" onAction={vi.fn()} />
     )
 
     expect(screen.getByRole('link', { name: 'View Blue Denim Jacket' })).toHaveAttribute('href', '/shared/items/item-001')
