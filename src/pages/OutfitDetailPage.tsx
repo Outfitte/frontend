@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { ChevronLeftIcon, ChevronRightIcon, Trash2Icon } from 'lucide-react'
+import { ShareDialog } from '@/components/shared/ShareDialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -54,6 +55,7 @@ export function OutfitDetailPage() {
 
   const [activePhotoIdx, setActivePhotoIdx] = useState(0)
   const [showWearForm, setShowWearForm] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
 
   useEffect(() => {
     setActivePhotoIdx(0)
@@ -144,6 +146,9 @@ export function OutfitDetailPage() {
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline" size="sm">
             <Link to={`/outfits/${id}/edit`}>Edit</Link>
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setShowShareDialog(true)}>
+            Share
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
@@ -362,6 +367,14 @@ export function OutfitDetailPage() {
           ))}
         </ul>
       </div>
+
+      <ShareDialog
+        open={showShareDialog}
+        onClose={() => setShowShareDialog(false)}
+        targetType="outfit"
+        targetId={id!}
+        targetLabel={outfitName}
+      />
     </div>
   )
 }

@@ -346,6 +346,27 @@ describe('LocationsPage', () => {
     })
   })
 
+  it('LocationsPage should show Share item in context menu alongside Rename Move and Delete', async () => {
+    const user = userEvent.setup()
+    render(<LocationsPage />)
+
+    await screen.findByText('Main Closet')
+    await user.click(screen.getByTestId('context-menu-loc-001'))
+
+    expect(await screen.findByRole('menuitem', { name: /share/i })).toBeInTheDocument()
+  })
+
+  it('LocationsPage should open ShareDialog when Share context menu item is clicked', async () => {
+    const user = userEvent.setup()
+    render(<LocationsPage />)
+
+    await screen.findByText('Main Closet')
+    await user.click(screen.getByTestId('context-menu-loc-001'))
+    await user.click(await screen.findByRole('menuitem', { name: /share/i }))
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument()
+  })
+
   it('LocationsPage should add created location to tree and close dialog on success', async () => {
     const user = userEvent.setup()
     server.use(

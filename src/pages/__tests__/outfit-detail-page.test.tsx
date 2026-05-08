@@ -480,4 +480,21 @@ describe('OutfitDetailPage', () => {
     await waitFor(() => expect(capturedBody).toMatchObject({ worn_on: '2026-04-14' }))
     await waitFor(() => expect(screen.queryByLabelText(/date/i)).not.toBeInTheDocument())
   })
+
+  it('OutfitDetailPage should render Share button in header action group', async () => {
+    renderPage()
+
+    await screen.findByText('Casual Friday')
+    expect(screen.getByRole('button', { name: /^share$/i })).toBeInTheDocument()
+  })
+
+  it('OutfitDetailPage should open ShareDialog when Share button is clicked', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await screen.findByText('Casual Friday')
+    await user.click(screen.getByRole('button', { name: /^share$/i }))
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument()
+  })
 })

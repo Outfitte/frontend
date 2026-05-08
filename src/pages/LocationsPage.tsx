@@ -31,6 +31,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useLocations, useCreateLocation, useUpdateLocation, useMoveLocation, useDeleteLocation } from '@/hooks/use-locations'
+import { ShareDialog } from '@/components/shared/ShareDialog'
 import { buildLocationTree, flattenTree, getAncestors, getDescendantIds, type LocationTreeNode } from '@/lib/location-tree'
 import { api } from '@/lib/api'
 import { queryKeys } from '@/lib/query-keys'
@@ -59,12 +60,13 @@ interface TreeNodeProps {
   onRenameCancel: () => void
   onMoveStart: (id: string) => void
   onDeleteStart: (id: string) => void
+  onShareStart: (id: string) => void
 }
 
 function TreeNode({
   node, depth, selectedId, collapsedIds, renamingId,
   onToggle, onSelect, onRenameStart, onRenameSubmit, onRenameCancel,
-  onMoveStart, onDeleteStart,
+  onMoveStart, onDeleteStart, onShareStart,
 }: TreeNodeProps) {
   const isExpanded = !collapsedIds.has(node.id)
   const isSelected = selectedId === node.id
@@ -132,6 +134,7 @@ function TreeNode({
           <DropdownMenuContent align="end">
             <DropdownMenuItem onSelect={() => onRenameStart(node.id)}>Rename</DropdownMenuItem>
             <DropdownMenuItem onSelect={() => onMoveStart(node.id)}>Move</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => onShareStart(node.id)}>Share</DropdownMenuItem>
             <DropdownMenuItem
               onSelect={() => onDeleteStart(node.id)}
               className="text-destructive"
@@ -156,6 +159,7 @@ function TreeNode({
           onRenameCancel={onRenameCancel}
           onMoveStart={onMoveStart}
           onDeleteStart={onDeleteStart}
+          onShareStart={onShareStart}
         />
       ))}
     </>
@@ -375,6 +379,7 @@ export function LocationsPage() {
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [movingId, setMovingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [sharingId, setSharingId] = useState<string | null>(null)
 
   function onToggle(id: string) {
     setCollapsedIds((prev) => {
@@ -441,6 +446,7 @@ export function LocationsPage() {
             onRenameCancel={() => setRenamingId(null)}
             onMoveStart={setMovingId}
             onDeleteStart={setDeletingId}
+            onShareStart={setSharingId}
           />
         ))}
       </div>
@@ -467,6 +473,15 @@ export function LocationsPage() {
         <DeleteDialog
           locationId={deletingId}
           onClose={() => setDeletingId(null)}
+        />
+      )}
+      {sharingId && (
+        <ShareDialog
+          open
+          onClose={() => setSharingId(null)}
+          targetType="location"
+          targetId={sharingId}
+          targetLabel={locations.find((l) => l.id === sharingId)?.label}
         />
       )}
     </div>
