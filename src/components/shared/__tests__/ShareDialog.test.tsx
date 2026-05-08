@@ -93,11 +93,55 @@ describe('ShareDialog', () => {
     expect(screen.getByText('Share Blue Denim Jacket')).toBeInTheDocument()
   })
 
+  it('ShareDialog should show empty message when all users are the authenticated user', async () => {
+    server.use(
+      http.get('/api/users', () => HttpResponse.json([{ id: 'user-001', email: 'user@example.com' }]))
+    )
+    render(<ShareDialog {...baseProps} />)
+
+    expect(await screen.findByTestId('share-dialog-empty')).toBeInTheDocument()
+  })
+
+  it('ShareDialog should show loading skeleton while users are fetching', async () => {
+    server.use(
+      http.get('/api/users', async () => {
+        await new Promise((resolve) => setTimeout(resolve, 200))
+        return HttpResponse.json([{ id: 'user-002', email: 'alice@example.com' }])
+      })
+    )
+    render(<ShareDialog {...baseProps} />)
+
+    expect(screen.getByTestId('share-dialog-loading')).toBeInTheDocument()
+    await screen.findByText('alice@example.com')
+    expect(screen.queryByTestId('share-dialog-loading')).not.toBeInTheDocument()
+  })
+
   it('ShareDialog should render user list populated from useUsers excluding authenticated user', async () => {
     render(<ShareDialog {...baseProps} />)
 
     expect(await screen.findByText('alice@example.com')).toBeInTheDocument()
     expect(screen.queryByText('user@example.com')).not.toBeInTheDocument()
+  })
+
+  it('ShareDialog should show Sharing label and disable button while mutation is pending', async () => {
+    server.use(
+      http.post('/api/shares', async () => {
+        await new Promise((resolve) => setTimeout(resolve, 200))
+        return HttpResponse.json(
+          { id: 'share-new', recipient_id: 'user-002', target_type: 'item', target_id: 'item-001', created_at: '2026-01-01T00:00:00Z' },
+          { status: 201 }
+        )
+      })
+    )
+    const user = userEvent.setup()
+    render(<ShareDialog {...baseProps} />)
+
+    await screen.findByText('alice@example.com')
+    await user.click(screen.getByText('alice@example.com'))
+    await user.click(screen.getByRole('button', { name: 'Share' }))
+
+    expect(screen.getByRole('button', { name: 'Sharing…' })).toBeDisabled()
+    await screen.findByRole('button', { name: 'Share' })
   })
 
   it('ShareDialog should call useCreateShare with recipient_id target_type and target_id on submit', async () => {
