@@ -634,4 +634,16 @@ describe('ItemDetailPage', () => {
 
     expect(await screen.findByRole('dialog')).toBeInTheDocument()
   })
+
+  it('ItemDetailPage should close ShareDialog when dialog Cancel button is clicked', async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.click(screen.getByRole('button', { name: /^share$/i }))
+    await screen.findByRole('dialog')
+    await user.click(screen.getByRole('button', { name: /^cancel$/i }))
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  })
 })

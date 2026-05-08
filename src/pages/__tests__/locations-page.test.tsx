@@ -367,6 +367,19 @@ describe('LocationsPage', () => {
     expect(await screen.findByRole('dialog')).toBeInTheDocument()
   })
 
+  it('LocationsPage should close ShareDialog when Cancel button is clicked', async () => {
+    const user = userEvent.setup()
+    render(<LocationsPage />)
+
+    await screen.findByText('Main Closet')
+    await user.click(screen.getByTestId('context-menu-loc-001'))
+    await user.click(await screen.findByRole('menuitem', { name: /share/i }))
+    await screen.findByRole('dialog')
+    await user.click(screen.getByRole('button', { name: /^cancel$/i }))
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  })
+
   it('LocationsPage should add created location to tree and close dialog on success', async () => {
     const user = userEvent.setup()
     server.use(
