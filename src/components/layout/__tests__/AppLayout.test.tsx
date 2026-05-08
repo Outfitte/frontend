@@ -136,6 +136,20 @@ describe('AppLayout', () => {
     expect(sharesLink).toHaveAttribute('data-active', 'true')
   })
 
+  it('AppLayout should not set data-active true on shared with me link when on shares route', () => {
+    renderLayout(['/shares'])
+
+    const sharedLink = screen.getByRole('link', { name: /shared with me/i })
+    expect(sharedLink).not.toHaveAttribute('data-active', 'true')
+  })
+
+  it('AppLayout should not set data-active true on my shares link when on shared route', () => {
+    renderLayout(['/shared'])
+
+    const sharesLink = screen.getByRole('link', { name: /my shares/i })
+    expect(sharesLink).not.toHaveAttribute('data-active', 'true')
+  })
+
   it('AppLayout should navigate to /items when Items link is clicked', async () => {
     const user = userEvent.setup()
     renderLayout(['/'])
