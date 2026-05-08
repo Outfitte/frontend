@@ -298,7 +298,7 @@ describe('Routing', () => {
     expect(await screen.findByTestId('outgoing-shares-page')).toBeInTheDocument()
   })
 
-  it('App should render shared page when authenticated user visits /shared', () => {
+  it('App should render shared page when authenticated user visits /shared', async () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
@@ -308,7 +308,7 @@ describe('Routing', () => {
       hydrateFromStorage: async () => {},
     })
     render(<AppWithLocation />, { initialEntries: ['/shared'] })
-    expect(screen.getByTestId('shared-page')).toBeInTheDocument()
+    expect(await screen.findByTestId('shared-page')).toBeInTheDocument()
   })
 
   it('App should render settings page when authenticated user visits /settings', () => {
