@@ -250,6 +250,12 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 })
   }),
 
+  // --- Outfit logs (range query) ---
+
+  http.get('/api/outfit-logs', () => {
+    return HttpResponse.json([])
+  }),
+
   // --- Shares ---
 
   http.get('/api/shares', () => {
