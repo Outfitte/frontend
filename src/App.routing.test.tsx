@@ -311,6 +311,24 @@ describe('Routing', () => {
     expect(await screen.findByTestId('shared-page')).toBeInTheDocument()
   })
 
+  it('App should redirect to /login when unauthenticated user visits /shared/items/:id', () => {
+    render(<AppWithLocation />, { initialEntries: ['/shared/items/item-001'] })
+    expect(screen.getByTestId('login-page')).toBeInTheDocument()
+  })
+
+  it('App should render shared item detail page when authenticated user visits /shared/items/:id', async () => {
+    useAuthStore.setState({
+      accessToken: 'access-token-abc123',
+      refreshToken: 'refresh-token-xyz789',
+      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      isAuthenticated: true,
+      isHydrating: false,
+      hydrateFromStorage: async () => {},
+    })
+    render(<AppWithLocation />, { initialEntries: ['/shared/items/item-001'] })
+    expect(await screen.findByTestId('shared-item-detail-page')).toBeInTheDocument()
+  })
+
   it('App should render settings page when authenticated user visits /settings', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
