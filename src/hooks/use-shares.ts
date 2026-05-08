@@ -25,7 +25,9 @@ export function useCreateShare() {
       toast.success('Share created')
     },
     onError: (error) => {
-      toast.error(error.message)
+      if (error.status !== 409 && error.status !== 422) {
+        toast.error(error.message)
+      }
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.shares.outgoing })

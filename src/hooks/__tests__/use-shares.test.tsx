@@ -36,7 +36,7 @@ describe('useCreateShare', () => {
     vi.clearAllMocks()
   })
 
-  it('useCreateShare should show error toast when POST /shares returns 409 (already exists)', async () => {
+  it('useCreateShare should set isError and not show toast when POST /shares returns 409 (already exists)', async () => {
     server.use(
       http.post('/api/shares', () =>
         HttpResponse.json({ error: 'Share already exists' }, { status: 409 })
@@ -48,10 +48,10 @@ describe('useCreateShare', () => {
       result.current.mutate({ recipient_id: 'user-002', target_type: 'item', target_id: 'item-001' })
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(toast.error).toHaveBeenCalledWith('Share already exists')
+    expect(toast.error).not.toHaveBeenCalled()
   })
 
-  it('useCreateShare should show error toast when POST /shares returns 422 (cannot share with self)', async () => {
+  it('useCreateShare should set isError and not show toast when POST /shares returns 422 (cannot share with self)', async () => {
     server.use(
       http.post('/api/shares', () =>
         HttpResponse.json({ error: 'Cannot share with self' }, { status: 422 })
@@ -63,7 +63,7 @@ describe('useCreateShare', () => {
       result.current.mutate({ recipient_id: 'user-001', target_type: 'item', target_id: 'item-001' })
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(toast.error).toHaveBeenCalledWith('Cannot share with self')
+    expect(toast.error).not.toHaveBeenCalled()
   })
 
   it('useCreateShare should show error toast when POST /shares returns 404 (target not found)', async () => {
