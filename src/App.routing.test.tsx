@@ -280,6 +280,24 @@ describe('Routing', () => {
     expect(screen.getByTestId('calendar-page')).toBeInTheDocument()
   })
 
+  it('App should redirect to /login when unauthenticated user visits /shares', () => {
+    render(<AppWithLocation />, { initialEntries: ['/shares'] })
+    expect(screen.getByTestId('login-page')).toBeInTheDocument()
+  })
+
+  it('App should render outgoing shares page when authenticated user visits /shares', async () => {
+    useAuthStore.setState({
+      accessToken: 'access-token-abc123',
+      refreshToken: 'refresh-token-xyz789',
+      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      isAuthenticated: true,
+      isHydrating: false,
+      hydrateFromStorage: async () => {},
+    })
+    render(<AppWithLocation />, { initialEntries: ['/shares'] })
+    expect(await screen.findByTestId('outgoing-shares-page')).toBeInTheDocument()
+  })
+
   it('App should render shared page when authenticated user visits /shared', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
