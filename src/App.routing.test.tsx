@@ -71,6 +71,26 @@ describe('Routing', () => {
     expect(screen.getByTestId('location')).toHaveTextContent('/login?next=%2Flocations')
   })
 
+  it('App should redirect to /login when unauthenticated user visits /outfits', () => {
+    render(<AppWithLocation />, { initialEntries: ['/outfits'] })
+    expect(screen.getByTestId('login-page')).toBeInTheDocument()
+  })
+
+  it('App should redirect to /login when unauthenticated user visits /outfits/new', () => {
+    render(<AppWithLocation />, { initialEntries: ['/outfits/new'] })
+    expect(screen.getByTestId('login-page')).toBeInTheDocument()
+  })
+
+  it('App should redirect to /login when unauthenticated user visits /calendar', () => {
+    render(<AppWithLocation />, { initialEntries: ['/calendar'] })
+    expect(screen.getByTestId('login-page')).toBeInTheDocument()
+  })
+
+  it('App should redirect to /login when unauthenticated user visits /shared', () => {
+    render(<AppWithLocation />, { initialEntries: ['/shared'] })
+    expect(screen.getByTestId('login-page')).toBeInTheDocument()
+  })
+
   it('App should redirect to / when authenticated user visits /login', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
