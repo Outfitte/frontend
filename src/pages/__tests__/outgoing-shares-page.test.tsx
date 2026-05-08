@@ -31,9 +31,20 @@ describe('OutgoingSharesPage', () => {
     expect(screen.getByTestId('outgoing-shares-skeleton')).toBeInTheDocument()
   })
 
+  it('OutgoingSharesPage should show error message when shares query fails', async () => {
+    server.use(
+      http.get('/api/shares', () => HttpResponse.json({ error: 'Server error' }, { status: 500 }))
+    )
+    renderPage()
+    expect(await screen.findByText(/failed to load shares/i)).toBeInTheDocument()
+  })
+
   it('OutgoingSharesPage should stay on page and show error toast when revoke fails', async () => {
     const user = userEvent.setup()
     server.use(
+      http.get('/api/shares', () =>
+        HttpResponse.json([mockShareView({ id: 'share-001', target_type: 'item', target_id: 'item-001' })])
+      ),
       http.delete('/api/shares/:id', () =>
         HttpResponse.json({ error: 'Server error' }, { status: 500 })
       )
