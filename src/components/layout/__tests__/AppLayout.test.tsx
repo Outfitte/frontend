@@ -14,7 +14,11 @@ function renderLayout(initialEntries?: string[]) {
         <Route path="/" element={<div>dashboard content</div>} />
         <Route path="/items" element={<div>items content</div>} />
         <Route path="/items/:id" element={<div>item detail content</div>} />
+        <Route path="/outfits" element={<div>outfits content</div>} />
+        <Route path="/calendar" element={<div>calendar content</div>} />
         <Route path="/locations" element={<div>locations content</div>} />
+        <Route path="/shared" element={<div>shared content</div>} />
+        <Route path="/shares" element={<div>shares content</div>} />
         <Route path="/settings" element={<div>settings content</div>} />
       </Route>
     </Routes>,
@@ -64,7 +68,8 @@ describe('AppLayout', () => {
     expect(screen.getByRole('link', { name: /locations/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /outfits/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /calendar/i })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /shared/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /shared with me/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /my shares/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /settings/i })).toBeInTheDocument()
   })
 
@@ -101,6 +106,48 @@ describe('AppLayout', () => {
 
     const itemsLink = screen.getByRole('link', { name: /items/i })
     expect(itemsLink).not.toHaveAttribute('data-active', 'true')
+  })
+
+  it('AppLayout should set data-active true on outfits nav button when on outfits route', () => {
+    renderLayout(['/outfits'])
+
+    const outfitsLink = screen.getByRole('link', { name: /outfits/i })
+    expect(outfitsLink).toHaveAttribute('data-active', 'true')
+  })
+
+  it('AppLayout should set data-active true on calendar nav button when on calendar route', () => {
+    renderLayout(['/calendar'])
+
+    const calendarLink = screen.getByRole('link', { name: /calendar/i })
+    expect(calendarLink).toHaveAttribute('data-active', 'true')
+  })
+
+  it('AppLayout should set data-active true on shared nav button when on shared route', () => {
+    renderLayout(['/shared'])
+
+    const sharedLink = screen.getByRole('link', { name: /shared with me/i })
+    expect(sharedLink).toHaveAttribute('data-active', 'true')
+  })
+
+  it('AppLayout should set data-active true on my shares nav button when on shares route', () => {
+    renderLayout(['/shares'])
+
+    const sharesLink = screen.getByRole('link', { name: /my shares/i })
+    expect(sharesLink).toHaveAttribute('data-active', 'true')
+  })
+
+  it('AppLayout should not set data-active true on shared with me link when on shares route', () => {
+    renderLayout(['/shares'])
+
+    const sharedLink = screen.getByRole('link', { name: /shared with me/i })
+    expect(sharedLink).not.toHaveAttribute('data-active', 'true')
+  })
+
+  it('AppLayout should not set data-active true on my shares link when on shared route', () => {
+    renderLayout(['/shared'])
+
+    const sharesLink = screen.getByRole('link', { name: /my shares/i })
+    expect(sharesLink).not.toHaveAttribute('data-active', 'true')
   })
 
   it('AppLayout should navigate to /items when Items link is clicked', async () => {
