@@ -109,7 +109,7 @@ describe('OutgoingSharesPage', () => {
     expect(screen.getByText('Mar 15, 2026')).toBeInTheDocument()
   })
 
-  it('OutgoingSharesPage should fall back to target_id when target is not found in lookup', async () => {
+  it('OutgoingSharesPage should fall back to target_id when item target is not found in lookup', async () => {
     server.use(
       http.get('/api/shares', () =>
         HttpResponse.json([
@@ -120,6 +120,32 @@ describe('OutgoingSharesPage', () => {
     )
     renderPage()
     expect(await screen.findByText('item-deleted')).toBeInTheDocument()
+  })
+
+  it('OutgoingSharesPage should fall back to target_id when outfit target is not found in lookup', async () => {
+    server.use(
+      http.get('/api/shares', () =>
+        HttpResponse.json([
+          mockShareView({ id: 'share-001', target_type: 'outfit', target_id: 'outfit-deleted' }),
+        ])
+      ),
+      http.get('/api/outfits', () => HttpResponse.json([]))
+    )
+    renderPage()
+    expect(await screen.findByText('outfit-deleted')).toBeInTheDocument()
+  })
+
+  it('OutgoingSharesPage should fall back to target_id when location target is not found in lookup', async () => {
+    server.use(
+      http.get('/api/shares', () =>
+        HttpResponse.json([
+          mockShareView({ id: 'share-001', target_type: 'location', target_id: 'loc-deleted' }),
+        ])
+      ),
+      http.get('/api/locations', () => HttpResponse.json([]))
+    )
+    renderPage()
+    expect(await screen.findByText('loc-deleted')).toBeInTheDocument()
   })
 
   it('OutgoingSharesPage should open AlertDialog when Revoke button is clicked', async () => {
