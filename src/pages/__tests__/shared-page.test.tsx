@@ -11,6 +11,16 @@ function renderPage() {
 }
 
 describe('SharedPage', () => {
+  it('SharedPage should show error message when fetch fails', async () => {
+    server.use(
+      http.get('/api/shares/with-me', () =>
+        HttpResponse.json({ error: 'Server error' }, { status: 500 })
+      )
+    )
+    renderPage()
+    expect(await screen.findByText(/failed to load/i)).toBeInTheDocument()
+  })
+
   it('SharedPage should show loading skeleton while fetching', () => {
     server.use(
       http.get('/api/shares/with-me', async () => {

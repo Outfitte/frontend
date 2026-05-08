@@ -68,7 +68,7 @@ function LocationsSection({ locations }: { locations: SharedLocation[] }) {
 }
 
 export function SharedPage() {
-  const { data, isLoading } = useSharedWithMe()
+  const { data, isLoading, isError } = useSharedWithMe()
 
   if (isLoading) {
     return (
@@ -76,6 +76,14 @@ export function SharedPage() {
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-6 w-full" />
         <Skeleton className="h-6 w-full" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div data-testid="shared-page" className="flex flex-col items-center justify-center py-24">
+        <p className="text-muted-foreground">Failed to load shared items. Please try again.</p>
       </div>
     )
   }
