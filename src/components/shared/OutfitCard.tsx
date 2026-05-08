@@ -16,15 +16,17 @@ interface OutfitCardProps {
   onAction?: (action: OutfitAction, id: string) => void
   isReadOnly?: boolean
   sharedByEmail?: string
+  linkTo?: string
 }
 
-export function OutfitCard({ outfit, onAction, isReadOnly, sharedByEmail }: OutfitCardProps) {
+export function OutfitCard({ outfit, onAction, isReadOnly, sharedByEmail, linkTo }: OutfitCardProps) {
   const displayName = outfit.name ?? 'Untitled outfit'
   const firstPhoto = outfit.photos[0]
+  const href = linkTo ?? `/outfits/${outfit.id}`
 
   return (
     <div data-testid="outfit-card" className="overflow-hidden rounded-xl border bg-card text-card-foreground ring-1 ring-foreground/10">
-      <Link to={`/outfits/${outfit.id}`} aria-label={`View ${displayName}`} className="block aspect-square bg-muted">
+      <Link to={href} aria-label={`View ${displayName}`} className="block aspect-square bg-muted">
         {firstPhoto ? (
           <img
             src={`/media/${firstPhoto.media_key}`}

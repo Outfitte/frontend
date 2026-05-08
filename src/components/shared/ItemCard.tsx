@@ -15,16 +15,29 @@ interface ItemCardProps {
   item: Item
   categoryLabel?: string
   isArchived?: boolean
+  isReadOnly?: boolean
+  sharedByEmail?: string
+  linkTo?: string
   onWoreToday?: (itemId: string) => void
   onAction?: (action: ItemAction, itemId: string) => void
 }
 
-export function ItemCard({ item, categoryLabel, isArchived, onWoreToday, onAction }: ItemCardProps) {
+export function ItemCard({
+  item,
+  categoryLabel,
+  isArchived,
+  isReadOnly,
+  sharedByEmail,
+  linkTo,
+  onWoreToday,
+  onAction,
+}: ItemCardProps) {
   const firstPhoto = item.photos[0]
+  const href = linkTo ?? `/items/${item.id}`
 
   return (
     <div data-testid="item-card" className="overflow-hidden rounded-xl border bg-card text-card-foreground ring-1 ring-foreground/10">
-      <Link to={`/items/${item.id}`} aria-label={`View ${item.name}`} className="block aspect-square bg-muted">
+      <Link to={href} aria-label={`View ${item.name}`} className="block aspect-square bg-muted">
         {firstPhoto ? (
           <img
             src={`/media/${firstPhoto.media_key}`}
@@ -60,50 +73,62 @@ export function ItemCard({ item, categoryLabel, isArchived, onWoreToday, onActio
                 {item.dispose_reason}
               </p>
             )}
+            {isReadOnly && sharedByEmail && (
+              <span
+                data-testid="item-shared-badge"
+                className="mt-1 inline-block rounded-full bg-muted px-2 py-0.5 text-xs"
+              >
+                shared by {sharedByEmail}
+              </span>
+            )}
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                type="button"
-                aria-label="Item options"
-                className="flex-shrink-0 rounded p-0.5 hover:bg-muted"
-              >
-                <MoreVerticalIcon className="h-4 w-4" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onSelect={() => onAction?.('edit', item.id)}>
-                Edit
-              </DropdownMenuItem>
-              {isArchived ? (
-                <DropdownMenuItem onSelect={() => onAction?.('unarchive', item.id)}>
-                  Unarchive
+          {!isReadOnly && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="Item options"
+                  className="flex-shrink-0 rounded p-0.5 hover:bg-muted"
+                >
+                  <MoreVerticalIcon className="h-4 w-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={() => onAction?.('edit', item.id)}>
+                  Edit
                 </DropdownMenuItem>
-              ) : (
-                <DropdownMenuItem onSelect={() => onAction?.('archive', item.id)}>
-                  Archive
+                {isArchived ? (
+                  <DropdownMenuItem onSelect={() => onAction?.('unarchive', item.id)}>
+                    Unarchive
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem onSelect={() => onAction?.('archive', item.id)}>
+                    Archive
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => onAction?.('dispose', item.id)}>
+                  Dispose
                 </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => onAction?.('dispose', item.id)}>
-                Dispose
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                variant="destructive"
-                onSelect={() => onAction?.('delete', item.id)}
-              >
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <DropdownMenuItem
+                  variant="destructive"
+                  onSelect={() => onAction?.('delete', item.id)}
+                >
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
-        <button
-          type="button"
-          onClick={() => onWoreToday?.(item.id)}
-          className="mt-2 w-full rounded-md border border-input bg-background px-2 py-1 text-xs hover:bg-muted"
-        >
-          Wore today
-        </button>
+        {!isReadOnly && (
+          <button
+            type="button"
+            onClick={() => onWoreToday?.(item.id)}
+            className="mt-2 w-full rounded-md border border-input bg-background px-2 py-1 text-xs hover:bg-muted"
+          >
+            Wore today
+          </button>
+        )}
       </div>
     </div>
   )
