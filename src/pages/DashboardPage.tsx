@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useAuthStore } from '@/stores/auth'
 import { useItems } from '@/hooks/use-items'
 import { useLocations } from '@/hooks/use-locations'
+import { useOutfits } from '@/hooks/use-outfits'
 import { api } from '@/lib/api'
 import { queryKeys } from '@/lib/query-keys'
 import type { Item, WearLog } from '@/types'
@@ -42,6 +43,10 @@ function computeWardrobeValue(items: Item[]): string {
   return [...currencyGroups.entries()]
     .map(([currency, cents]) => formatCurrency(currency, cents))
     .join(' + ')
+}
+
+function pickMostRecentlyCreated<T extends { created_at: string }>(items: T[] | undefined): T | undefined {
+  return items ? [...items].sort((a, b) => b.created_at.localeCompare(a.created_at))[0] : undefined
 }
 
 function pickMostRecentlyWorn(items: Item[], wearLogSets: (WearLog[] | undefined)[]): Item | undefined {
@@ -101,12 +106,12 @@ export function DashboardPage() {
   const { isLoading: itemsLoading, data: activeItems } = useItems('active')
   const { isLoading: locationsLoading, data: locations } = useLocations()
   const { item: recentlyWorn, isLoading: wearLogsLoading } = useRecentlyWornItem(activeItems)
+  const { isLoading: outfitsLoading, data: outfits } = useOutfits()
 
-  const isLoading = itemsLoading || locationsLoading || wearLogsLoading
+  const isLoading = itemsLoading || locationsLoading || wearLogsLoading || outfitsLoading
 
-  const recentlyAdded = activeItems
-    ? [...activeItems].sort((a, b) => b.created_at.localeCompare(a.created_at))[0]
-    : undefined
+  const recentlyAdded = pickMostRecentlyCreated(activeItems)
+  const recentOutfit = pickMostRecentlyCreated(outfits)
 
   const wardrobeValue = computeWardrobeValue(activeItems ?? [])
 
@@ -145,6 +150,8 @@ export function DashboardPage() {
               <StatCardSkeleton />
               <StatCardSkeleton />
               <StatCardSkeleton />
+              <StatCardSkeleton />
+              <StatCardSkeleton />
             </>
           ) : (
             <>
@@ -161,6 +168,12 @@ export function DashboardPage() {
                 testId="stat-recently-worn"
               />
               <StatCard label="Wardrobe value" value={wardrobeValue} testId="stat-wardrobe-value" />
+              <StatCard label="Total outfits" value={outfits?.length ?? 0} testId="stat-total-outfits" />
+              <StatCard
+                label="Most recent outfit"
+                value={recentOutfit?.name ?? '—'}
+                testId="stat-recent-outfit"
+              />
             </>
           )}
         </div>

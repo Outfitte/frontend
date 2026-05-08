@@ -4,7 +4,7 @@ import { http, HttpResponse } from 'msw'
 import { server } from '@/test/mocks/server'
 import { render } from '@/test/utils'
 import { useAuthStore } from '@/stores/auth'
-import { mockItem, mockLocation } from '@/test/mocks/fixtures'
+import { mockItem, mockLocation, mockOutfit } from '@/test/mocks/fixtures'
 import { DashboardPage } from '@/pages/DashboardPage'
 
 describe('DashboardPage', () => {
@@ -85,6 +85,74 @@ describe('DashboardPage', () => {
     render(<DashboardPage />)
 
     expect(screen.queryByText('alice@example.com')).not.toBeInTheDocument()
+  })
+
+  // --- Outfit stats ---
+
+  it('DashboardPage should show zero for stat-total-outfits when outfits API fails', async () => {
+    server.use(
+      http.get('/api/outfits', () => HttpResponse.json({ error: 'server error' }, { status: 500 }))
+    )
+    render(<DashboardPage />)
+
+    const card = await screen.findByTestId('stat-total-outfits')
+    expect(card).toHaveTextContent('0')
+  })
+
+  it('DashboardPage should show dash for stat-recent-outfit when no outfits exist', async () => {
+    server.use(
+      http.get('/api/outfits', () => HttpResponse.json([]))
+    )
+    render(<DashboardPage />)
+
+    const card = await screen.findByTestId('stat-recent-outfit')
+    expect(card).toHaveTextContent('—')
+    expect(card).toHaveTextContent(/most recent outfit/i)
+  })
+
+  it('DashboardPage should show seven stat card skeletons including outfit cards while loading', () => {
+    server.use(
+      http.get('/api/items', async () => { await new Promise(() => {}) }),
+      http.get('/api/locations', async () => { await new Promise(() => {}) }),
+      http.get('/api/outfits', async () => { await new Promise(() => {}) })
+    )
+    render(<DashboardPage />)
+
+    expect(screen.getAllByTestId('stat-card-skeleton')).toHaveLength(7)
+  })
+
+  it('DashboardPage should show total outfit count when outfits are loaded', async () => {
+    server.use(
+      http.get('/api/outfits', () =>
+        HttpResponse.json([
+          mockOutfit({ id: 'outfit-001', name: 'Casual Friday' }),
+          mockOutfit({ id: 'outfit-002', name: 'Smart Casual' }),
+          mockOutfit({ id: 'outfit-003', name: 'Beach Day' }),
+        ])
+      )
+    )
+    render(<DashboardPage />)
+
+    const card = await screen.findByTestId('stat-total-outfits')
+    expect(card).toHaveTextContent('3')
+    expect(card).toHaveTextContent(/total outfits/i)
+  })
+
+  it('DashboardPage should show most recently created outfit name when outfits exist', async () => {
+    server.use(
+      http.get('/api/outfits', () =>
+        HttpResponse.json([
+          mockOutfit({ id: 'outfit-001', name: 'Casual Friday', created_at: '2026-03-01T00:00:00Z' }),
+          mockOutfit({ id: 'outfit-002', name: 'Smart Casual', created_at: '2026-04-15T00:00:00Z' }),
+          mockOutfit({ id: 'outfit-003', name: 'Beach Day', created_at: '2026-02-10T00:00:00Z' }),
+        ])
+      )
+    )
+    render(<DashboardPage />)
+
+    const card = await screen.findByTestId('stat-recent-outfit')
+    expect(card).toHaveTextContent('Smart Casual')
+    expect(card).toHaveTextContent(/most recent outfit/i)
   })
 
   // --- Happy path ---
@@ -212,6 +280,29 @@ describe('DashboardPage', () => {
 
     const card = await screen.findByTestId('stat-recently-worn')
     expect(card).toHaveTextContent('White Sneakers')
+    expect(card).toHaveTextContent(/recently worn/i)
+  })
+
+  it('DashboardPage should pick the most recent wear log when item has multiple logs', async () => {
+    server.use(
+      http.get('/api/items', ({ request }) => {
+        const url = new URL(request.url)
+        if (url.searchParams.get('status') === 'active') {
+          return HttpResponse.json([mockItem({ id: 'item-001', name: 'Blue Denim Jacket' })])
+        }
+        return HttpResponse.json([])
+      }),
+      http.get('/api/items/item-001/wear-logs', () =>
+        HttpResponse.json([
+          { id: 'wl-1', item_id: 'item-001', owner_id: 'user-001', worn_on: '2026-04-20', notes: null, created_at: '2026-04-20T08:00:00Z' },
+          { id: 'wl-2', item_id: 'item-001', owner_id: 'user-001', worn_on: '2026-03-10', notes: null, created_at: '2026-03-10T08:00:00Z' },
+        ])
+      )
+    )
+    render(<DashboardPage />)
+
+    const card = await screen.findByTestId('stat-recently-worn')
+    expect(card).toHaveTextContent('Blue Denim Jacket')
     expect(card).toHaveTextContent(/recently worn/i)
   })
 
