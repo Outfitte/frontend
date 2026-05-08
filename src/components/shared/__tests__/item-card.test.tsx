@@ -52,4 +52,56 @@ describe('ItemCard', () => {
 
     expect(screen.getByTestId('item-card-dispose-reason')).toHaveTextContent('Donated')
   })
+
+  it('ItemCard should not render context menu trigger when isReadOnly is true', () => {
+    render(
+      <ItemCard item={mockItem()} isReadOnly onAction={vi.fn()} />
+    )
+
+    expect(screen.queryByRole('button', { name: 'Item options' })).not.toBeInTheDocument()
+  })
+
+  it('ItemCard should not render Wore today button when isReadOnly is true', () => {
+    render(
+      <ItemCard item={mockItem()} isReadOnly onWoreToday={vi.fn()} onAction={vi.fn()} />
+    )
+
+    expect(screen.queryByRole('button', { name: 'Wore today' })).not.toBeInTheDocument()
+  })
+
+  it('ItemCard should not render shared badge when sharedByEmail is set but isReadOnly is false', () => {
+    render(
+      <ItemCard item={mockItem()} sharedByEmail="alice@example.com" onAction={vi.fn()} />
+    )
+
+    expect(screen.queryByTestId('item-shared-badge')).not.toBeInTheDocument()
+  })
+
+  it('ItemCard should render item-shared-badge with "shared by <email>" when isReadOnly and sharedByEmail are provided', () => {
+    render(
+      <ItemCard item={mockItem()} isReadOnly sharedByEmail="alice@example.com" onAction={vi.fn()} />
+    )
+
+    expect(screen.getByTestId('item-shared-badge')).toHaveTextContent('shared by alice@example.com')
+  })
+
+  it('ItemCard should link to /items/:id by default', () => {
+    render(
+      <ItemCard item={mockItem({ id: 'item-001', name: 'Blue Denim Jacket' })} onAction={vi.fn()} />
+    )
+
+    expect(screen.getByRole('link', { name: 'View Blue Denim Jacket' })).toHaveAttribute('href', '/items/item-001')
+  })
+
+  it('ItemCard should link to linkTo prop when provided', () => {
+    render(
+      <ItemCard
+        item={mockItem({ id: 'item-001', name: 'Blue Denim Jacket' })}
+        linkTo="/shared/items/item-001"
+        onAction={vi.fn()}
+      />
+    )
+
+    expect(screen.getByRole('link', { name: 'View Blue Denim Jacket' })).toHaveAttribute('href', '/shared/items/item-001')
+  })
 })
