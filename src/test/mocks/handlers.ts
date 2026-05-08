@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw'
-import { mockItem, mockCategory, mockLocation, mockChildLocation, mockWearLog, mockPhoto, mockUserSummary, mockOutfit, mockShareView, mockShare } from './fixtures'
+import { mockItem, mockCategory, mockLocation, mockChildLocation, mockWearLog, mockPhoto, mockUserSummary, mockOutfit, mockOutfitLog, mockShareView, mockShare } from './fixtures'
 
 export const handlers = [
   http.get('/api/health', () => {
