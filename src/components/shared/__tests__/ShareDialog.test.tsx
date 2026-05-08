@@ -29,13 +29,6 @@ describe('ShareDialog', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('ShareDialog should render dialog with title when open is true', () => {
-    render(<ShareDialog {...baseProps} targetLabel="Blue Denim Jacket" />)
-
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
-    expect(screen.getByText('Share Blue Denim Jacket')).toBeInTheDocument()
-  })
-
   it('ShareDialog should show validation error when submitting without selecting a recipient', async () => {
     const user = userEvent.setup()
     render(<ShareDialog {...baseProps} />)
@@ -45,7 +38,7 @@ describe('ShareDialog', () => {
     expect(screen.getByText('Please select a recipient')).toBeInTheDocument()
   })
 
-  it('ShareDialog should stay open and show inline error when API returns 409', async () => {
+  it('ShareDialog should stay open show inline error and not toast when API returns 409', async () => {
     server.use(
       http.post('/api/shares', () => HttpResponse.json({ error: 'Already shared' }, { status: 409 }))
     )
@@ -58,9 +51,10 @@ describe('ShareDialog', () => {
 
     expect(await screen.findByText('Already shared')).toBeInTheDocument()
     expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(toast.error).not.toHaveBeenCalled()
   })
 
-  it('ShareDialog should stay open and show inline error when API returns 422', async () => {
+  it('ShareDialog should stay open show inline error and not toast when API returns 422', async () => {
     server.use(
       http.post('/api/shares', () => HttpResponse.json({ error: 'Cannot share with self' }, { status: 422 }))
     )
@@ -73,13 +67,7 @@ describe('ShareDialog', () => {
 
     expect(await screen.findByText('Cannot share with self')).toBeInTheDocument()
     expect(screen.getByRole('dialog')).toBeInTheDocument()
-  })
-
-  it('ShareDialog should render user list populated from useUsers excluding authenticated user', async () => {
-    render(<ShareDialog {...baseProps} />)
-
-    expect(await screen.findByText('alice@example.com')).toBeInTheDocument()
-    expect(screen.queryByText('user@example.com')).not.toBeInTheDocument()
+    expect(toast.error).not.toHaveBeenCalled()
   })
 
   it('ShareDialog should show toast error on failures other than 409 or 422', async () => {
@@ -98,13 +86,30 @@ describe('ShareDialog', () => {
     })
   })
 
+  it('ShareDialog should render dialog with title when open is true', () => {
+    render(<ShareDialog {...baseProps} targetLabel="Blue Denim Jacket" />)
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByText('Share Blue Denim Jacket')).toBeInTheDocument()
+  })
+
+  it('ShareDialog should render user list populated from useUsers excluding authenticated user', async () => {
+    render(<ShareDialog {...baseProps} />)
+
+    expect(await screen.findByText('alice@example.com')).toBeInTheDocument()
+    expect(screen.queryByText('user@example.com')).not.toBeInTheDocument()
+  })
+
   it('ShareDialog should call useCreateShare with recipient_id target_type and target_id on submit', async () => {
     const user = userEvent.setup()
     let capturedBody: unknown
     server.use(
       http.post('/api/shares', async ({ request }) => {
         capturedBody = await request.json()
-        return HttpResponse.json({ id: 'share-new', recipient_id: 'user-002', target_type: 'item', target_id: 'item-001', created_at: '2026-01-01T00:00:00Z' }, { status: 201 })
+        return HttpResponse.json(
+          { id: 'share-new', recipient_id: 'user-002', target_type: 'item', target_id: 'item-001', created_at: '2026-01-01T00:00:00Z' },
+          { status: 201 }
+        )
       })
     )
     render(<ShareDialog {...baseProps} targetType="item" targetId="item-001" />)
