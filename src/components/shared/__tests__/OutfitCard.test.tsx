@@ -14,6 +14,14 @@ describe('OutfitCard', () => {
     expect(screen.getByText('Untitled outfit')).toBeInTheDocument()
   })
 
+  it('OutfitCard should render "Untitled outfit" placeholder when name is empty string', () => {
+    render(
+      <OutfitCard outfit={mockOutfit({ name: '' })} onAction={vi.fn()} />
+    )
+
+    expect(screen.getByText('Untitled outfit')).toBeInTheDocument()
+  })
+
   it('OutfitCard should render a photo placeholder when outfit has no photos', () => {
     render(
       <OutfitCard outfit={mockOutfit({ photos: [] })} onAction={vi.fn()} />
