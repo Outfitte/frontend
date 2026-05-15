@@ -171,7 +171,7 @@ export function DashboardPage() {
               <StatCard label="Total outfits" value={outfits?.length ?? 0} testId="stat-total-outfits" />
               <StatCard
                 label="Most recent outfit"
-                value={recentOutfit?.name ?? '—'}
+                value={recentOutfit?.name || (recentOutfit ? 'Untitled outfit' : '—')}
                 testId="stat-recent-outfit"
               />
             </>

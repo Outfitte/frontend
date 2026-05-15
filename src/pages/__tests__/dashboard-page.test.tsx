@@ -138,6 +138,20 @@ describe('DashboardPage', () => {
     expect(card).toHaveTextContent(/total outfits/i)
   })
 
+  it('DashboardPage should show "Untitled outfit" for stat-recent-outfit when most recent outfit has empty name', async () => {
+    server.use(
+      http.get('/api/outfits', () =>
+        HttpResponse.json([
+          mockOutfit({ id: 'outfit-001', name: '', created_at: '2026-04-15T00:00:00Z' }),
+        ])
+      )
+    )
+    render(<DashboardPage />)
+
+    const card = await screen.findByTestId('stat-recent-outfit')
+    expect(card).toHaveTextContent('Untitled outfit')
+  })
+
   it('DashboardPage should show most recently created outfit name when outfits exist', async () => {
     server.use(
       http.get('/api/outfits', () =>

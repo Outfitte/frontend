@@ -20,7 +20,7 @@ interface OutfitCardProps {
 }
 
 export function OutfitCard({ outfit, onAction, isReadOnly, sharedByEmail, linkTo }: OutfitCardProps) {
-  const displayName = outfit.name ?? 'Untitled outfit'
+  const displayName = outfit.name || 'Untitled outfit'
   const firstPhoto = outfit.photos[0]
   const href = linkTo ?? `/outfits/${outfit.id}`
 
