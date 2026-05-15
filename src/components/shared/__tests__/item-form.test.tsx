@@ -233,6 +233,26 @@ describe('ItemForm', () => {
     expect(screen.queryByDisplayValue('material')).not.toBeInTheDocument()
   })
 
+  it('ItemForm should disable Add Field button when 50 metadata fields are present', async () => {
+    renderCreate({
+      defaultValues: {
+        metadata: Array.from({ length: 50 }, (_, i) => ({ key: `key${i}`, value: `value${i}` })),
+      },
+    })
+
+    expect(screen.getByRole('button', { name: /add field/i })).toBeDisabled()
+  })
+
+  it('ItemForm should enable Add Field button when fewer than 50 metadata fields are present', async () => {
+    renderCreate({
+      defaultValues: {
+        metadata: Array.from({ length: 49 }, (_, i) => ({ key: `key${i}`, value: `value${i}` })),
+      },
+    })
+
+    expect(screen.getByRole('button', { name: /add field/i })).not.toBeDisabled()
+  })
+
   it('ItemForm should show photo preview for newly queued files', async () => {
     const user = userEvent.setup()
     renderCreate()

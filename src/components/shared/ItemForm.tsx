@@ -15,6 +15,8 @@ import type { FieldHint, Photo } from '@/types'
 
 // ─── Schema ──────────────────────────────────────────────────────────────────
 
+const MAX_METADATA_FIELDS = 50
+
 const metadataRowSchema = z.strictObject({
   key: z
     .string()
@@ -400,6 +402,7 @@ export function ItemForm({
           size="sm"
           className="mt-3"
           onClick={() => append({ key: '', value: '' })}
+          disabled={fields.length >= MAX_METADATA_FIELDS}
         >
           Add Field
         </Button>
