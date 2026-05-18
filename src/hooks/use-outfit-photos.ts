@@ -30,7 +30,9 @@ export function useUploadOutfitPhoto() {
     },
     onSettled: (_, __, { outfitId }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.outfits.all })
-      queryClient.invalidateQueries({ queryKey: queryKeys.outfits.detail(outfitId) })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.outfits.detail(outfitId),
+      })
     },
   })
 }
@@ -39,7 +41,9 @@ export function useDeleteOutfitPhoto() {
   const queryClient = useQueryClient()
   return useMutation<void, ApiError, DeleteOutfitPhotoVars>({
     mutationFn: ({ outfitId, mediaKey }) =>
-      api.delete<void>(`/outfits/${outfitId}/photos/${encodeURIComponent(mediaKey)}`),
+      api.delete<void>(
+        `/outfits/${outfitId}/photos/${encodeURIComponent(mediaKey)}`
+      ),
     onSuccess: () => {
       toast.success('Photo deleted')
     },
@@ -48,7 +52,9 @@ export function useDeleteOutfitPhoto() {
     },
     onSettled: (_, __, { outfitId }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.outfits.all })
-      queryClient.invalidateQueries({ queryKey: queryKeys.outfits.detail(outfitId) })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.outfits.detail(outfitId),
+      })
     },
   })
 }

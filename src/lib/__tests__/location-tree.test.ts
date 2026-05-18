@@ -8,12 +8,14 @@ import {
 import type { Location } from '@/types'
 
 // Helpers
-function loc(
-  id: string,
-  parent_id: string | null,
-  label: string,
-): Location {
-  return { id, owner_id: 'owner-1', parent_id, label, created_at: '2024-01-01T00:00:00Z' }
+function loc(id: string, parent_id: string | null, label: string): Location {
+  return {
+    id,
+    owner_id: 'owner-1',
+    parent_id,
+    label,
+    created_at: '2024-01-01T00:00:00Z',
+  }
 }
 
 describe('buildLocationTree', () => {
@@ -29,7 +31,9 @@ describe('buildLocationTree', () => {
 
   it('buildLocationTree should return one root node with empty children when given single location with no parent', () => {
     const locations = [loc('a', null, 'Closet')]
-    expect(buildLocationTree(locations)).toEqual([{ ...locations[0], children: [] }])
+    expect(buildLocationTree(locations)).toEqual([
+      { ...locations[0], children: [] },
+    ])
   })
 
   it('buildLocationTree should place root nodes at top level when given multiple locations with no parent', () => {
@@ -107,7 +111,12 @@ describe('flattenTree', () => {
     ]
     const tree = buildLocationTree(locations)
     const flat = flattenTree(tree)
-    expect(flat.map((n) => n.id)).toEqual(['root', 'child1', 'grandchild', 'child2'])
+    expect(flat.map((n) => n.id)).toEqual([
+      'root',
+      'child1',
+      'grandchild',
+      'child2',
+    ])
   })
 })
 

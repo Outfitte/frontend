@@ -3,7 +3,11 @@ import { renderHook, waitFor } from '@/test/utils'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/mocks/server'
-import { mockSharedItem, mockSharedOutfit, mockSharedLocation } from '@/test/mocks/fixtures'
+import {
+  mockSharedItem,
+  mockSharedOutfit,
+  mockSharedLocation,
+} from '@/test/mocks/fixtures'
 import { useSharedWithMe } from '@/hooks/use-shared-with-me'
 
 function makeWrapper() {
@@ -23,7 +27,10 @@ function makeWrapper() {
 describe('useSharedWithMe', () => {
   it('useSharedWithMe should return error when GET /shares/with-me returns 500', async () => {
     server.use(
-      http.get('/api/shares/with-me', () => new HttpResponse(null, { status: 500 }))
+      http.get(
+        '/api/shares/with-me',
+        () => new HttpResponse(null, { status: 500 })
+      )
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useSharedWithMe(), { wrapper })
@@ -51,12 +58,22 @@ describe('useSharedWithMe', () => {
     const { result } = renderHook(() => useSharedWithMe(), { wrapper })
     expect(result.current.isLoading).toBe(true)
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data).toEqual({ items: [], outfits: [], locations: [] })
+    expect(result.current.data).toEqual({
+      items: [],
+      outfits: [],
+      locations: [],
+    })
   })
 
   it('useSharedWithMe should return SharedWithMeResult with items, outfits, locations when GET /shares/with-me returns data', async () => {
-    const sharedItem = mockSharedItem({ id: 'item-shared-001', name: 'Shared Jacket' })
-    const sharedOutfit = mockSharedOutfit({ id: 'outfit-shared-001', name: 'Shared Casual' })
+    const sharedItem = mockSharedItem({
+      id: 'item-shared-001',
+      name: 'Shared Jacket',
+    })
+    const sharedOutfit = mockSharedOutfit({
+      id: 'outfit-shared-001',
+      name: 'Shared Casual',
+    })
     const sharedLocation = mockSharedLocation()
     server.use(
       http.get('/api/shares/with-me', () =>

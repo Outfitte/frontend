@@ -57,7 +57,8 @@ export function useCreateLocation() {
 export function useUpdateLocation() {
   const queryClient = useQueryClient()
   return useMutation<Location, ApiError, UpdateLocationVars>({
-    mutationFn: ({ id, label }) => api.patch<Location>(`/locations/${id}`, { label }),
+    mutationFn: ({ id, label }) =>
+      api.patch<Location>(`/locations/${id}`, { label }),
     onSuccess: () => {
       toast.success('Location updated')
     },
@@ -66,7 +67,9 @@ export function useUpdateLocation() {
     },
     onSettled: (_, __, { id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.locations.all })
-      queryClient.invalidateQueries({ queryKey: queryKeys.locations.detail(id) })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.locations.detail(id),
+      })
     },
   })
 }

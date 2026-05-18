@@ -41,7 +41,10 @@ describe('useLogOutfitWear', () => {
   it('useLogOutfitWear should call toast.error when POST /outfits/:id/logs returns 422 future date', async () => {
     server.use(
       http.post('/api/outfits/:id/logs', () =>
-        HttpResponse.json({ error: 'worn_on cannot be in the future' }, { status: 422 })
+        HttpResponse.json(
+          { error: 'worn_on cannot be in the future' },
+          { status: 422 }
+        )
       )
     )
     const { wrapper } = makeWrapper()
@@ -72,14 +75,27 @@ describe('useLogOutfitWear', () => {
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useLogOutfitWear(), { wrapper })
     act(() => {
-      result.current.mutate({ outfitId: 'outfit-001', worn_on: '2026-04-15', notes: 'Date night' })
+      result.current.mutate({
+        outfitId: 'outfit-001',
+        worn_on: '2026-04-15',
+        notes: 'Date night',
+      })
     })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data).toMatchObject({ id: 'outfitlog-new-001', worn_on: '2026-04-15' })
+    expect(result.current.data).toMatchObject({
+      id: 'outfitlog-new-001',
+      worn_on: '2026-04-15',
+    })
     expect(toast.success).toHaveBeenCalledWith('Outfit wear logged')
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.logs('outfit-001') })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfitLogs.all })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfits.logs('outfit-001'),
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfitLogs.all,
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.all,
+    })
   })
 })
 
@@ -99,7 +115,11 @@ describe('useUpdateOutfitLog', () => {
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useUpdateOutfitLog(), { wrapper })
     act(() => {
-      result.current.mutate({ outfitId: 'outfit-001', logId: 'outfitlog-missing', worn_on: '2026-04-15' })
+      result.current.mutate({
+        outfitId: 'outfit-001',
+        logId: 'outfitlog-missing',
+        worn_on: '2026-04-15',
+      })
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(toast.error).toHaveBeenCalledWith('Outfit log not found')
@@ -109,7 +129,11 @@ describe('useUpdateOutfitLog', () => {
     server.use(
       http.patch('/api/outfits/:id/logs/:logID', ({ params }) =>
         HttpResponse.json(
-          mockOutfitLog({ id: params['logID'] as string, outfit_id: params['id'] as string, worn_on: '2026-04-20' })
+          mockOutfitLog({
+            id: params['logID'] as string,
+            outfit_id: params['id'] as string,
+            worn_on: '2026-04-20',
+          })
         )
       )
     )
@@ -117,12 +141,20 @@ describe('useUpdateOutfitLog', () => {
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useUpdateOutfitLog(), { wrapper })
     act(() => {
-      result.current.mutate({ outfitId: 'outfit-001', logId: 'outfitlog-001', worn_on: '2026-04-20' })
+      result.current.mutate({
+        outfitId: 'outfit-001',
+        logId: 'outfitlog-001',
+        worn_on: '2026-04-20',
+      })
     })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(toast.success).toHaveBeenCalledWith('Outfit log updated')
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.logs('outfit-001') })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfitLogs.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfits.logs('outfit-001'),
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfitLogs.all,
+    })
   })
 })
 
@@ -142,7 +174,10 @@ describe('useDeleteOutfitLog', () => {
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useDeleteOutfitLog(), { wrapper })
     act(() => {
-      result.current.mutate({ outfitId: 'outfit-001', logId: 'outfitlog-missing' })
+      result.current.mutate({
+        outfitId: 'outfit-001',
+        logId: 'outfitlog-missing',
+      })
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(toast.error).toHaveBeenCalledWith('Outfit log not found')
@@ -150,8 +185,9 @@ describe('useDeleteOutfitLog', () => {
 
   it('useDeleteOutfitLog should toast.success and invalidate outfits.logs, outfitLogs.all and items.all when DELETE returns 204', async () => {
     server.use(
-      http.delete('/api/outfits/:id/logs/:logID', () =>
-        new HttpResponse(null, { status: 204 })
+      http.delete(
+        '/api/outfits/:id/logs/:logID',
+        () => new HttpResponse(null, { status: 204 })
       )
     )
     const { queryClient, wrapper } = makeWrapper()
@@ -162,9 +198,15 @@ describe('useDeleteOutfitLog', () => {
     })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(toast.success).toHaveBeenCalledWith('Outfit log deleted')
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.logs('outfit-001') })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfitLogs.all })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfits.logs('outfit-001'),
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfitLogs.all,
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.all,
+    })
   })
 })
 
@@ -177,14 +219,20 @@ describe('useOutfitLogsByRange', () => {
 
   it('useOutfitLogsByRange should not fetch when from is undefined', async () => {
     const { wrapper } = makeWrapper()
-    const { result } = renderHook(() => useOutfitLogsByRange(undefined, '2026-04-30'), { wrapper })
+    const { result } = renderHook(
+      () => useOutfitLogsByRange(undefined, '2026-04-30'),
+      { wrapper }
+    )
     await waitFor(() => expect(result.current.fetchStatus).toBe('idle'))
     expect(result.current.data).toBeUndefined()
   })
 
   it('useOutfitLogsByRange should not fetch when to is undefined', async () => {
     const { wrapper } = makeWrapper()
-    const { result } = renderHook(() => useOutfitLogsByRange('2026-04-01', undefined), { wrapper })
+    const { result } = renderHook(
+      () => useOutfitLogsByRange('2026-04-01', undefined),
+      { wrapper }
+    )
     await waitFor(() => expect(result.current.fetchStatus).toBe('idle'))
     expect(result.current.data).toBeUndefined()
   })
@@ -206,12 +254,18 @@ describe('useOutfitLogsByRange', () => {
 
   it('useOutfitLogsByRange should return OutfitLog[] when GET /outfit-logs?from=...&to=... succeeds', async () => {
     const logs = [
-      mockOutfitLog({ id: 'outfitlog-001', outfit_id: 'outfit-001', worn_on: '2026-04-15' }),
-      mockOutfitLog({ id: 'outfitlog-002', outfit_id: 'outfit-002', worn_on: '2026-04-20' }),
+      mockOutfitLog({
+        id: 'outfitlog-001',
+        outfit_id: 'outfit-001',
+        worn_on: '2026-04-15',
+      }),
+      mockOutfitLog({
+        id: 'outfitlog-002',
+        outfit_id: 'outfit-002',
+        worn_on: '2026-04-20',
+      }),
     ]
-    server.use(
-      http.get('/api/outfit-logs', () => HttpResponse.json(logs))
-    )
+    server.use(http.get('/api/outfit-logs', () => HttpResponse.json(logs)))
     const { wrapper } = makeWrapper()
     const { result } = renderHook(
       () => useOutfitLogsByRange('2026-04-01', '2026-04-30'),
@@ -244,22 +298,36 @@ describe('useOutfitLogs', () => {
       )
     )
     const { wrapper } = makeWrapper()
-    const { result } = renderHook(() => useOutfitLogs('outfit-missing'), { wrapper })
+    const { result } = renderHook(() => useOutfitLogs('outfit-missing'), {
+      wrapper,
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(result.current.error?.message).toBe('Outfit not found')
   })
 
   it('useOutfitLogs should return OutfitLog[] sorted desc by worn_on when fetch succeeds', async () => {
     const logs = [
-      mockOutfitLog({ id: 'outfitlog-001', outfit_id: 'outfit-001', worn_on: '2026-04-10' }),
-      mockOutfitLog({ id: 'outfitlog-002', outfit_id: 'outfit-001', worn_on: '2026-04-12' }),
-      mockOutfitLog({ id: 'outfitlog-003', outfit_id: 'outfit-001', worn_on: '2026-04-11' }),
+      mockOutfitLog({
+        id: 'outfitlog-001',
+        outfit_id: 'outfit-001',
+        worn_on: '2026-04-10',
+      }),
+      mockOutfitLog({
+        id: 'outfitlog-002',
+        outfit_id: 'outfit-001',
+        worn_on: '2026-04-12',
+      }),
+      mockOutfitLog({
+        id: 'outfitlog-003',
+        outfit_id: 'outfit-001',
+        worn_on: '2026-04-11',
+      }),
     ]
-    server.use(
-      http.get('/api/outfits/:id/logs', () => HttpResponse.json(logs))
-    )
+    server.use(http.get('/api/outfits/:id/logs', () => HttpResponse.json(logs)))
     const { wrapper } = makeWrapper()
-    const { result } = renderHook(() => useOutfitLogs('outfit-001'), { wrapper })
+    const { result } = renderHook(() => useOutfitLogs('outfit-001'), {
+      wrapper,
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     const wornDates = result.current.data!.map((l) => l.worn_on)
     expect(wornDates).toEqual(['2026-04-12', '2026-04-11', '2026-04-10'])

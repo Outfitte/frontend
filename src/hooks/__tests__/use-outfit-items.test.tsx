@@ -38,7 +38,9 @@ describe('useAddOutfitItem', () => {
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useAddOutfitItem(), { wrapper })
-    act(() => { result.current.mutate({ outfitId: 'outfit-001', itemId: 'item-001' }) })
+    act(() => {
+      result.current.mutate({ outfitId: 'outfit-001', itemId: 'item-001' })
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Item not owned')
@@ -48,20 +50,26 @@ describe('useAddOutfitItem', () => {
     let capturedBody: Record<string, unknown> | undefined
     server.use(
       http.post('/api/outfits/:id/items', async ({ request }) => {
-        capturedBody = await request.json() as Record<string, unknown>
+        capturedBody = (await request.json()) as Record<string, unknown>
         return new HttpResponse(null, { status: 204 })
       })
     )
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useAddOutfitItem(), { wrapper })
-    act(() => { result.current.mutate({ outfitId: 'outfit-001', itemId: 'item-002' }) })
+    act(() => {
+      result.current.mutate({ outfitId: 'outfit-001', itemId: 'item-002' })
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(capturedBody).toEqual({ item_id: 'item-002' })
     const { toast } = await import('@/lib/toast')
     expect(toast.success).toHaveBeenCalled()
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.all })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.detail('outfit-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfits.all,
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfits.detail('outfit-001'),
+    })
   })
 })
 
@@ -75,12 +83,17 @@ describe('useRemoveOutfitItem', () => {
   it('useRemoveOutfitItem should call toast.error when DELETE /outfits/:id/items/:itemId returns 404', async () => {
     server.use(
       http.delete('/api/outfits/:id/items/:itemId', () =>
-        HttpResponse.json({ error: 'Item not found in outfit' }, { status: 404 })
+        HttpResponse.json(
+          { error: 'Item not found in outfit' },
+          { status: 404 }
+        )
       )
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useRemoveOutfitItem(), { wrapper })
-    act(() => { result.current.mutate({ outfitId: 'outfit-001', itemId: 'item-001' }) })
+    act(() => {
+      result.current.mutate({ outfitId: 'outfit-001', itemId: 'item-001' })
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Item not found in outfit')
@@ -97,12 +110,18 @@ describe('useRemoveOutfitItem', () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useRemoveOutfitItem(), { wrapper })
-    act(() => { result.current.mutate({ outfitId: 'outfit-001', itemId: 'item-002' }) })
+    act(() => {
+      result.current.mutate({ outfitId: 'outfit-001', itemId: 'item-002' })
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(capturedPath).toBe('/outfits/outfit-001/items/item-002')
     const { toast } = await import('@/lib/toast')
     expect(toast.success).toHaveBeenCalled()
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.all })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.detail('outfit-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfits.all,
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfits.detail('outfit-001'),
+    })
   })
 })

@@ -29,7 +29,9 @@ export function useUploadPhoto() {
       toast.error(error.message)
     },
     onSettled: (_, __, { itemId }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.items.detail(itemId) })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.items.detail(itemId),
+      })
     },
   })
 }
@@ -46,7 +48,9 @@ export function useDeletePhoto() {
       toast.error(error.message)
     },
     onSettled: (_, __, { itemId }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.items.detail(itemId) })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.items.detail(itemId),
+      })
     },
   })
 }

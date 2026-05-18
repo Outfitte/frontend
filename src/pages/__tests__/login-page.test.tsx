@@ -8,7 +8,6 @@ import { LoginPage } from '@/pages/LoginPage'
 import { Route, Routes } from 'react-router'
 
 describe('LoginPage', () => {
-
   it('LoginPage should show required field errors when form is submitted empty', async () => {
     const user = userEvent.setup()
     render(<LoginPage />)
@@ -55,11 +54,18 @@ describe('LoginPage', () => {
   it('LoginPage should disable button with loading indicator while request is pending', async () => {
     let resolveRequest!: () => void
     server.use(
-      http.post('/api/auth/login', () =>
-        new Promise<Response>((resolve) => {
-          resolveRequest = () =>
-            resolve(HttpResponse.json({ access_token: 'tok', refresh_token: 'rtok' }))
-        })
+      http.post(
+        '/api/auth/login',
+        () =>
+          new Promise<Response>((resolve) => {
+            resolveRequest = () =>
+              resolve(
+                HttpResponse.json({
+                  access_token: 'tok',
+                  refresh_token: 'rtok',
+                })
+              )
+          })
       )
     )
     const user = userEvent.setup()
@@ -69,7 +75,9 @@ describe('LoginPage', () => {
     await user.type(screen.getByLabelText(/password/i), 'secret123')
     await user.click(screen.getByRole('button', { name: /sign in/i }))
 
-    expect(await screen.findByRole('button', { name: /signing in/i })).toBeDisabled()
+    expect(
+      await screen.findByRole('button', { name: /signing in/i })
+    ).toBeDisabled()
 
     await act(async () => {
       resolveRequest()
@@ -190,10 +198,12 @@ describe('LoginPage', () => {
     expect(await screen.findByRole('alert')).toBeInTheDocument()
 
     server.use(
-      http.post('/api/auth/login', () =>
-        new Promise<Response>(() => {
-          // never resolves — request stays in flight
-        })
+      http.post(
+        '/api/auth/login',
+        () =>
+          new Promise<Response>(() => {
+            // never resolves — request stays in flight
+          })
       )
     )
     await user.click(screen.getByRole('button', { name: /sign in/i }))

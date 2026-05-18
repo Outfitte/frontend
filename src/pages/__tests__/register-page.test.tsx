@@ -26,7 +26,9 @@ describe('RegisterPage', () => {
     await user.type(screen.getByLabelText(/^password$/i), 'short')
     await user.click(screen.getByRole('button', { name: /register/i }))
 
-    expect(await screen.findByText(/password must be at least 8 characters/i)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/password must be at least 8 characters/i)
+    ).toBeInTheDocument()
   })
 
   it('should show validation error when passwords do not match', async () => {
@@ -35,16 +37,24 @@ describe('RegisterPage', () => {
 
     await user.type(screen.getByLabelText(/^email$/i), 'alice@example.com')
     await user.type(screen.getByLabelText(/^password$/i), 'securepassword')
-    await user.type(screen.getByLabelText(/confirm password/i), 'differentpassword')
+    await user.type(
+      screen.getByLabelText(/confirm password/i),
+      'differentpassword'
+    )
     await user.click(screen.getByRole('button', { name: /register/i }))
 
-    expect(await screen.findByText(/passwords do not match/i)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/passwords do not match/i)
+    ).toBeInTheDocument()
   })
 
   it('should show error message when registration fails with 409 duplicate email', async () => {
     server.use(
       http.post('/api/auth/register', () =>
-        HttpResponse.json({ error: 'Email already registered' }, { status: 409 })
+        HttpResponse.json(
+          { error: 'Email already registered' },
+          { status: 409 }
+        )
       )
     )
     const user = userEvent.setup()
@@ -52,16 +62,24 @@ describe('RegisterPage', () => {
 
     await user.type(screen.getByLabelText(/^email$/i), 'alice@example.com')
     await user.type(screen.getByLabelText(/^password$/i), 'securepassword')
-    await user.type(screen.getByLabelText(/confirm password/i), 'securepassword')
+    await user.type(
+      screen.getByLabelText(/confirm password/i),
+      'securepassword'
+    )
     await user.click(screen.getByRole('button', { name: /register/i }))
 
-    expect(await screen.findByText(/email already registered/i)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/email already registered/i)
+    ).toBeInTheDocument()
   })
 
   it('should show error message when registration fails with 403 registration disabled', async () => {
     server.use(
       http.post('/api/auth/register', () =>
-        HttpResponse.json({ error: 'Registration is disabled' }, { status: 403 })
+        HttpResponse.json(
+          { error: 'Registration is disabled' },
+          { status: 403 }
+        )
       )
     )
     const user = userEvent.setup()
@@ -69,16 +87,24 @@ describe('RegisterPage', () => {
 
     await user.type(screen.getByLabelText(/^email$/i), 'alice@example.com')
     await user.type(screen.getByLabelText(/^password$/i), 'securepassword')
-    await user.type(screen.getByLabelText(/confirm password/i), 'securepassword')
+    await user.type(
+      screen.getByLabelText(/confirm password/i),
+      'securepassword'
+    )
     await user.click(screen.getByRole('button', { name: /register/i }))
 
-    expect(await screen.findByText(/registration is disabled/i)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/registration is disabled/i)
+    ).toBeInTheDocument()
   })
 
   it('should clear previous error when form is resubmitted', async () => {
     server.use(
       http.post('/api/auth/register', () =>
-        HttpResponse.json({ error: 'Email already registered' }, { status: 409 })
+        HttpResponse.json(
+          { error: 'Email already registered' },
+          { status: 409 }
+        )
       )
     )
     const user = userEvent.setup()
@@ -86,15 +112,20 @@ describe('RegisterPage', () => {
 
     await user.type(screen.getByLabelText(/^email$/i), 'alice@example.com')
     await user.type(screen.getByLabelText(/^password$/i), 'securepassword')
-    await user.type(screen.getByLabelText(/confirm password/i), 'securepassword')
+    await user.type(
+      screen.getByLabelText(/confirm password/i),
+      'securepassword'
+    )
     await user.click(screen.getByRole('button', { name: /register/i }))
     expect(await screen.findByRole('alert')).toBeInTheDocument()
 
     server.use(
-      http.post('/api/auth/register', () =>
-        new Promise<Response>(() => {
-          // never resolves — request stays in flight
-        })
+      http.post(
+        '/api/auth/register',
+        () =>
+          new Promise<Response>(() => {
+            // never resolves — request stays in flight
+          })
       )
     )
     await user.click(screen.getByRole('button', { name: /register/i }))
@@ -108,27 +139,36 @@ describe('RegisterPage', () => {
     expect(screen.getByLabelText(/^email$/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/^password$/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /register/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /register/i })
+    ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /sign in/i })).toBeInTheDocument()
   })
 
   it('should disable the button with loading indicator while request is pending', async () => {
     let resolveRequest!: () => void
     server.use(
-      http.post('/api/auth/register', () =>
-        new Promise<Response>((resolve) => {
-          resolveRequest = () =>
-            resolve(
-              HttpResponse.json(
-                {
-                  user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' },
-                  access_token: 'access-token-abc123',
-                  refresh_token: 'refresh-token-xyz789',
-                },
-                { status: 201 }
+      http.post(
+        '/api/auth/register',
+        () =>
+          new Promise<Response>((resolve) => {
+            resolveRequest = () =>
+              resolve(
+                HttpResponse.json(
+                  {
+                    user: {
+                      id: 'user-001',
+                      email: 'alice@example.com',
+                      role: 'user',
+                      created_at: '2026-01-01T00:00:00Z',
+                    },
+                    access_token: 'access-token-abc123',
+                    refresh_token: 'refresh-token-xyz789',
+                  },
+                  { status: 201 }
+                )
               )
-            )
-        })
+          })
       )
     )
     const user = userEvent.setup()
@@ -136,10 +176,15 @@ describe('RegisterPage', () => {
 
     await user.type(screen.getByLabelText(/^email$/i), 'alice@example.com')
     await user.type(screen.getByLabelText(/^password$/i), 'securepassword')
-    await user.type(screen.getByLabelText(/confirm password/i), 'securepassword')
+    await user.type(
+      screen.getByLabelText(/confirm password/i),
+      'securepassword'
+    )
     await user.click(screen.getByRole('button', { name: /register/i }))
 
-    expect(await screen.findByRole('button', { name: /registering/i })).toBeDisabled()
+    expect(
+      await screen.findByRole('button', { name: /registering/i })
+    ).toBeDisabled()
 
     await act(async () => {
       resolveRequest()
@@ -151,7 +196,12 @@ describe('RegisterPage', () => {
       http.post('/api/auth/register', () =>
         HttpResponse.json(
           {
-            user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' },
+            user: {
+              id: 'user-001',
+              email: 'alice@example.com',
+              role: 'user',
+              created_at: '2026-01-01T00:00:00Z',
+            },
             access_token: 'access-token-abc123',
             refresh_token: 'refresh-token-xyz789',
           },
@@ -170,7 +220,10 @@ describe('RegisterPage', () => {
 
     await user.type(screen.getByLabelText(/^email$/i), 'alice@example.com')
     await user.type(screen.getByLabelText(/^password$/i), 'securepassword')
-    await user.type(screen.getByLabelText(/confirm password/i), 'securepassword')
+    await user.type(
+      screen.getByLabelText(/confirm password/i),
+      'securepassword'
+    )
     await user.click(screen.getByRole('button', { name: /register/i }))
 
     expect(await screen.findByText('Dashboard')).toBeInTheDocument()
@@ -183,7 +236,12 @@ describe('RegisterPage', () => {
         capturedBody = (await request.json()) as Record<string, unknown>
         return HttpResponse.json(
           {
-            user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' },
+            user: {
+              id: 'user-001',
+              email: 'alice@example.com',
+              role: 'user',
+              created_at: '2026-01-01T00:00:00Z',
+            },
             access_token: 'access-token-abc123',
             refresh_token: 'refresh-token-xyz789',
           },
@@ -202,12 +260,18 @@ describe('RegisterPage', () => {
 
     await user.type(screen.getByLabelText(/^email$/i), 'alice@example.com')
     await user.type(screen.getByLabelText(/^password$/i), 'securepassword')
-    await user.type(screen.getByLabelText(/confirm password/i), 'securepassword')
+    await user.type(
+      screen.getByLabelText(/confirm password/i),
+      'securepassword'
+    )
     await user.click(screen.getByRole('button', { name: /register/i }))
 
     await screen.findByText('Dashboard')
     await waitFor(() => {
-      expect(capturedBody).toEqual({ username: 'alice@example.com', password: 'securepassword' })
+      expect(capturedBody).toEqual({
+        username: 'alice@example.com',
+        password: 'securepassword',
+      })
     })
     expect(capturedBody).not.toHaveProperty('email')
   })

@@ -12,8 +12,16 @@ describe('OutfitsPage', () => {
     server.use(
       http.get('/api/outfits', () =>
         HttpResponse.json([
-          mockOutfit({ id: 'outfit-001', name: 'Casual Friday', created_at: '2026-04-01T00:00:00Z' }),
-          mockOutfit({ id: 'outfit-002', name: 'Smart Casual', created_at: '2026-03-01T00:00:00Z' }),
+          mockOutfit({
+            id: 'outfit-001',
+            name: 'Casual Friday',
+            created_at: '2026-04-01T00:00:00Z',
+          }),
+          mockOutfit({
+            id: 'outfit-002',
+            name: 'Smart Casual',
+            created_at: '2026-03-01T00:00:00Z',
+          }),
         ])
       )
     )
@@ -29,17 +37,19 @@ describe('OutfitsPage', () => {
     )
     render(<OutfitsPage />)
 
-    expect(screen.getAllByTestId('outfit-card-skeleton').length).toBeGreaterThan(0)
+    expect(
+      screen.getAllByTestId('outfit-card-skeleton').length
+    ).toBeGreaterThan(0)
   })
 
   it('OutfitsPage should show empty state with create CTA when no outfits exist', async () => {
-    server.use(
-      http.get('/api/outfits', () => HttpResponse.json([]))
-    )
+    server.use(http.get('/api/outfits', () => HttpResponse.json([])))
     render(<OutfitsPage />)
 
     expect(await screen.findByText(/no outfits yet/i)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /create your first outfit/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: /create your first outfit/i })
+    ).toBeInTheDocument()
   })
 
   it('OutfitsPage should restore outfit card when delete fails', async () => {
@@ -52,7 +62,9 @@ describe('OutfitsPage', () => {
     render(<OutfitsPage />)
 
     await screen.findByText('Casual Friday')
-    await user.click(screen.getAllByRole('button', { name: /outfit options/i })[0])
+    await user.click(
+      screen.getAllByRole('button', { name: /outfit options/i })[0]
+    )
     await user.click(screen.getByRole('menuitem', { name: /delete/i }))
 
     expect(await screen.findByText('Casual Friday')).toBeInTheDocument()
@@ -77,7 +89,9 @@ describe('OutfitsPage', () => {
     render(<OutfitsPage />)
 
     await screen.findByText('Casual Friday')
-    expect(screen.getByRole('link', { name: /create outfit/i })).toHaveAttribute('href', '/outfits/new')
+    expect(
+      screen.getByRole('link', { name: /create outfit/i })
+    ).toHaveAttribute('href', '/outfits/new')
   })
 
   it('OutfitsPage should sort outfits alphabetically when sort is set to name', async () => {
@@ -85,15 +99,26 @@ describe('OutfitsPage', () => {
     server.use(
       http.get('/api/outfits', () =>
         HttpResponse.json([
-          mockOutfit({ id: 'outfit-001', name: 'Zebra Look', created_at: '2026-04-01T00:00:00Z' }),
-          mockOutfit({ id: 'outfit-002', name: 'Alpha Style', created_at: '2026-03-01T00:00:00Z' }),
+          mockOutfit({
+            id: 'outfit-001',
+            name: 'Zebra Look',
+            created_at: '2026-04-01T00:00:00Z',
+          }),
+          mockOutfit({
+            id: 'outfit-002',
+            name: 'Alpha Style',
+            created_at: '2026-03-01T00:00:00Z',
+          }),
         ])
       )
     )
     render(<OutfitsPage />)
 
     await screen.findByText('Zebra Look')
-    await user.selectOptions(screen.getByRole('combobox', { name: /sort/i }), 'name')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /sort/i }),
+      'name'
+    )
 
     const cards = screen.getAllByTestId('outfit-card')
     expect(cards[0]).toHaveTextContent('Alpha Style')
@@ -105,15 +130,26 @@ describe('OutfitsPage', () => {
     server.use(
       http.get('/api/outfits', () =>
         HttpResponse.json([
-          mockOutfit({ id: 'outfit-001', name: 'Newer Outfit', created_at: '2026-04-01T00:00:00Z' }),
-          mockOutfit({ id: 'outfit-002', name: 'Older Outfit', created_at: '2025-01-01T00:00:00Z' }),
+          mockOutfit({
+            id: 'outfit-001',
+            name: 'Newer Outfit',
+            created_at: '2026-04-01T00:00:00Z',
+          }),
+          mockOutfit({
+            id: 'outfit-002',
+            name: 'Older Outfit',
+            created_at: '2025-01-01T00:00:00Z',
+          }),
         ])
       )
     )
     render(<OutfitsPage />)
 
     await screen.findByText('Newer Outfit')
-    await user.selectOptions(screen.getByRole('combobox', { name: /sort/i }), 'oldest')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /sort/i }),
+      'oldest'
+    )
 
     const cards = screen.getAllByTestId('outfit-card')
     expect(cards[0]).toHaveTextContent('Older Outfit')
@@ -125,11 +161,15 @@ describe('OutfitsPage', () => {
     render(<OutfitsPage />)
 
     await screen.findByText('Casual Friday')
-    await user.click(screen.getAllByRole('button', { name: /outfit options/i })[0])
+    await user.click(
+      screen.getAllByRole('button', { name: /outfit options/i })[0]
+    )
     await user.click(screen.getByRole('menuitem', { name: /edit/i }))
 
     await waitFor(() =>
-      expect(screen.queryByRole('menuitem', { name: /edit/i })).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole('menuitem', { name: /edit/i })
+      ).not.toBeInTheDocument()
     )
   })
 
@@ -138,11 +178,15 @@ describe('OutfitsPage', () => {
     render(<OutfitsPage />)
 
     await screen.findByText('Casual Friday')
-    await user.click(screen.getAllByRole('button', { name: /outfit options/i })[0])
+    await user.click(
+      screen.getAllByRole('button', { name: /outfit options/i })[0]
+    )
     await user.click(screen.getByRole('menuitem', { name: /log wear/i }))
 
     await waitFor(() =>
-      expect(screen.queryByRole('menuitem', { name: /log wear/i })).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole('menuitem', { name: /log wear/i })
+      ).not.toBeInTheDocument()
     )
   })
 
@@ -151,14 +195,18 @@ describe('OutfitsPage', () => {
     let resolveDelete!: () => void
     server.use(
       http.delete('/api/outfits/:id', async () => {
-        await new Promise<void>((resolve) => { resolveDelete = resolve })
+        await new Promise<void>((resolve) => {
+          resolveDelete = resolve
+        })
         return new HttpResponse(null, { status: 204 })
       })
     )
     render(<OutfitsPage />)
 
     await screen.findByText('Casual Friday')
-    await user.click(screen.getAllByRole('button', { name: /outfit options/i })[0])
+    await user.click(
+      screen.getAllByRole('button', { name: /outfit options/i })[0]
+    )
     await user.click(screen.getByRole('menuitem', { name: /delete/i }))
 
     expect(screen.queryByText('Casual Friday')).not.toBeInTheDocument()
@@ -171,15 +219,26 @@ describe('OutfitsPage', () => {
     server.use(
       http.get('/api/outfits', () =>
         HttpResponse.json([
-          mockOutfit({ id: 'outfit-001', name: 'Beta Look', created_at: '2026-04-01T00:00:00Z' }),
-          mockOutfit({ id: 'outfit-002', name: null, created_at: '2026-03-01T00:00:00Z' }),
+          mockOutfit({
+            id: 'outfit-001',
+            name: 'Beta Look',
+            created_at: '2026-04-01T00:00:00Z',
+          }),
+          mockOutfit({
+            id: 'outfit-002',
+            name: null,
+            created_at: '2026-03-01T00:00:00Z',
+          }),
         ])
       )
     )
     render(<OutfitsPage />)
 
     await screen.findByText('Beta Look')
-    await user.selectOptions(screen.getByRole('combobox', { name: /sort/i }), 'name')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /sort/i }),
+      'name'
+    )
 
     const cards = screen.getAllByTestId('outfit-card')
     expect(cards[0]).toHaveTextContent('Untitled outfit')

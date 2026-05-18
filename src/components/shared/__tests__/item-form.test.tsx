@@ -14,18 +14,17 @@ vi.mock('@/lib/toast', () => ({
 
 const noop = vi.fn()
 
-function renderCreate(overrides: Partial<React.ComponentProps<typeof ItemForm>> = {}) {
+function renderCreate(
+  overrides: Partial<React.ComponentProps<typeof ItemForm>> = {}
+) {
   return render(
-    <ItemForm
-      mode="create"
-      onSave={vi.fn()}
-      onCancel={noop}
-      {...overrides}
-    />
+    <ItemForm mode="create" onSave={vi.fn()} onCancel={noop} {...overrides} />
   )
 }
 
-function renderEdit(overrides: Partial<React.ComponentProps<typeof ItemForm>> = {}) {
+function renderEdit(
+  overrides: Partial<React.ComponentProps<typeof ItemForm>> = {}
+) {
   return render(
     <ItemForm
       mode="edit"
@@ -83,7 +82,9 @@ describe('ItemForm', () => {
     await user.type(screen.getByLabelText(/price/i), '49.99')
     await user.click(screen.getByRole('button', { name: /^save$/i }))
 
-    expect(await screen.findByText(/both price and currency are required/i)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/both price and currency are required/i)
+    ).toBeInTheDocument()
   })
 
   it('ItemForm should show validation error when price is set without currency in edit mode', async () => {
@@ -94,7 +95,9 @@ describe('ItemForm', () => {
     await user.clear(screen.getByLabelText(/currency/i))
     await user.click(screen.getByRole('button', { name: /save changes/i }))
 
-    expect(await screen.findByText(/both price and currency are required/i)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/both price and currency are required/i)
+    ).toBeInTheDocument()
   })
 
   it('ItemForm should show validation error when currency code has more than 3 characters in create mode', async () => {
@@ -106,7 +109,9 @@ describe('ItemForm', () => {
     await user.type(screen.getByLabelText(/currency/i), 'USDX')
     await user.click(screen.getByRole('button', { name: /^save$/i }))
 
-    expect(await screen.findByText(/enter a 3-letter currency code/i)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/enter a 3-letter currency code/i)
+    ).toBeInTheDocument()
   })
 
   // --- Happy path ---
@@ -114,20 +119,36 @@ describe('ItemForm', () => {
   it('ItemForm should render all sections when mode is create with empty defaults', () => {
     renderCreate()
 
-    expect(screen.getByRole('heading', { name: /basic info/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /^purchase$/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /custom fields/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /^photos$/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /basic info/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /^purchase$/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /custom fields/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /^photos$/i })
+    ).toBeInTheDocument()
   })
 
   it('ItemForm should render all sections when mode is edit with pre-populated values', async () => {
     renderEdit()
 
     await screen.findByDisplayValue('Blue Denim Jacket')
-    expect(screen.getByRole('heading', { name: /basic info/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /^purchase$/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /custom fields/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /^photos$/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /basic info/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /^purchase$/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /custom fields/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /^photos$/i })
+    ).toBeInTheDocument()
     expect(screen.getByDisplayValue('Blue Denim Jacket')).toBeInTheDocument()
     expect(screen.getByDisplayValue("Levi's")).toBeInTheDocument()
     expect(screen.getByDisplayValue('89.99')).toBeInTheDocument()
@@ -143,7 +164,11 @@ describe('ItemForm', () => {
             id: 'cat-001',
             label: 'Jackets',
             field_hints: [
-              { key: 'condition', label: 'Condition', placeholder: 'e.g. new, good, worn' },
+              {
+                key: 'condition',
+                label: 'Condition',
+                placeholder: 'e.g. new, good, worn',
+              },
               { key: 'size', label: 'Size', placeholder: 'e.g. S, M, L' },
             ],
           }),
@@ -153,7 +178,10 @@ describe('ItemForm', () => {
     renderCreate()
 
     await screen.findByRole('option', { name: 'Jackets' })
-    await user.selectOptions(screen.getByRole('combobox', { name: /category/i }), 'cat-001')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /category/i }),
+      'cat-001'
+    )
 
     expect(await screen.findByDisplayValue('condition')).toBeInTheDocument()
     expect(screen.getByDisplayValue('size')).toBeInTheDocument()
@@ -168,7 +196,11 @@ describe('ItemForm', () => {
             id: 'cat-001',
             label: 'Jackets',
             field_hints: [
-              { key: 'condition', label: 'Condition', placeholder: 'e.g. new, good, worn' },
+              {
+                key: 'condition',
+                label: 'Condition',
+                placeholder: 'e.g. new, good, worn',
+              },
             ],
           }),
         ])
@@ -177,10 +209,16 @@ describe('ItemForm', () => {
     renderCreate()
 
     await screen.findByRole('option', { name: 'Jackets' })
-    await user.selectOptions(screen.getByRole('combobox', { name: /category/i }), 'cat-001')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /category/i }),
+      'cat-001'
+    )
     await screen.findByDisplayValue('condition')
 
-    await user.selectOptions(screen.getByRole('combobox', { name: /category/i }), '')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /category/i }),
+      ''
+    )
 
     expect(screen.queryByDisplayValue('condition')).not.toBeInTheDocument()
   })
@@ -236,7 +274,10 @@ describe('ItemForm', () => {
   it('ItemForm should disable Add Field button when 50 metadata fields are present', async () => {
     renderCreate({
       defaultValues: {
-        metadata: Array.from({ length: 50 }, (_, i) => ({ key: `key${i}`, value: `value${i}` })),
+        metadata: Array.from({ length: 50 }, (_, i) => ({
+          key: `key${i}`,
+          value: `value${i}`,
+        })),
       },
     })
 
@@ -246,11 +287,16 @@ describe('ItemForm', () => {
   it('ItemForm should enable Add Field button when fewer than 50 metadata fields are present', async () => {
     renderCreate({
       defaultValues: {
-        metadata: Array.from({ length: 49 }, (_, i) => ({ key: `key${i}`, value: `value${i}` })),
+        metadata: Array.from({ length: 49 }, (_, i) => ({
+          key: `key${i}`,
+          value: `value${i}`,
+        })),
       },
     })
 
-    expect(screen.getByRole('button', { name: /add field/i })).not.toBeDisabled()
+    expect(
+      screen.getByRole('button', { name: /add field/i })
+    ).not.toBeDisabled()
   })
 
   it('ItemForm should show photo preview for newly queued files', async () => {
@@ -266,7 +312,9 @@ describe('ItemForm', () => {
 
   it('ItemForm should use /media/ path for existing photo src when item has photos', async () => {
     renderEdit({
-      existingPhotos: [mockPhoto({ id: 'photo-001', media_key: 'uploads/photo-001.jpg' })],
+      existingPhotos: [
+        mockPhoto({ id: 'photo-001', media_key: 'uploads/photo-001.jpg' }),
+      ],
       itemId: 'item-001',
     })
 
@@ -283,8 +331,12 @@ describe('ItemForm', () => {
       itemId: 'item-001',
     })
 
-    expect(await screen.findByRole('button', { name: /delete photo photo-001/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /delete photo photo-002/i })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('button', { name: /delete photo photo-001/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /delete photo photo-002/i })
+    ).toBeInTheDocument()
   })
 
   it('ItemForm should remove a queued photo from preview when its Remove button is clicked', async () => {
@@ -311,15 +363,21 @@ describe('ItemForm', () => {
     )
     const user = userEvent.setup()
     renderEdit({
-      existingPhotos: [mockPhoto({ id: 'photo-001', media_key: 'uploads/photo-001.jpg' })],
+      existingPhotos: [
+        mockPhoto({ id: 'photo-001', media_key: 'uploads/photo-001.jpg' }),
+      ],
       // no itemId provided
     })
 
     await screen.findByRole('button', { name: /delete photo photo-001/i })
-    await user.click(screen.getByRole('button', { name: /delete photo photo-001/i }))
+    await user.click(
+      screen.getByRole('button', { name: /delete photo photo-001/i })
+    )
 
     // The button remains visible because the no-op guard leaves the photo in place
-    expect(screen.getByRole('button', { name: /delete photo photo-001/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /delete photo photo-001/i })
+    ).toBeInTheDocument()
     expect(deletedKeys.length).toBe(0)
   })
 
@@ -333,15 +391,21 @@ describe('ItemForm', () => {
     )
     const user = userEvent.setup()
     renderEdit({
-      existingPhotos: [mockPhoto({ id: 'photo-001', media_key: 'uploads/photo-001.jpg' })],
+      existingPhotos: [
+        mockPhoto({ id: 'photo-001', media_key: 'uploads/photo-001.jpg' }),
+      ],
       itemId: 'item-001',
     })
 
     await screen.findByRole('button', { name: /delete photo photo-001/i })
-    await user.click(screen.getByRole('button', { name: /delete photo photo-001/i }))
+    await user.click(
+      screen.getByRole('button', { name: /delete photo photo-001/i })
+    )
 
     await vi.waitFor(() => expect(deletedKeys.length).toBe(1))
-    expect(screen.queryByRole('button', { name: /delete photo photo-001/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /delete photo photo-001/i })
+    ).not.toBeInTheDocument()
   })
 
   it('ItemForm should fire onCancel callback when Cancel button is clicked', async () => {

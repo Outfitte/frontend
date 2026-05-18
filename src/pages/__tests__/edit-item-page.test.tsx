@@ -16,7 +16,10 @@ function renderPage(id = 'item-001') {
   return render(
     <Routes>
       <Route path="/items/:id/edit" element={<EditItemPage />} />
-      <Route path="/items/:id" element={<div data-testid="item-detail-page" />} />
+      <Route
+        path="/items/:id"
+        element={<div data-testid="item-detail-page" />}
+      />
     </Routes>,
     { initialEntries: [`/items/${id}/edit`] }
   )
@@ -49,7 +52,9 @@ describe('EditItemPage', () => {
 
   it('EditItemPage should have data-testid edit-item-page on root element', async () => {
     server.use(
-      http.get('/api/items/:id', () => HttpResponse.json(mockItem({ id: 'item-001', name: 'Blue Jacket' })))
+      http.get('/api/items/:id', () =>
+        HttpResponse.json(mockItem({ id: 'item-001', name: 'Blue Jacket' }))
+      )
     )
     renderPage()
 
@@ -75,19 +80,25 @@ describe('EditItemPage', () => {
     )
     renderPage()
 
-    expect(await screen.findByDisplayValue('Blue Denim Jacket')).toBeInTheDocument()
+    expect(
+      await screen.findByDisplayValue('Blue Denim Jacket')
+    ).toBeInTheDocument()
     expect(screen.getByDisplayValue("Levi's")).toBeInTheDocument()
     expect(screen.getByDisplayValue('blue')).toBeInTheDocument()
     expect(screen.getByDisplayValue('89.99')).toBeInTheDocument()
     expect(screen.getByDisplayValue('USD')).toBeInTheDocument()
     expect(screen.getByDisplayValue('2025-03-15')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('https://example.com/jacket')).toBeInTheDocument()
+    expect(
+      screen.getByDisplayValue('https://example.com/jacket')
+    ).toBeInTheDocument()
   })
 
   it('EditItemPage should show validation error when name is cleared on submit', async () => {
     const user = userEvent.setup()
     server.use(
-      http.get('/api/items/:id', () => HttpResponse.json(mockItem({ id: 'item-001', name: 'Blue Jacket' })))
+      http.get('/api/items/:id', () =>
+        HttpResponse.json(mockItem({ id: 'item-001', name: 'Blue Jacket' }))
+      )
     )
     renderPage()
 
@@ -103,7 +114,11 @@ describe('EditItemPage', () => {
     server.use(
       http.get('/api/items/:id', () =>
         HttpResponse.json(
-          mockItem({ id: 'item-001', purchase_price: '89.99', purchase_currency: 'USD' })
+          mockItem({
+            id: 'item-001',
+            purchase_price: '89.99',
+            purchase_currency: 'USD',
+          })
         )
       )
     )
@@ -134,7 +149,10 @@ describe('EditItemPage', () => {
     renderPage()
 
     await screen.findByDisplayValue('Blue Denim Jacket')
-    await user.selectOptions(screen.getByRole('combobox', { name: /category/i }), '')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /category/i }),
+      ''
+    )
 
     expect(screen.getByRole('combobox', { name: /category/i })).toHaveValue('')
   })
@@ -143,7 +161,11 @@ describe('EditItemPage', () => {
     server.use(
       http.get('/api/items/:id', () =>
         HttpResponse.json(
-          mockItem({ id: 'item-001', metadata: { material: 'cotton', fit: 'slim' }, category_id: null })
+          mockItem({
+            id: 'item-001',
+            metadata: { material: 'cotton', fit: 'slim' },
+            category_id: null,
+          })
         )
       )
     )
@@ -162,7 +184,11 @@ describe('EditItemPage', () => {
     server.use(
       http.get('/api/items/:id', () =>
         HttpResponse.json(
-          mockItem({ id: 'item-001', metadata: { material: 'cotton' }, category_id: null })
+          mockItem({
+            id: 'item-001',
+            metadata: { material: 'cotton' },
+            category_id: null,
+          })
         )
       ),
       http.patch('/api/items/:id', async ({ request }) => {
@@ -178,7 +204,9 @@ describe('EditItemPage', () => {
     await user.click(screen.getByRole('button', { name: /save changes/i }))
 
     await waitFor(() =>
-      expect((patchBody['metadata'] as Record<string, string>)?.['material']).toBe('')
+      expect(
+        (patchBody['metadata'] as Record<string, string>)?.['material']
+      ).toBe('')
     )
   })
 
@@ -188,7 +216,11 @@ describe('EditItemPage', () => {
     server.use(
       http.get('/api/items/:id', () =>
         HttpResponse.json(
-          mockItem({ id: 'item-001', metadata: { material: 'cotton' }, category_id: null })
+          mockItem({
+            id: 'item-001',
+            metadata: { material: 'cotton' },
+            category_id: null,
+          })
         )
       ),
       http.patch('/api/items/:id', async ({ request }) => {
@@ -220,8 +252,14 @@ describe('EditItemPage', () => {
           mockItem({
             id: 'item-001',
             photos: [
-              mockPhoto({ id: 'photo-001', media_key: 'uploads/photo-001.jpg' }),
-              mockPhoto({ id: 'photo-002', media_key: 'uploads/photo-002.jpg' }),
+              mockPhoto({
+                id: 'photo-001',
+                media_key: 'uploads/photo-001.jpg',
+              }),
+              mockPhoto({
+                id: 'photo-002',
+                media_key: 'uploads/photo-002.jpg',
+              }),
             ],
           })
         )
@@ -230,8 +268,12 @@ describe('EditItemPage', () => {
     renderPage()
 
     await screen.findByTestId('edit-item-page')
-    expect(screen.getByRole('button', { name: /delete photo photo-001/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /delete photo photo-002/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /delete photo photo-001/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /delete photo photo-002/i })
+    ).toBeInTheDocument()
   })
 
   it('EditItemPage should send DELETE request and remove photo from view when delete button clicked', async () => {
@@ -241,7 +283,12 @@ describe('EditItemPage', () => {
         HttpResponse.json(
           mockItem({
             id: 'item-001',
-            photos: [mockPhoto({ id: 'photo-001', media_key: 'uploads/photo-001.jpg' })],
+            photos: [
+              mockPhoto({
+                id: 'photo-001',
+                media_key: 'uploads/photo-001.jpg',
+              }),
+            ],
           })
         )
       ),
@@ -254,10 +301,14 @@ describe('EditItemPage', () => {
     renderPage()
 
     await screen.findByRole('button', { name: /delete photo photo-001/i })
-    await user.click(screen.getByRole('button', { name: /delete photo photo-001/i }))
+    await user.click(
+      screen.getByRole('button', { name: /delete photo photo-001/i })
+    )
 
     await waitFor(() => expect(deletedKeys.length).toBe(1))
-    expect(screen.queryByRole('button', { name: /delete photo photo-001/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /delete photo photo-001/i })
+    ).not.toBeInTheDocument()
   })
 
   it('EditItemPage should allow new photos to be added and upload them on submission', async () => {
@@ -294,8 +345,12 @@ describe('EditItemPage', () => {
   it('EditItemPage should navigate to item detail page on successful update', async () => {
     const user = userEvent.setup()
     server.use(
-      http.get('/api/items/:id', () => HttpResponse.json(mockItem({ id: 'item-001', name: 'Blue Jacket' }))),
-      http.patch('/api/items/:id', () => HttpResponse.json(mockItem({ id: 'item-001' })))
+      http.get('/api/items/:id', () =>
+        HttpResponse.json(mockItem({ id: 'item-001', name: 'Blue Jacket' }))
+      ),
+      http.patch('/api/items/:id', () =>
+        HttpResponse.json(mockItem({ id: 'item-001' }))
+      )
     )
     renderPage()
 
@@ -308,7 +363,9 @@ describe('EditItemPage', () => {
   it('EditItemPage should navigate back to item detail page when Cancel is clicked', async () => {
     const user = userEvent.setup()
     server.use(
-      http.get('/api/items/:id', () => HttpResponse.json(mockItem({ id: 'item-001', name: 'Blue Jacket' })))
+      http.get('/api/items/:id', () =>
+        HttpResponse.json(mockItem({ id: 'item-001', name: 'Blue Jacket' }))
+      )
     )
     renderPage()
 
@@ -334,7 +391,13 @@ describe('EditItemPage', () => {
           mockCategory({
             id: 'cat-001',
             label: 'Jackets',
-            field_hints: [{ key: 'condition', label: 'Condition', placeholder: 'e.g. good' }],
+            field_hints: [
+              {
+                key: 'condition',
+                label: 'Condition',
+                placeholder: 'e.g. good',
+              },
+            ],
           }),
         ])
       )
@@ -389,7 +452,9 @@ describe('EditItemPage', () => {
     let patchBody: Record<string, unknown> = {}
     server.use(
       http.get('/api/items/:id', () =>
-        HttpResponse.json(mockItem({ id: 'item-001', metadata: {}, category_id: null }))
+        HttpResponse.json(
+          mockItem({ id: 'item-001', metadata: {}, category_id: null })
+        )
       ),
       http.patch('/api/items/:id', async ({ request }) => {
         patchBody = (await request.json()) as Record<string, unknown>
@@ -406,7 +471,9 @@ describe('EditItemPage', () => {
     await user.click(screen.getByRole('button', { name: /save changes/i }))
 
     await waitFor(() =>
-      expect(Object.keys((patchBody['metadata'] as Record<string, string>) ?? {})).toHaveLength(0)
+      expect(
+        Object.keys((patchBody['metadata'] as Record<string, string>) ?? {})
+      ).toHaveLength(0)
     )
   })
 
@@ -428,7 +495,13 @@ describe('EditItemPage', () => {
           mockCategory({
             id: 'cat-001',
             label: 'Jackets',
-            field_hints: [{ key: 'condition', label: 'Condition', placeholder: 'e.g. good' }],
+            field_hints: [
+              {
+                key: 'condition',
+                label: 'Condition',
+                placeholder: 'e.g. good',
+              },
+            ],
           }),
         ])
       ),
@@ -444,7 +517,9 @@ describe('EditItemPage', () => {
     await user.click(screen.getByRole('button', { name: /save changes/i }))
 
     await waitFor(() =>
-      expect((patchBody['metadata'] as Record<string, string>)?.['condition']).toBe('')
+      expect(
+        (patchBody['metadata'] as Record<string, string>)?.['condition']
+      ).toBe('')
     )
   })
 
@@ -499,7 +574,10 @@ describe('EditItemPage', () => {
     renderPage()
 
     await screen.findByDisplayValue('89.99')
-    await user.selectOptions(screen.getByRole('combobox', { name: /location/i }), '')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /location/i }),
+      ''
+    )
     await user.clear(screen.getByLabelText(/price/i))
     await user.clear(screen.getByLabelText(/purchase date/i))
     await user.click(screen.getByRole('button', { name: /save changes/i }))
@@ -516,7 +594,9 @@ describe('EditItemPage', () => {
     const { toast } = await import('@/lib/toast')
     const user = userEvent.setup()
     server.use(
-      http.get('/api/items/:id', () => HttpResponse.json(mockItem({ id: 'item-001', name: 'Blue Jacket' }))),
+      http.get('/api/items/:id', () =>
+        HttpResponse.json(mockItem({ id: 'item-001', name: 'Blue Jacket' }))
+      ),
       http.patch('/api/items/:id', () =>
         HttpResponse.json({ error: 'Server error' }, { status: 500 })
       )

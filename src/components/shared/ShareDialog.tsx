@@ -47,7 +47,11 @@ export function ShareDialog({
     setValidationError(null)
     setApiError(null)
     createShare.mutate(
-      { recipient_id: selectedUserId, target_type: targetType, target_id: targetId },
+      {
+        recipient_id: selectedUserId,
+        target_type: targetType,
+        target_id: targetId,
+      },
       {
         onSuccess: () => {
           handleClose()
@@ -71,7 +75,12 @@ export function ShareDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) handleClose() }}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) handleClose()
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -84,11 +93,17 @@ export function ShareDialog({
               ))}
             </div>
           ) : recipients.length === 0 ? (
-            <p data-testid="share-dialog-empty" className="py-4 text-center text-sm text-muted-foreground">
+            <p
+              data-testid="share-dialog-empty"
+              className="text-muted-foreground py-4 text-center text-sm"
+            >
               No other users to share with
             </p>
           ) : (
-            <ul data-testid="user-list" className="max-h-60 overflow-y-auto space-y-1">
+            <ul
+              data-testid="user-list"
+              className="max-h-60 space-y-1 overflow-y-auto"
+            >
               {recipients.map((user) => (
                 <li key={user.id}>
                   <button
@@ -113,9 +128,7 @@ export function ShareDialog({
           {validationError && (
             <p className="text-destructive text-xs">{validationError}</p>
           )}
-          {apiError && (
-            <p className="text-destructive text-xs">{apiError}</p>
-          )}
+          {apiError && <p className="text-destructive text-xs">{apiError}</p>}
         </div>
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={handleClose}>

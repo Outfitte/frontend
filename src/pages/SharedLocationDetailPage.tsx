@@ -24,8 +24,11 @@ export function SharedLocationDetailPage() {
 
   if (!sharedLocation) {
     return (
-      <div data-testid="shared-location-detail-page" className="flex flex-col items-center justify-center py-24">
-        <p className="text-lg text-muted-foreground">Location not found</p>
+      <div
+        data-testid="shared-location-detail-page"
+        className="flex flex-col items-center justify-center py-24"
+      >
+        <p className="text-muted-foreground text-lg">Location not found</p>
         <Button asChild className="mt-4" variant="outline">
           <Link to="/shared">Back to shared</Link>
         </Button>
@@ -35,7 +38,10 @@ export function SharedLocationDetailPage() {
 
   return (
     <div data-testid="shared-location-detail-page">
-      <div data-testid="shared-by-banner" className="mb-4 rounded-md bg-muted px-4 py-2 text-sm text-muted-foreground">
+      <div
+        data-testid="shared-by-banner"
+        className="bg-muted text-muted-foreground mb-4 rounded-md px-4 py-2 text-sm"
+      >
         shared by {sharedLocation.shared_by.email}
       </div>
 
@@ -44,7 +50,7 @@ export function SharedLocationDetailPage() {
       </div>
 
       {sharedLocation.items.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No items</p>
+        <p className="text-muted-foreground text-sm">No items</p>
       ) : (
         <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
           {sharedLocation.items.map((item) => (

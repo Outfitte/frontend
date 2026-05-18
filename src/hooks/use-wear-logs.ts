@@ -11,7 +11,9 @@ export function useWearLogs(itemId?: string) {
       api
         .get<WearLog[]>(`/items/${itemId}/wear-logs`)
         // Sort client-side: API response order is not guaranteed
-        .then((logs) => logs.sort((a, b) => b.worn_on.localeCompare(a.worn_on))),
+        .then((logs) =>
+          logs.sort((a, b) => b.worn_on.localeCompare(a.worn_on))
+        ),
     enabled: !!itemId,
   })
 }
@@ -34,8 +36,12 @@ export function useLogWear() {
       toast.error(error.message)
     },
     onSettled: (_, __, { itemId }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.items.wearLogs(itemId) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.items.detail(itemId) })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.items.wearLogs(itemId),
+      })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.items.detail(itemId),
+      })
     },
   })
 }
@@ -57,8 +63,12 @@ export function useDeleteWearLog() {
       toast.error(error.message)
     },
     onSettled: (_, __, { itemId }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.items.wearLogs(itemId) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.items.detail(itemId) })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.items.wearLogs(itemId),
+      })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.items.detail(itemId),
+      })
     },
   })
 }

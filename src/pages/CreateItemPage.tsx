@@ -21,7 +21,10 @@ export function CreateItemPage() {
         purchase_currency: payload.purchase_currency || undefined,
         purchase_date: payload.purchase_date || undefined,
         seller_url: payload.seller_url || undefined,
-        metadata: Object.keys(payload.metadata).length > 0 ? payload.metadata : undefined,
+        metadata:
+          Object.keys(payload.metadata).length > 0
+            ? payload.metadata
+            : undefined,
       })
 
       for (const file of queuedPhotos) {

@@ -3,7 +3,13 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router'
 import { http, HttpResponse } from 'msw'
-import { format, startOfMonth, endOfMonth, subMonths, addMonths } from 'date-fns'
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  subMonths,
+  addMonths,
+} from 'date-fns'
 import { server } from '@/test/mocks/server'
 import { render } from '@/test/utils'
 import { mockOutfitLog, mockOutfit } from '@/test/mocks/fixtures'
@@ -46,7 +52,9 @@ describe('CalendarPage', () => {
   it('CalendarPage should render 7 day-header columns Mon through Sun', async () => {
     render(<CalendarPage />)
 
-    await waitFor(() => expect(screen.queryByTestId('calendar-skeleton')).not.toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.queryByTestId('calendar-skeleton')).not.toBeInTheDocument()
+    )
 
     expect(screen.getByText('Mon')).toBeInTheDocument()
     expect(screen.getByText('Tue')).toBeInTheDocument()
@@ -60,7 +68,9 @@ describe('CalendarPage', () => {
   it('CalendarPage should default to current month and show month/year header', async () => {
     render(<CalendarPage />)
 
-    await waitFor(() => expect(screen.queryByTestId('calendar-skeleton')).not.toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.queryByTestId('calendar-skeleton')).not.toBeInTheDocument()
+    )
 
     expect(screen.getByText('May 2026')).toBeInTheDocument()
   })
@@ -78,14 +88,20 @@ describe('CalendarPage', () => {
     await waitFor(() => expect(capturedUrl).toContain('from='))
 
     const url = new URL(capturedUrl)
-    expect(url.searchParams.get('from')).toBe(format(startOfMonth(FIXED_NOW), 'yyyy-MM-dd'))
-    expect(url.searchParams.get('to')).toBe(format(endOfMonth(FIXED_NOW), 'yyyy-MM-dd'))
+    expect(url.searchParams.get('from')).toBe(
+      format(startOfMonth(FIXED_NOW), 'yyyy-MM-dd')
+    )
+    expect(url.searchParams.get('to')).toBe(
+      format(endOfMonth(FIXED_NOW), 'yyyy-MM-dd')
+    )
   })
 
   it('CalendarPage should render all days of current month plus padding days to fill the week grid', async () => {
     render(<CalendarPage />)
 
-    await waitFor(() => expect(screen.queryByTestId('calendar-skeleton')).not.toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.queryByTestId('calendar-skeleton')).not.toBeInTheDocument()
+    )
 
     // May 2026: grid starts Apr 27 (Mon), ends May 31 (Sun) — 35 days total
     const dayCells = screen.getAllByTestId(/^calendar-day/)
@@ -95,7 +111,9 @@ describe('CalendarPage', () => {
   it('CalendarPage should render days outside current month with muted styling', async () => {
     render(<CalendarPage />)
 
-    await waitFor(() => expect(screen.queryByTestId('calendar-skeleton')).not.toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.queryByTestId('calendar-skeleton')).not.toBeInTheDocument()
+    )
 
     const outsideDays = screen.getAllByTestId('calendar-day-outside')
     expect(outsideDays.length).toBeGreaterThan(0)
@@ -105,11 +123,17 @@ describe('CalendarPage', () => {
     server.use(
       http.get('/api/outfit-logs', () =>
         HttpResponse.json([
-          mockOutfitLog({ id: 'log-001', outfit_id: 'outfit-001', worn_on: '2026-05-15' }),
+          mockOutfitLog({
+            id: 'log-001',
+            outfit_id: 'outfit-001',
+            worn_on: '2026-05-15',
+          }),
         ])
       ),
       http.get('/api/outfits', () =>
-        HttpResponse.json([mockOutfit({ id: 'outfit-001', name: 'Casual Friday' })])
+        HttpResponse.json([
+          mockOutfit({ id: 'outfit-001', name: 'Casual Friday' }),
+        ])
       )
     )
     render(<CalendarPage />)
@@ -121,7 +145,11 @@ describe('CalendarPage', () => {
     server.use(
       http.get('/api/outfit-logs', () =>
         HttpResponse.json([
-          mockOutfitLog({ id: 'log-001', outfit_id: 'outfit-999', worn_on: '2026-05-15' }),
+          mockOutfitLog({
+            id: 'log-001',
+            outfit_id: 'outfit-999',
+            worn_on: '2026-05-15',
+          }),
         ])
       ),
       http.get('/api/outfits', () =>
@@ -134,32 +162,50 @@ describe('CalendarPage', () => {
   })
 
   it('CalendarPage should navigate to previous month when previous button is clicked', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime.bind(vi) })
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime.bind(vi),
+    })
     render(<CalendarPage />)
 
-    await waitFor(() => expect(screen.queryByTestId('calendar-skeleton')).not.toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.queryByTestId('calendar-skeleton')).not.toBeInTheDocument()
+    )
     await user.click(screen.getByRole('button', { name: /previous month/i }))
 
-    expect(screen.getByText(format(subMonths(FIXED_NOW, 1), 'MMMM yyyy'))).toBeInTheDocument()
+    expect(
+      screen.getByText(format(subMonths(FIXED_NOW, 1), 'MMMM yyyy'))
+    ).toBeInTheDocument()
   })
 
   it('CalendarPage should navigate to next month when next button is clicked', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime.bind(vi) })
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime.bind(vi),
+    })
     render(<CalendarPage />)
 
-    await waitFor(() => expect(screen.queryByTestId('calendar-skeleton')).not.toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.queryByTestId('calendar-skeleton')).not.toBeInTheDocument()
+    )
     await user.click(screen.getByRole('button', { name: /next month/i }))
 
-    expect(screen.getByText(format(addMonths(FIXED_NOW, 1), 'MMMM yyyy'))).toBeInTheDocument()
+    expect(
+      screen.getByText(format(addMonths(FIXED_NOW, 1), 'MMMM yyyy'))
+    ).toBeInTheDocument()
   })
 
   it('CalendarPage should return to current month when today button is clicked after navigating away', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime.bind(vi) })
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime.bind(vi),
+    })
     render(<CalendarPage />)
 
-    await waitFor(() => expect(screen.queryByTestId('calendar-skeleton')).not.toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.queryByTestId('calendar-skeleton')).not.toBeInTheDocument()
+    )
     await user.click(screen.getByRole('button', { name: /previous month/i }))
-    expect(screen.getByText(format(subMonths(FIXED_NOW, 1), 'MMMM yyyy'))).toBeInTheDocument()
+    expect(
+      screen.getByText(format(subMonths(FIXED_NOW, 1), 'MMMM yyyy'))
+    ).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /^today$/i }))
 
@@ -170,8 +216,16 @@ describe('CalendarPage', () => {
     server.use(
       http.get('/api/outfit-logs', () =>
         HttpResponse.json([
-          mockOutfitLog({ id: 'log-001', outfit_id: 'outfit-001', worn_on: '2026-05-15' }),
-          mockOutfitLog({ id: 'log-002', outfit_id: 'outfit-002', worn_on: '2026-05-15' }),
+          mockOutfitLog({
+            id: 'log-001',
+            outfit_id: 'outfit-001',
+            worn_on: '2026-05-15',
+          }),
+          mockOutfitLog({
+            id: 'log-002',
+            outfit_id: 'outfit-002',
+            worn_on: '2026-05-15',
+          }),
         ])
       ),
       http.get('/api/outfits', () =>
@@ -188,26 +242,39 @@ describe('CalendarPage', () => {
   })
 
   it('CalendarPage should navigate to /outfits/:id when a log entry is clicked', async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime.bind(vi) })
+    const user = userEvent.setup({
+      advanceTimers: vi.advanceTimersByTime.bind(vi),
+    })
     server.use(
       http.get('/api/outfit-logs', () =>
         HttpResponse.json([
-          mockOutfitLog({ id: 'log-001', outfit_id: 'outfit-001', worn_on: '2026-05-15' }),
+          mockOutfitLog({
+            id: 'log-001',
+            outfit_id: 'outfit-001',
+            worn_on: '2026-05-15',
+          }),
         ])
       ),
       http.get('/api/outfits', () =>
-        HttpResponse.json([mockOutfit({ id: 'outfit-001', name: 'Casual Friday' })])
+        HttpResponse.json([
+          mockOutfit({ id: 'outfit-001', name: 'Casual Friday' }),
+        ])
       )
     )
     render(
       <Routes>
         <Route path="/calendar" element={<CalendarPage />} />
-        <Route path="/outfits/:id" element={<div data-testid="outfit-detail-page" />} />
+        <Route
+          path="/outfits/:id"
+          element={<div data-testid="outfit-detail-page" />}
+        />
       </Routes>,
       { initialEntries: ['/calendar'] }
     )
 
-    await user.click(await screen.findByRole('button', { name: 'Casual Friday' }))
+    await user.click(
+      await screen.findByRole('button', { name: 'Casual Friday' })
+    )
 
     expect(await screen.findByTestId('outfit-detail-page')).toBeInTheDocument()
   })
@@ -218,9 +285,13 @@ describe('CalendarPage', () => {
     )
     render(<CalendarPage />)
 
-    await waitFor(() => expect(screen.queryByTestId('calendar-skeleton')).not.toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.queryByTestId('calendar-skeleton')).not.toBeInTheDocument()
+    )
 
     expect(screen.getAllByTestId(/^calendar-day/).length).toBeGreaterThan(0)
-    expect(screen.queryByRole('button', { name: /outfit/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /outfit/i })
+    ).not.toBeInTheDocument()
   })
 })

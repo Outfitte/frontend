@@ -21,7 +21,9 @@ export function useAddOutfitItem() {
     },
     onSettled: (_, __, { outfitId }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.outfits.all })
-      queryClient.invalidateQueries({ queryKey: queryKeys.outfits.detail(outfitId) })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.outfits.detail(outfitId),
+      })
     },
   })
 }
@@ -39,7 +41,9 @@ export function useRemoveOutfitItem() {
     },
     onSettled: (_, __, { outfitId }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.outfits.all })
-      queryClient.invalidateQueries({ queryKey: queryKeys.outfits.detail(outfitId) })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.outfits.detail(outfitId),
+      })
     },
   })
 }

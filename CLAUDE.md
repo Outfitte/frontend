@@ -61,7 +61,7 @@ api.get<T>(path)
 api.post<T>(path, body)
 api.patch<T>(path, body)
 api.delete<T>(path)
-api.upload<T>(path, formData)   // multipart/form-data — skips JSON Content-Type, goes through same auth/retry pipeline
+api.upload<T>(path, formData) // multipart/form-data — skips JSON Content-Type, goes through same auth/retry pipeline
 ```
 
 - Base URL: always `/api` (see `constants.ts`); proxied to `BACKEND_URL` at the Vite dev server or nginx layer
@@ -160,18 +160,18 @@ Never write multiple tests up front. Never implement the full body before each i
 
 ## Running the project
 
-| Task | Command |
-|---|---|
-| Dev server | `npm run dev` |
-| Production build | `npm run build` |
-| Preview build | `npm run preview` |
-| Run tests (once) | `npm test` |
-| Run tests (watch) | `npm run test:watch` |
-| Coverage report | `npm run test:coverage` |
-| Lint | `npm run lint` |
-| Lint + autofix | `npm run lint:fix` |
-| Format | `npm run format` |
-| Check formatting | `npm run format:check` |
+| Task              | Command                 |
+| ----------------- | ----------------------- |
+| Dev server        | `npm run dev`           |
+| Production build  | `npm run build`         |
+| Preview build     | `npm run preview`       |
+| Run tests (once)  | `npm test`              |
+| Run tests (watch) | `npm run test:watch`    |
+| Coverage report   | `npm run test:coverage` |
+| Lint              | `npm run lint`          |
+| Lint + autofix    | `npm run lint:fix`      |
+| Format            | `npm run format`        |
+| Check formatting  | `npm run format:check`  |
 
 ### Docker
 

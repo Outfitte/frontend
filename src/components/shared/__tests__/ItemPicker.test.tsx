@@ -40,9 +40,7 @@ describe('ItemPicker', () => {
   })
 
   it('ItemPicker should show item-picker-error testid when items fail to load', async () => {
-    server.use(
-      http.get('/api/items', () => HttpResponse.error())
-    )
+    server.use(http.get('/api/items', () => HttpResponse.error()))
 
     render(<ItemPicker {...baseProps} />)
 
@@ -69,7 +67,9 @@ describe('ItemPicker', () => {
   it('ItemPicker should not call onClose on Add click when closeOnSelect is false', async () => {
     const user = userEvent.setup()
     const onClose = vi.fn()
-    render(<ItemPicker {...baseProps} onClose={onClose} closeOnSelect={false} />)
+    render(
+      <ItemPicker {...baseProps} onClose={onClose} closeOnSelect={false} />
+    )
 
     await screen.findByText('Blue Denim Jacket')
     const addButtons = screen.getAllByRole('button', { name: 'Add' })
@@ -126,7 +126,9 @@ describe('ItemPicker', () => {
   it('ItemPicker should call onSelect with the item id when Add is clicked', async () => {
     const user = userEvent.setup()
     const onSelect = vi.fn()
-    render(<ItemPicker {...baseProps} onSelect={onSelect} closeOnSelect={false} />)
+    render(
+      <ItemPicker {...baseProps} onSelect={onSelect} closeOnSelect={false} />
+    )
 
     await screen.findByText('Blue Denim Jacket')
     const addButtons = screen.getAllByRole('button', { name: 'Add' })

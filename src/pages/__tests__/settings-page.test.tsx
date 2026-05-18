@@ -55,8 +55,12 @@ describe('SettingsPage', () => {
     useAuthStore.setState({ user: regularUser })
     render(<SettingsPage />)
 
-    expect(screen.queryByRole('switch', { name: /registration/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: /^admin$/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('switch', { name: /registration/i })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: /^admin$/i })
+    ).not.toBeInTheDocument()
   })
 
   it('SettingsPage should show error message when GET /admin/settings fails', async () => {
@@ -68,8 +72,12 @@ describe('SettingsPage', () => {
     )
     render(<SettingsPage />)
 
-    expect(await screen.findByText(/failed to load admin settings/i)).toBeInTheDocument()
-    expect(screen.queryByRole('switch', { name: /registration/i })).not.toBeInTheDocument()
+    expect(
+      await screen.findByText(/failed to load admin settings/i)
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('switch', { name: /registration/i })
+    ).not.toBeInTheDocument()
   })
 
   it('SettingsPage should show error toast and revert switch when PATCH /admin/settings fails', async () => {
@@ -115,8 +123,12 @@ describe('SettingsPage', () => {
     )
     render(<SettingsPage />)
 
-    expect(await screen.findByRole('switch', { name: /registration/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /^admin$/i })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('switch', { name: /registration/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /^admin$/i })
+    ).toBeInTheDocument()
   })
 
   it('SettingsPage should reflect registration_enabled from API when admin loads settings', async () => {
@@ -142,7 +154,9 @@ describe('SettingsPage', () => {
       ),
       http.patch('/api/admin/settings', async ({ request }) => {
         capturedBody = await request.json()
-        await new Promise<void>((resolve) => { resolvePatch = resolve })
+        await new Promise<void>((resolve) => {
+          resolvePatch = resolve
+        })
         return HttpResponse.json({ registration_enabled: false })
       })
     )
@@ -155,10 +169,14 @@ describe('SettingsPage', () => {
     await user.click(toggle)
 
     // Optimistic update should be applied immediately before PATCH resolves
-    expect(screen.getByRole('switch', { name: /registration/i })).not.toBeChecked()
+    expect(
+      screen.getByRole('switch', { name: /registration/i })
+    ).not.toBeChecked()
     expect(capturedBody).toEqual({ registration_enabled: false })
 
-    await act(async () => { resolvePatch() })
+    await act(async () => {
+      resolvePatch()
+    })
   })
 
   it('SettingsPage should change html dark class and persist to localStorage when dark theme is selected', async () => {

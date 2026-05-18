@@ -14,7 +14,10 @@ const ITEM_ID_2 = 'item-shared-002'
 function renderPage(id = LOCATION_ID) {
   return render(
     <Routes>
-      <Route path="/shared/locations/:id" element={<SharedLocationDetailPage />} />
+      <Route
+        path="/shared/locations/:id"
+        element={<SharedLocationDetailPage />}
+      />
     </Routes>,
     { initialEntries: [`/shared/locations/${id}`] }
   )
@@ -40,7 +43,13 @@ describe('SharedLocationDetailPage', () => {
                 mockItem({
                   id: ITEM_ID_1,
                   name: 'Blue Scarf',
-                  photos: [mockPhoto({ id: 'photo-001', media_key: 'uploads/scarf.jpg', position: 0 })],
+                  photos: [
+                    mockPhoto({
+                      id: 'photo-001',
+                      media_key: 'uploads/scarf.jpg',
+                      position: 0,
+                    }),
+                  ],
                 }),
                 mockItem({
                   id: ITEM_ID_2,
@@ -77,7 +86,9 @@ describe('SharedLocationDetailPage', () => {
     )
     renderPage()
 
-    expect(screen.getByTestId('shared-location-detail-skeleton')).toBeInTheDocument()
+    expect(
+      screen.getByTestId('shared-location-detail-skeleton')
+    ).toBeInTheDocument()
   })
 
   // --- Happy path ---
@@ -85,19 +96,25 @@ describe('SharedLocationDetailPage', () => {
   it('SharedLocationDetailPage should have data-testid shared-location-detail-page on root element', async () => {
     renderPage()
 
-    expect(await screen.findByTestId('shared-location-detail-page')).toBeInTheDocument()
+    expect(
+      await screen.findByTestId('shared-location-detail-page')
+    ).toBeInTheDocument()
   })
 
   it('SharedLocationDetailPage should render location label as heading', async () => {
     renderPage()
 
-    expect(await screen.findByRole('heading', { name: 'Winter Wardrobe' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Winter Wardrobe' })
+    ).toBeInTheDocument()
   })
 
   it('SharedLocationDetailPage should render shared-by banner with sender email', async () => {
     renderPage()
 
-    expect(await screen.findByTestId('shared-by-banner')).toHaveTextContent('shared by alice@example.com')
+    expect(await screen.findByTestId('shared-by-banner')).toHaveTextContent(
+      'shared by alice@example.com'
+    )
   })
 
   it('SharedLocationDetailPage should list items using ItemCard in read-only mode', async () => {
@@ -106,8 +123,12 @@ describe('SharedLocationDetailPage', () => {
     await screen.findByRole('heading', { name: 'Winter Wardrobe' })
     const cards = screen.getAllByTestId('item-card')
     expect(cards).toHaveLength(2)
-    expect(screen.queryByRole('button', { name: /wore today/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /item options/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /wore today/i })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /item options/i })
+    ).not.toBeInTheDocument()
   })
 
   it('SharedLocationDetailPage should link items to /shared/items/:id', async () => {
@@ -122,12 +143,24 @@ describe('SharedLocationDetailPage', () => {
     renderPage()
 
     await screen.findByRole('heading', { name: 'Winter Wardrobe' })
-    expect(screen.queryByRole('button', { name: /create/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /move/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /delete/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /rename/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /share/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: /edit/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /create/i })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /move/i })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /delete/i })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /rename/i })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /share/i })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: /edit/i })
+    ).not.toBeInTheDocument()
   })
 
   it('SharedLocationDetailPage should render empty state when location has no items', async () => {

@@ -5,7 +5,14 @@ import { Route, Routes } from 'react-router'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/mocks/server'
 import { render } from '@/test/utils'
-import { mockItem, mockWearLog, mockLocation, mockChildLocation, mockCategory, mockPhoto } from '@/test/mocks/fixtures'
+import {
+  mockItem,
+  mockWearLog,
+  mockLocation,
+  mockChildLocation,
+  mockCategory,
+  mockPhoto,
+} from '@/test/mocks/fixtures'
 import { ItemDetailPage } from '@/pages/ItemDetailPage'
 
 vi.mock('@/lib/toast', () => ({
@@ -41,28 +48,52 @@ describe('ItemDetailPage', () => {
             seller_url: 'https://example.com/jacket',
             metadata: { condition: 'good', size: 'M' },
             photos: [
-              mockPhoto({ id: 'photo-001', media_key: 'uploads/photo-001.jpg', position: 0 }),
-              mockPhoto({ id: 'photo-002', media_key: 'uploads/photo-002.jpg', position: 1 }),
+              mockPhoto({
+                id: 'photo-001',
+                media_key: 'uploads/photo-001.jpg',
+                position: 0,
+              }),
+              mockPhoto({
+                id: 'photo-002',
+                media_key: 'uploads/photo-002.jpg',
+                position: 1,
+              }),
             ],
           })
         )
       ),
       http.get('/api/items/:id/wear-logs', ({ params }) =>
         HttpResponse.json([
-          mockWearLog({ id: 'wearlog-001', item_id: params['id'] as string, worn_on: '2026-04-10', notes: 'Wore to work' }),
-          mockWearLog({ id: 'wearlog-002', item_id: params['id'] as string, worn_on: '2026-04-11', notes: 'Casual day' }),
+          mockWearLog({
+            id: 'wearlog-001',
+            item_id: params['id'] as string,
+            worn_on: '2026-04-10',
+            notes: 'Wore to work',
+          }),
+          mockWearLog({
+            id: 'wearlog-002',
+            item_id: params['id'] as string,
+            worn_on: '2026-04-11',
+            notes: 'Casual day',
+          }),
         ])
       ),
       http.get('/api/locations', () =>
         HttpResponse.json([
-          mockLocation({ id: 'loc-001', parent_id: null, label: 'Main Closet' }),
-          mockChildLocation({ id: 'loc-002', parent_id: 'loc-001', label: 'Top Shelf' }),
+          mockLocation({
+            id: 'loc-001',
+            parent_id: null,
+            label: 'Main Closet',
+          }),
+          mockChildLocation({
+            id: 'loc-002',
+            parent_id: 'loc-001',
+            label: 'Top Shelf',
+          }),
         ])
       ),
       http.get('/api/categories', () =>
-        HttpResponse.json([
-          mockCategory({ id: 'cat-001', label: 'Jackets' }),
-        ])
+        HttpResponse.json([mockCategory({ id: 'cat-001', label: 'Jackets' })])
       )
     )
   })
@@ -94,7 +125,9 @@ describe('ItemDetailPage', () => {
   it('ItemDetailPage should show placeholder when item has no photos', async () => {
     server.use(
       http.get('/api/items/:id', () =>
-        HttpResponse.json(mockItem({ id: ITEM_ID, name: 'No Photo Item', photos: [] }))
+        HttpResponse.json(
+          mockItem({ id: ITEM_ID, name: 'No Photo Item', photos: [] })
+        )
       )
     )
     renderPage()
@@ -135,7 +168,9 @@ describe('ItemDetailPage', () => {
     await user.type(dateInput, '2099-12-31')
     await user.click(screen.getByRole('button', { name: /save/i }))
 
-    expect(await screen.findByText(/date cannot be in the future/i)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/date cannot be in the future/i)
+    ).toBeInTheDocument()
   })
 
   it('ItemDetailPage should stay on page and not navigate when delete API returns error', async () => {
@@ -187,7 +222,9 @@ describe('ItemDetailPage', () => {
 
     // wear logs are sorted descending by worn_on, so wearlog-002 (2026-04-11) is first
     await screen.findByText('Casual day')
-    await user.click(screen.getAllByRole('button', { name: /delete wear log/i })[0])
+    await user.click(
+      screen.getAllByRole('button', { name: /delete wear log/i })[0]
+    )
 
     await waitFor(() => expect(deletedLogId).toBe('wearlog-002'))
   })
@@ -195,7 +232,9 @@ describe('ItemDetailPage', () => {
   it('ItemDetailPage should not render disposal reason section when dispose_reason is null', async () => {
     server.use(
       http.get('/api/items/:id', () =>
-        HttpResponse.json(mockItem({ id: ITEM_ID, status: 'disposed', dispose_reason: null }))
+        HttpResponse.json(
+          mockItem({ id: ITEM_ID, status: 'disposed', dispose_reason: null })
+        )
       )
     )
     renderPage()
@@ -207,13 +246,21 @@ describe('ItemDetailPage', () => {
   it('ItemDetailPage should render disposal reason when item is disposed with a reason', async () => {
     server.use(
       http.get('/api/items/:id', () =>
-        HttpResponse.json(mockItem({ id: ITEM_ID, status: 'disposed', dispose_reason: 'Donated' }))
+        HttpResponse.json(
+          mockItem({
+            id: ITEM_ID,
+            status: 'disposed',
+            dispose_reason: 'Donated',
+          })
+        )
       )
     )
     renderPage()
 
     await screen.findByText('Blue Denim Jacket')
-    expect(screen.getByTestId('item-dispose-reason')).toHaveTextContent('Donated')
+    expect(screen.getByTestId('item-dispose-reason')).toHaveTextContent(
+      'Donated'
+    )
   })
 
   // --- Happy path ---
@@ -227,7 +274,9 @@ describe('ItemDetailPage', () => {
   it('ItemDetailPage should render item name, brand, color, and category as heading and badges', async () => {
     renderPage()
 
-    expect(await screen.findByRole('heading', { name: 'Blue Denim Jacket' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Blue Denim Jacket' })
+    ).toBeInTheDocument()
     expect(screen.getByText("Levi's")).toBeInTheDocument()
     expect(screen.getByText('blue')).toBeInTheDocument()
     expect(screen.getByText('Jackets')).toBeInTheDocument()
@@ -237,7 +286,10 @@ describe('ItemDetailPage', () => {
     renderPage()
 
     await screen.findByText('Blue Denim Jacket')
-    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', '/media/uploads/photo-001.jpg')
+    expect(screen.getByTestId('main-photo')).toHaveAttribute(
+      'src',
+      '/media/uploads/photo-001.jpg'
+    )
   })
 
   it('ItemDetailPage should render photo gallery with main photo and thumbnail strip', async () => {
@@ -402,19 +454,32 @@ describe('ItemDetailPage', () => {
   it('ItemDetailPage should show Unarchive button when loading an already-archived item', async () => {
     server.use(
       http.get('/api/items/:id', () =>
-        HttpResponse.json(mockItem({ id: ITEM_ID, name: 'Blue Denim Jacket', status: 'archived' }))
+        HttpResponse.json(
+          mockItem({
+            id: ITEM_ID,
+            name: 'Blue Denim Jacket',
+            status: 'archived',
+          })
+        )
       )
     )
     renderPage()
 
-    expect(await screen.findByRole('button', { name: /unarchive/i })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /^archive$/i })).not.toBeInTheDocument()
+    expect(
+      await screen.findByRole('button', { name: /unarchive/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /^archive$/i })
+    ).not.toBeInTheDocument()
   })
 
   it('ItemDetailPage should show Unarchive button after archiving item', async () => {
     const user = userEvent.setup()
     server.use(
-      http.post('/api/items/:id/archive', () => new HttpResponse(null, { status: 204 }))
+      http.post(
+        '/api/items/:id/archive',
+        () => new HttpResponse(null, { status: 204 })
+      )
     )
     renderPage()
 
@@ -422,7 +487,9 @@ describe('ItemDetailPage', () => {
     await user.click(screen.getByRole('button', { name: /^archive$/i }))
 
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: /unarchive/i })).toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: /unarchive/i })
+      ).toBeInTheDocument()
     )
   })
 
@@ -430,7 +497,10 @@ describe('ItemDetailPage', () => {
     const user = userEvent.setup()
     let unarchived = false
     server.use(
-      http.post('/api/items/:id/archive', () => new HttpResponse(null, { status: 204 })),
+      http.post(
+        '/api/items/:id/archive',
+        () => new HttpResponse(null, { status: 204 })
+      ),
       http.post('/api/items/:id/unarchive', () => {
         unarchived = true
         return new HttpResponse(null, { status: 204 })
@@ -462,11 +532,17 @@ describe('ItemDetailPage', () => {
     renderPage()
 
     await screen.findByText('Blue Denim Jacket')
-    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-001'))
+    expect(screen.getByTestId('main-photo')).toHaveAttribute(
+      'src',
+      expect.stringContaining('photo-001')
+    )
 
     await user.click(screen.getByRole('button', { name: /next photo/i }))
 
-    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-002'))
+    expect(screen.getByTestId('main-photo')).toHaveAttribute(
+      'src',
+      expect.stringContaining('photo-002')
+    )
   })
 
   it('ItemDetailPage should navigate to previous photo when Prev arrow button is clicked', async () => {
@@ -475,11 +551,17 @@ describe('ItemDetailPage', () => {
 
     await screen.findByText('Blue Denim Jacket')
     await user.click(screen.getByRole('button', { name: /next photo/i }))
-    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-002'))
+    expect(screen.getByTestId('main-photo')).toHaveAttribute(
+      'src',
+      expect.stringContaining('photo-002')
+    )
 
     await user.click(screen.getByRole('button', { name: /previous photo/i }))
 
-    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-001'))
+    expect(screen.getByTestId('main-photo')).toHaveAttribute(
+      'src',
+      expect.stringContaining('photo-001')
+    )
   })
 
   it('ItemDetailPage should wrap to last photo when Prev is clicked on the first photo', async () => {
@@ -490,7 +572,10 @@ describe('ItemDetailPage', () => {
     // Start at first photo, click prev → wraps to last
     await user.click(screen.getByRole('button', { name: /previous photo/i }))
 
-    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-002'))
+    expect(screen.getByTestId('main-photo')).toHaveAttribute(
+      'src',
+      expect.stringContaining('photo-002')
+    )
   })
 
   it('ItemDetailPage should wrap to first photo when Next is clicked on the last photo', async () => {
@@ -500,11 +585,17 @@ describe('ItemDetailPage', () => {
     await screen.findByText('Blue Denim Jacket')
     // Navigate to last photo, then click next → wraps to first
     await user.click(screen.getByRole('button', { name: /next photo/i }))
-    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-002'))
+    expect(screen.getByTestId('main-photo')).toHaveAttribute(
+      'src',
+      expect.stringContaining('photo-002')
+    )
 
     await user.click(screen.getByRole('button', { name: /next photo/i }))
 
-    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-001'))
+    expect(screen.getByTestId('main-photo')).toHaveAttribute(
+      'src',
+      expect.stringContaining('photo-001')
+    )
   })
 
   it('ItemDetailPage should render purchase section when only seller URL is set', async () => {
@@ -536,7 +627,9 @@ describe('ItemDetailPage', () => {
     await user.click(screen.getByRole('button', { name: /dispose/i }))
 
     expect(await screen.findByRole('dialog')).toBeInTheDocument()
-    expect(screen.getByRole('combobox', { name: /reason/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('combobox', { name: /reason/i })
+    ).toBeInTheDocument()
   })
 
   it('ItemDetailPage should close dispose dialog when Cancel button is clicked', async () => {
@@ -569,10 +662,15 @@ describe('ItemDetailPage', () => {
     await user.click(screen.getByRole('button', { name: /dispose/i }))
 
     await screen.findByRole('dialog')
-    await user.selectOptions(screen.getByRole('combobox', { name: /reason/i }), 'donated')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /reason/i }),
+      'donated'
+    )
     await user.click(screen.getByRole('button', { name: /confirm/i }))
 
-    await waitFor(() => expect(capturedBody).toMatchObject({ reason: 'donated' }))
+    await waitFor(() =>
+      expect(capturedBody).toMatchObject({ reason: 'donated' })
+    )
   })
 
   it('ItemDetailPage should open delete confirmation dialog when Delete button is clicked', async () => {
@@ -609,13 +707,21 @@ describe('ItemDetailPage', () => {
   it('ItemDetailPage should hide Share button when item is disposed', async () => {
     server.use(
       http.get('/api/items/:id', () =>
-        HttpResponse.json(mockItem({ id: ITEM_ID, status: 'disposed', dispose_reason: 'donated' }))
+        HttpResponse.json(
+          mockItem({
+            id: ITEM_ID,
+            status: 'disposed',
+            dispose_reason: 'donated',
+          })
+        )
       )
     )
     renderPage()
 
     await screen.findByText('Blue Denim Jacket')
-    expect(screen.queryByRole('button', { name: /^share$/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /^share$/i })
+    ).not.toBeInTheDocument()
   })
 
   it('ItemDetailPage should render Share button in header for active items', async () => {
@@ -644,6 +750,8 @@ describe('ItemDetailPage', () => {
     await screen.findByRole('dialog')
     await user.click(screen.getByRole('button', { name: /^cancel$/i }))
 
-    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    )
   })
 })

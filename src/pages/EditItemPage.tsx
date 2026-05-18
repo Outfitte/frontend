@@ -38,7 +38,9 @@ export function EditItemPage() {
 
   // Split item metadata into hint values and user rows
   const category = categories.find((c) => c.id === item.category_id)
-  const hintKeys = new Set<string>(category?.field_hints.map((h: FieldHint) => h.key) ?? [])
+  const hintKeys = new Set<string>(
+    category?.field_hints.map((h: FieldHint) => h.key) ?? []
+  )
 
   const defaultHintValues: Record<string, string> = {}
   const userMetadata: Array<{ key: string; value: string }> = []

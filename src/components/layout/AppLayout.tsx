@@ -48,10 +48,20 @@ const NAV_ITEMS = [
   { to: '/settings', label: 'Settings', icon: SettingsIcon },
 ]
 
-function NavItem({ to, label, icon: Icon }: { to: string; label: string; icon: React.ElementType }) {
+function NavItem({
+  to,
+  label,
+  icon: Icon,
+}: {
+  to: string
+  label: string
+  icon: React.ElementType
+}) {
   const end = to === '/'
   const { pathname } = useLocation()
-  const isActive = end ? pathname === to : pathname === to || pathname.startsWith(to + '/')
+  const isActive = end
+    ? pathname === to
+    : pathname === to || pathname.startsWith(to + '/')
 
   return (
     <SidebarMenuItem>
@@ -93,7 +103,7 @@ function UserMenu() {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex items-center gap-2 rounded-md p-1 hover:bg-accent"
+          className="hover:bg-accent flex items-center gap-2 rounded-md p-1"
           aria-label="User menu"
         >
           <Avatar size="sm">
@@ -111,10 +121,7 @@ function UserMenu() {
           <NavLink to="/settings">Settings</NavLink>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          variant="destructive"
-          onSelect={logout}
-        >
+        <DropdownMenuItem variant="destructive" onSelect={logout}>
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>

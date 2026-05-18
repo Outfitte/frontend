@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { format, parseISO } from 'date-fns'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
@@ -17,16 +17,17 @@ export function SharedItemDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { data, isLoading } = useSharedWithMe()
   const [activePhotoIdx, setActivePhotoIdx] = useState(0)
+  const [prevId, setPrevId] = useState(id)
+  if (prevId !== id) {
+    setPrevId(id)
+    setActivePhotoIdx(0)
+  }
 
   const item = data?.items.find((i) => i.id === id)
 
   const { data: wearLogs = [] } = useWearLogs(item ? id : undefined)
   const { data: locations = [] } = useLocations()
   const { data: categories = [] } = useCategories()
-
-  useEffect(() => {
-    setActivePhotoIdx(0)
-  }, [id])
 
   if (isLoading) {
     return (
@@ -46,8 +47,11 @@ export function SharedItemDetailPage() {
 
   if (!item) {
     return (
-      <div data-testid="shared-item-detail-page" className="flex flex-col items-center justify-center py-24">
-        <p className="text-lg text-muted-foreground">Item not found</p>
+      <div
+        data-testid="shared-item-detail-page"
+        className="flex flex-col items-center justify-center py-24"
+      >
+        <p className="text-muted-foreground text-lg">Item not found</p>
         <Button asChild className="mt-4" variant="outline">
           <Link to="/shared">Back to shared</Link>
         </Button>
@@ -60,8 +64,12 @@ export function SharedItemDetailPage() {
   const activePhoto = sortedPhotos[activePhotoIdx]
 
   const currentLocation = locations.find((l) => l.id === item.location_id)
-  const ancestors = item.location_id ? getAncestors(locations, item.location_id) : []
-  const breadcrumbLocations = currentLocation ? [...ancestors, currentLocation] : ancestors
+  const ancestors = item.location_id
+    ? getAncestors(locations, item.location_id)
+    : []
+  const breadcrumbLocations = currentLocation
+    ? [...ancestors, currentLocation]
+    : ancestors
 
   const wearCount = wearLogs.length
   const lastWornDate = wearLogs.length > 0 ? wearLogs[0].worn_on : null
@@ -84,7 +92,10 @@ export function SharedItemDetailPage() {
   return (
     <div data-testid="shared-item-detail-page">
       {/* Shared-by banner */}
-      <div data-testid="shared-by-banner" className="mb-4 rounded-md bg-muted px-4 py-2 text-sm text-muted-foreground">
+      <div
+        data-testid="shared-by-banner"
+        className="bg-muted text-muted-foreground mb-4 rounded-md px-4 py-2 text-sm"
+      >
         shared by {item.shared_by.email}
       </div>
 
@@ -105,13 +116,13 @@ export function SharedItemDetailPage() {
           {sortedPhotos.length === 0 ? (
             <div
               data-testid="photo-placeholder"
-              className="flex aspect-square items-center justify-center rounded-xl border bg-muted text-muted-foreground"
+              className="bg-muted text-muted-foreground flex aspect-square items-center justify-center rounded-xl border"
             >
               No photo
             </div>
           ) : (
             <div data-testid="photo-gallery">
-              <div className="relative aspect-square overflow-hidden rounded-xl border bg-muted">
+              <div className="bg-muted relative aspect-square overflow-hidden rounded-xl border">
                 <img
                   data-testid="main-photo"
                   src={`/media/${activePhoto.media_key}`}
@@ -124,7 +135,7 @@ export function SharedItemDetailPage() {
                       type="button"
                       aria-label="Previous photo"
                       onClick={prevPhoto}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-1 hover:bg-background"
+                      className="bg-background/80 hover:bg-background absolute top-1/2 left-2 -translate-y-1/2 rounded-full p-1"
                     >
                       <ChevronLeftIcon className="h-5 w-5" />
                     </button>
@@ -132,7 +143,7 @@ export function SharedItemDetailPage() {
                       type="button"
                       aria-label="Next photo"
                       onClick={nextPhoto}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-1 hover:bg-background"
+                      className="bg-background/80 hover:bg-background absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1"
                     >
                       <ChevronRightIcon className="h-5 w-5" />
                     </button>
@@ -150,7 +161,7 @@ export function SharedItemDetailPage() {
                       onClick={() => setActivePhotoIdx(idx)}
                       className={cn(
                         'flex-shrink-0 overflow-hidden rounded-lg border',
-                        idx === activePhotoIdx ? 'ring-2 ring-primary' : ''
+                        idx === activePhotoIdx ? 'ring-primary ring-2' : ''
                       )}
                     >
                       <img
@@ -171,7 +182,9 @@ export function SharedItemDetailPage() {
           {/* Location breadcrumb */}
           {breadcrumbLocations.length > 0 && (
             <div>
-              <p className="mb-1 text-sm font-medium text-muted-foreground">Location</p>
+              <p className="text-muted-foreground mb-1 text-sm font-medium">
+                Location
+              </p>
               <nav
                 data-testid="location-breadcrumb"
                 aria-label="Location breadcrumb"
@@ -179,7 +192,9 @@ export function SharedItemDetailPage() {
               >
                 {breadcrumbLocations.map((loc, idx) => (
                   <span key={loc.id} className="flex items-center gap-1">
-                    {idx > 0 && <span className="text-muted-foreground">/</span>}
+                    {idx > 0 && (
+                      <span className="text-muted-foreground">/</span>
+                    )}
                     <span>{loc.label}</span>
                   </span>
                 ))}
@@ -190,11 +205,13 @@ export function SharedItemDetailPage() {
           {/* Metadata key-value pairs */}
           {Object.keys(item.metadata).length > 0 && (
             <div>
-              <p className="mb-2 text-sm font-medium text-muted-foreground">Details</p>
+              <p className="text-muted-foreground mb-2 text-sm font-medium">
+                Details
+              </p>
               <dl className="space-y-1">
                 {Object.entries(item.metadata).map(([key, value]) => (
                   <div key={key} className="flex gap-2 text-sm">
-                    <dt className="font-medium text-muted-foreground">{key}</dt>
+                    <dt className="text-muted-foreground font-medium">{key}</dt>
                     <dd>{value}</dd>
                   </div>
                 ))}
@@ -205,11 +222,13 @@ export function SharedItemDetailPage() {
           {/* Purchase section */}
           {hasPurchaseData && (
             <div data-testid="purchase-section">
-              <p className="mb-2 text-sm font-medium text-muted-foreground">Purchase</p>
+              <p className="text-muted-foreground mb-2 text-sm font-medium">
+                Purchase
+              </p>
               <dl className="space-y-1 text-sm">
                 {(item.purchase_price || item.purchase_currency) && (
                   <div className="flex gap-2">
-                    <dt className="font-medium text-muted-foreground">Price</dt>
+                    <dt className="text-muted-foreground font-medium">Price</dt>
                     <dd>
                       {item.purchase_price} {item.purchase_currency}
                     </dd>
@@ -217,13 +236,17 @@ export function SharedItemDetailPage() {
                 )}
                 {item.purchase_date && (
                   <div className="flex gap-2">
-                    <dt className="font-medium text-muted-foreground">Date</dt>
-                    <dd>{format(parseISO(item.purchase_date), 'MMM d, yyyy')}</dd>
+                    <dt className="text-muted-foreground font-medium">Date</dt>
+                    <dd>
+                      {format(parseISO(item.purchase_date), 'MMM d, yyyy')}
+                    </dd>
                   </div>
                 )}
                 {item.seller_url && /^https?:\/\//i.test(item.seller_url) && (
                   <div className="flex gap-2">
-                    <dt className="font-medium text-muted-foreground">Seller</dt>
+                    <dt className="text-muted-foreground font-medium">
+                      Seller
+                    </dt>
                     <dd>
                       <a
                         href={item.seller_url}
@@ -248,7 +271,7 @@ export function SharedItemDetailPage() {
         <h2 className="mb-4 text-lg font-semibold">Wear History</h2>
         <div className="mb-4 flex gap-6 text-sm">
           <div>
-            <span className="font-medium text-muted-foreground">Worn </span>
+            <span className="text-muted-foreground font-medium">Worn </span>
             <span data-testid="wear-count" className="font-bold">
               {wearCount}
             </span>
@@ -256,8 +279,12 @@ export function SharedItemDetailPage() {
           </div>
           {lastWornDate && (
             <div>
-              <span className="font-medium text-muted-foreground">Last worn </span>
-              <span data-testid="last-worn">{format(parseISO(lastWornDate), 'MMM d, yyyy')}</span>
+              <span className="text-muted-foreground font-medium">
+                Last worn{' '}
+              </span>
+              <span data-testid="last-worn">
+                {format(parseISO(lastWornDate), 'MMM d, yyyy')}
+              </span>
             </div>
           )}
         </div>
@@ -265,8 +292,12 @@ export function SharedItemDetailPage() {
           {wearLogs.map((log) => (
             <li key={log.id} className="rounded-lg border p-3">
               <div className="text-sm">
-                <p className="font-medium">{format(parseISO(log.worn_on), 'MMM d, yyyy')}</p>
-                {log.notes && <p className="text-muted-foreground">{log.notes}</p>}
+                <p className="font-medium">
+                  {format(parseISO(log.worn_on), 'MMM d, yyyy')}
+                </p>
+                {log.notes && (
+                  <p className="text-muted-foreground">{log.notes}</p>
+                )}
               </div>
             </li>
           ))}

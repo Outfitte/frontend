@@ -80,14 +80,21 @@ export function CalendarPage() {
           <ChevronRight className="h-4 w-4" />
         </Button>
 
-        <Button variant="ghost" size="sm" onClick={() => setViewedMonth(new Date())}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setViewedMonth(new Date())}
+        >
           Today
         </Button>
       </div>
 
       <div className="grid grid-cols-7 border-b">
         {WEEK_DAYS.map((day) => (
-          <div key={day} className="py-2 text-center text-sm font-medium text-muted-foreground">
+          <div
+            key={day}
+            className="text-muted-foreground py-2 text-center text-sm font-medium"
+          >
             {day}
           </div>
         ))}
@@ -96,7 +103,11 @@ export function CalendarPage() {
       {isLoading ? (
         <div className="grid grid-cols-7 gap-px">
           {Array.from({ length: gridDays.length }).map((_, i) => (
-            <Skeleton key={i} data-testid="calendar-skeleton" className="h-20" />
+            <Skeleton
+              key={i}
+              data-testid="calendar-skeleton"
+              className="h-20"
+            />
           ))}
         </div>
       ) : (
@@ -110,9 +121,14 @@ export function CalendarPage() {
               <div
                 key={day.toISOString()}
                 data-testid={inMonth ? 'calendar-day' : 'calendar-day-outside'}
-                className={cn('min-h-20 p-1', !inMonth && 'text-muted-foreground')}
+                className={cn(
+                  'min-h-20 p-1',
+                  !inMonth && 'text-muted-foreground'
+                )}
               >
-                <span className="block text-right text-sm">{format(day, 'd')}</span>
+                <span className="block text-right text-sm">
+                  {format(day, 'd')}
+                </span>
                 <div className="mt-1 flex flex-col gap-0.5">
                   {dayLogs.map((log) => {
                     const outfitName = resolveOutfitName(log.outfit_id, outfits)
@@ -121,7 +137,7 @@ export function CalendarPage() {
                         key={log.id}
                         type="button"
                         aria-label={outfitName}
-                        className="truncate rounded bg-primary/10 px-1 py-0.5 text-left text-xs hover:bg-primary/20"
+                        className="bg-primary/10 hover:bg-primary/20 truncate rounded px-1 py-0.5 text-left text-xs"
                         onClick={() => navigate(`/outfits/${log.outfit_id}`)}
                       >
                         {outfitName}

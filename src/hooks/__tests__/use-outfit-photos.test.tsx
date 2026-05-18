@@ -6,7 +6,10 @@ import { server } from '@/test/mocks/server'
 import { mockPhoto } from '@/test/mocks/fixtures'
 import { queryKeys } from '@/lib/query-keys'
 import { useAuthStore } from '@/stores/auth'
-import { useUploadOutfitPhoto, useDeleteOutfitPhoto } from '@/hooks/use-outfit-photos'
+import {
+  useUploadOutfitPhoto,
+  useDeleteOutfitPhoto,
+} from '@/hooks/use-outfit-photos'
 
 vi.mock('@/lib/toast', () => ({
   toast: { error: vi.fn(), success: vi.fn(), info: vi.fn() },
@@ -87,8 +90,12 @@ describe('useUploadOutfitPhoto', () => {
       })
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.all })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.detail('outfit-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfits.all,
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfits.detail('outfit-001'),
+    })
   })
 
   it('useUploadOutfitPhoto should include Authorization header when access token is set', async () => {
@@ -97,7 +104,10 @@ describe('useUploadOutfitPhoto', () => {
       http.post('/api/outfits/:id/photos', ({ request }) => {
         capturedAuthHeader = request.headers.get('Authorization')
         return HttpResponse.json(
-          mockPhoto({ id: 'photo-new-001', media_key: 'uploads/outfit-001/photo-new-001.jpg' }),
+          mockPhoto({
+            id: 'photo-new-001',
+            media_key: 'uploads/outfit-001/photo-new-001.jpg',
+          }),
           { status: 201 }
         )
       })
@@ -121,7 +131,10 @@ describe('useUploadOutfitPhoto', () => {
       http.post('/api/outfits/:id/photos', ({ request }) => {
         capturedAuthHeader = request.headers.get('Authorization')
         return HttpResponse.json(
-          mockPhoto({ id: 'photo-new-001', media_key: 'uploads/outfit-001/photo-new-001.jpg' }),
+          mockPhoto({
+            id: 'photo-new-001',
+            media_key: 'uploads/outfit-001/photo-new-001.jpg',
+          }),
           { status: 201 }
         )
       })
@@ -142,7 +155,10 @@ describe('useUploadOutfitPhoto', () => {
     server.use(
       http.post('/api/outfits/:id/photos', ({ params }) =>
         HttpResponse.json(
-          mockPhoto({ id: 'photo-new-001', media_key: `uploads/${params['id'] as string}/photo-new-001.jpg` }),
+          mockPhoto({
+            id: 'photo-new-001',
+            media_key: `uploads/${params['id'] as string}/photo-new-001.jpg`,
+          }),
           { status: 201 }
         )
       )
@@ -158,12 +174,19 @@ describe('useUploadOutfitPhoto', () => {
     })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(result.current.data).toEqual(
-      mockPhoto({ id: 'photo-new-001', media_key: 'uploads/outfit-001/photo-new-001.jpg' })
+      mockPhoto({
+        id: 'photo-new-001',
+        media_key: 'uploads/outfit-001/photo-new-001.jpg',
+      })
     )
     const { toast } = await import('@/lib/toast')
     expect(toast.success).toHaveBeenCalledWith('Photo uploaded')
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.all })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.detail('outfit-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfits.all,
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfits.detail('outfit-001'),
+    })
   })
 })
 
@@ -184,7 +207,10 @@ describe('useDeleteOutfitPhoto', () => {
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useDeleteOutfitPhoto(), { wrapper })
     act(() => {
-      result.current.mutate({ outfitId: 'outfit-001', mediaKey: 'uploads/outfit-001/photo-001.jpg' })
+      result.current.mutate({
+        outfitId: 'outfit-001',
+        mediaKey: 'uploads/outfit-001/photo-001.jpg',
+      })
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
     const { toast } = await import('@/lib/toast')
@@ -201,29 +227,44 @@ describe('useDeleteOutfitPhoto', () => {
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useDeleteOutfitPhoto(), { wrapper })
     act(() => {
-      result.current.mutate({ outfitId: 'outfit-001', mediaKey: 'uploads/outfit-001/photo-001.jpg' })
+      result.current.mutate({
+        outfitId: 'outfit-001',
+        mediaKey: 'uploads/outfit-001/photo-001.jpg',
+      })
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.all })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.detail('outfit-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfits.all,
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfits.detail('outfit-001'),
+    })
   })
 
   it('useDeleteOutfitPhoto should call toast.success and invalidate outfit queries when DELETE /outfits/:id/photos/:key returns 204', async () => {
     server.use(
-      http.delete('/api/outfits/:id/photos/:key', () =>
-        new HttpResponse(null, { status: 204 })
+      http.delete(
+        '/api/outfits/:id/photos/:key',
+        () => new HttpResponse(null, { status: 204 })
       )
     )
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useDeleteOutfitPhoto(), { wrapper })
     act(() => {
-      result.current.mutate({ outfitId: 'outfit-001', mediaKey: 'uploads/outfit-001/photo-001.jpg' })
+      result.current.mutate({
+        outfitId: 'outfit-001',
+        mediaKey: 'uploads/outfit-001/photo-001.jpg',
+      })
     })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     const { toast } = await import('@/lib/toast')
     expect(toast.success).toHaveBeenCalledWith('Photo deleted')
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.all })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.detail('outfit-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfits.all,
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfits.detail('outfit-001'),
+    })
   })
 })

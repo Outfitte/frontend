@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { format, parseISO, isAfter } from 'date-fns'
 import { useForm } from 'react-hook-form'
@@ -39,7 +39,12 @@ import {
   useDisposeItem,
   type DisposeReason,
 } from '@/hooks/use-items'
-import { useWearLogs, useLogWear, useDeleteWearLog } from '@/hooks/use-wear-logs'
+import type { ItemStatus } from '@/types'
+import {
+  useWearLogs,
+  useLogWear,
+  useDeleteWearLog,
+} from '@/hooks/use-wear-logs'
 import { useLocations } from '@/hooks/use-locations'
 import { useCategories } from '@/hooks/use-categories'
 import { getAncestors } from '@/lib/location-tree'
@@ -62,7 +67,16 @@ export function ItemDetailPage() {
   const navigate = useNavigate()
 
   const [activePhotoIdx, setActivePhotoIdx] = useState(0)
+  const [prevId, setPrevId] = useState(id)
+  if (prevId !== id) {
+    setPrevId(id)
+    setActivePhotoIdx(0)
+  }
+
   const [isArchived, setIsArchived] = useState(false)
+  const [prevItemStatus, setPrevItemStatus] = useState<ItemStatus | undefined>(
+    undefined
+  )
 
   const [showWearForm, setShowWearForm] = useState(false)
   const [showDisposeDialog, setShowDisposeDialog] = useState(false)
@@ -70,18 +84,10 @@ export function ItemDetailPage() {
   const [disposeReason, setDisposeReason] = useState<DisposeReason>('donated')
 
   const { data: item, isLoading, error } = useItem(id!)
-
-  // Reset photo index when navigating to a different item
-  useEffect(() => {
-    setActivePhotoIdx(0)
-  }, [id])
-
-  // Sync archived state from server data on load and after refetch
-  useEffect(() => {
-    if (item) {
-      setIsArchived(item.status === 'archived')
-    }
-  }, [item])
+  if (item?.status !== prevItemStatus) {
+    setPrevItemStatus(item?.status)
+    if (item) setIsArchived(item.status === 'archived')
+  }
   const { data: wearLogs = [] } = useWearLogs(id)
   const { data: locations = [] } = useLocations()
   const { data: categories = [] } = useCategories()
@@ -125,8 +131,11 @@ export function ItemDetailPage() {
 
   if (error || !item) {
     return (
-      <div data-testid="item-detail-page" className="flex flex-col items-center justify-center py-24">
-        <p className="text-lg text-muted-foreground">Item not found</p>
+      <div
+        data-testid="item-detail-page"
+        className="flex flex-col items-center justify-center py-24"
+      >
+        <p className="text-muted-foreground text-lg">Item not found</p>
         <Button asChild className="mt-4" variant="outline">
           <Link to="/items">Back to items</Link>
         </Button>
@@ -139,8 +148,12 @@ export function ItemDetailPage() {
   const activePhoto = sortedPhotos[activePhotoIdx]
 
   const currentLocation = locations.find((l) => l.id === item.location_id)
-  const ancestors = item.location_id ? getAncestors(locations, item.location_id) : []
-  const breadcrumbLocations = currentLocation ? [...ancestors, currentLocation] : ancestors
+  const ancestors = item.location_id
+    ? getAncestors(locations, item.location_id)
+    : []
+  const breadcrumbLocations = currentLocation
+    ? [...ancestors, currentLocation]
+    : ancestors
 
   // Wear stats — wearLogs already sorted desc by worn_on from the hook
   const wearCount = wearLogs.length
@@ -185,7 +198,11 @@ export function ItemDetailPage() {
 
   function onWearLogSubmit(values: WearLogFormValues) {
     logWear(
-      { itemId: id!, worn_on: values.worn_on, notes: values.notes || undefined },
+      {
+        itemId: id!,
+        worn_on: values.worn_on,
+        notes: values.notes || undefined,
+      },
       {
         onSuccess: () => {
           setShowWearForm(false)
@@ -229,11 +246,19 @@ export function ItemDetailPage() {
             </Button>
           )}
           {item.status !== 'disposed' && (
-            <Button variant="outline" size="sm" onClick={() => setShowShareDialog(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowShareDialog(true)}
+            >
               Share
             </Button>
           )}
-          <Button variant="outline" size="sm" onClick={() => setShowDisposeDialog(true)}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowDisposeDialog(true)}
+          >
             Dispose
           </Button>
           <AlertDialog>
@@ -246,13 +271,15 @@ export function ItemDetailPage() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete {item.name}?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. &ldquo;{item.name}&rdquo; will be permanently
-                  deleted.
+                  This action cannot be undone. &ldquo;{item.name}&rdquo; will
+                  be permanently deleted.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete}>Confirm delete</AlertDialogAction>
+                <AlertDialogAction onClick={handleDelete}>
+                  Confirm delete
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -266,14 +293,14 @@ export function ItemDetailPage() {
           {sortedPhotos.length === 0 ? (
             <div
               data-testid="photo-placeholder"
-              className="flex aspect-square items-center justify-center rounded-xl border bg-muted text-muted-foreground"
+              className="bg-muted text-muted-foreground flex aspect-square items-center justify-center rounded-xl border"
             >
               No photo
             </div>
           ) : (
             <div data-testid="photo-gallery">
               {/* Main photo */}
-              <div className="relative aspect-square overflow-hidden rounded-xl border bg-muted">
+              <div className="bg-muted relative aspect-square overflow-hidden rounded-xl border">
                 <img
                   data-testid="main-photo"
                   src={`/media/${activePhoto.media_key}`}
@@ -286,7 +313,7 @@ export function ItemDetailPage() {
                       type="button"
                       aria-label="Previous photo"
                       onClick={prevPhoto}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-1 hover:bg-background"
+                      className="bg-background/80 hover:bg-background absolute top-1/2 left-2 -translate-y-1/2 rounded-full p-1"
                     >
                       <ChevronLeftIcon className="h-5 w-5" />
                     </button>
@@ -294,7 +321,7 @@ export function ItemDetailPage() {
                       type="button"
                       aria-label="Next photo"
                       onClick={nextPhoto}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-1 hover:bg-background"
+                      className="bg-background/80 hover:bg-background absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1"
                     >
                       <ChevronRightIcon className="h-5 w-5" />
                     </button>
@@ -313,7 +340,7 @@ export function ItemDetailPage() {
                       onClick={() => setActivePhotoIdx(idx)}
                       className={cn(
                         'flex-shrink-0 overflow-hidden rounded-lg border',
-                        idx === activePhotoIdx ? 'ring-2 ring-primary' : ''
+                        idx === activePhotoIdx ? 'ring-primary ring-2' : ''
                       )}
                     >
                       <img
@@ -334,7 +361,9 @@ export function ItemDetailPage() {
           {/* Location breadcrumb */}
           {breadcrumbLocations.length > 0 && (
             <div>
-              <p className="mb-1 text-sm font-medium text-muted-foreground">Location</p>
+              <p className="text-muted-foreground mb-1 text-sm font-medium">
+                Location
+              </p>
               <nav
                 data-testid="location-breadcrumb"
                 aria-label="Location breadcrumb"
@@ -342,7 +371,9 @@ export function ItemDetailPage() {
               >
                 {breadcrumbLocations.map((loc, idx) => (
                   <span key={loc.id} className="flex items-center gap-1">
-                    {idx > 0 && <span className="text-muted-foreground">/</span>}
+                    {idx > 0 && (
+                      <span className="text-muted-foreground">/</span>
+                    )}
                     <span>{loc.label}</span>
                   </span>
                 ))}
@@ -353,11 +384,13 @@ export function ItemDetailPage() {
           {/* Metadata key-value pairs */}
           {Object.keys(item.metadata).length > 0 && (
             <div>
-              <p className="mb-2 text-sm font-medium text-muted-foreground">Details</p>
+              <p className="text-muted-foreground mb-2 text-sm font-medium">
+                Details
+              </p>
               <dl className="space-y-1">
                 {Object.entries(item.metadata).map(([key, value]) => (
                   <div key={key} className="flex gap-2 text-sm">
-                    <dt className="font-medium text-muted-foreground">{key}</dt>
+                    <dt className="text-muted-foreground font-medium">{key}</dt>
                     <dd>{value}</dd>
                   </div>
                 ))}
@@ -368,7 +401,9 @@ export function ItemDetailPage() {
           {/* Disposal reason */}
           {item.dispose_reason && (
             <div data-testid="item-dispose-reason">
-              <p className="mb-1 text-sm font-medium text-muted-foreground">Disposal reason</p>
+              <p className="text-muted-foreground mb-1 text-sm font-medium">
+                Disposal reason
+              </p>
               <p className="text-sm">{item.dispose_reason}</p>
             </div>
           )}
@@ -376,11 +411,13 @@ export function ItemDetailPage() {
           {/* Purchase section */}
           {hasPurchaseData && (
             <div data-testid="purchase-section">
-              <p className="mb-2 text-sm font-medium text-muted-foreground">Purchase</p>
+              <p className="text-muted-foreground mb-2 text-sm font-medium">
+                Purchase
+              </p>
               <dl className="space-y-1 text-sm">
                 {(item.purchase_price || item.purchase_currency) && (
                   <div className="flex gap-2">
-                    <dt className="font-medium text-muted-foreground">Price</dt>
+                    <dt className="text-muted-foreground font-medium">Price</dt>
                     <dd>
                       {item.purchase_price} {item.purchase_currency}
                     </dd>
@@ -388,13 +425,17 @@ export function ItemDetailPage() {
                 )}
                 {item.purchase_date && (
                   <div className="flex gap-2">
-                    <dt className="font-medium text-muted-foreground">Date</dt>
-                    <dd>{format(parseISO(item.purchase_date), 'MMM d, yyyy')}</dd>
+                    <dt className="text-muted-foreground font-medium">Date</dt>
+                    <dd>
+                      {format(parseISO(item.purchase_date), 'MMM d, yyyy')}
+                    </dd>
                   </div>
                 )}
                 {item.seller_url && /^https?:\/\//i.test(item.seller_url) && (
                   <div className="flex gap-2">
-                    <dt className="font-medium text-muted-foreground">Seller</dt>
+                    <dt className="text-muted-foreground font-medium">
+                      Seller
+                    </dt>
                     <dd>
                       <a
                         href={item.seller_url}
@@ -426,7 +467,7 @@ export function ItemDetailPage() {
         {/* Wear stats */}
         <div className="mb-4 flex gap-6 text-sm">
           <div>
-            <span className="font-medium text-muted-foreground">Worn </span>
+            <span className="text-muted-foreground font-medium">Worn </span>
             <span data-testid="wear-count" className="font-bold">
               {wearCount}
             </span>
@@ -434,8 +475,12 @@ export function ItemDetailPage() {
           </div>
           {lastWornDate && (
             <div>
-              <span className="font-medium text-muted-foreground">Last worn </span>
-              <span data-testid="last-worn">{format(parseISO(lastWornDate), 'MMM d, yyyy')}</span>
+              <span className="text-muted-foreground font-medium">
+                Last worn{' '}
+              </span>
+              <span data-testid="last-worn">
+                {format(parseISO(lastWornDate), 'MMM d, yyyy')}
+              </span>
             </div>
           )}
         </div>
@@ -450,14 +495,26 @@ export function ItemDetailPage() {
             <div className="space-y-3">
               <div>
                 <Label htmlFor="worn_on">Date</Label>
-                <Input id="worn_on" type="date" {...register('worn_on')} className="mt-1" />
+                <Input
+                  id="worn_on"
+                  type="date"
+                  {...register('worn_on')}
+                  className="mt-1"
+                />
                 {errors.worn_on && (
-                  <p className="mt-1 text-xs text-destructive">{errors.worn_on.message}</p>
+                  <p className="text-destructive mt-1 text-xs">
+                    {errors.worn_on.message}
+                  </p>
                 )}
               </div>
               <div>
                 <Label htmlFor="notes">Notes</Label>
-                <Textarea id="notes" {...register('notes')} className="mt-1" rows={2} />
+                <Textarea
+                  id="notes"
+                  {...register('notes')}
+                  className="mt-1"
+                  rows={2}
+                />
               </div>
               <div className="flex gap-2">
                 <Button type="submit" size="sm" disabled={isLoggingWear}>
@@ -482,16 +539,23 @@ export function ItemDetailPage() {
         {/* Wear log list */}
         <ul className="space-y-2">
           {wearLogs.map((log) => (
-            <li key={log.id} className="flex items-start justify-between rounded-lg border p-3">
+            <li
+              key={log.id}
+              className="flex items-start justify-between rounded-lg border p-3"
+            >
               <div className="text-sm">
-                <p className="font-medium">{format(parseISO(log.worn_on), 'MMM d, yyyy')}</p>
-                {log.notes && <p className="text-muted-foreground">{log.notes}</p>}
+                <p className="font-medium">
+                  {format(parseISO(log.worn_on), 'MMM d, yyyy')}
+                </p>
+                {log.notes && (
+                  <p className="text-muted-foreground">{log.notes}</p>
+                )}
               </div>
               <button
                 type="button"
                 aria-label="Delete wear log"
                 onClick={() => deleteWearLog({ itemId: id!, logId: log.id })}
-                className="ml-2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-destructive"
+                className="text-muted-foreground hover:bg-muted hover:text-destructive ml-2 rounded p-1"
               >
                 <Trash2Icon className="h-4 w-4" />
               </button>
@@ -520,8 +584,10 @@ export function ItemDetailPage() {
               id="dispose-reason"
               aria-label="Reason"
               value={disposeReason}
-              onChange={(e) => setDisposeReason(e.target.value as DisposeReason)}
-              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none"
+              onChange={(e) =>
+                setDisposeReason(e.target.value as DisposeReason)
+              }
+              className="border-input w-full rounded-md border bg-transparent px-3 py-2 text-sm outline-none"
             >
               <option value="donated">Donated</option>
               <option value="sold">Sold</option>
@@ -531,7 +597,10 @@ export function ItemDetailPage() {
             </select>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDisposeDialog(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setShowDisposeDialog(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleDispose}>Confirm</Button>

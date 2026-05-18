@@ -17,11 +17,19 @@ function useAdminSettings() {
 
 function useUpdateAdminSettings() {
   const queryClient = useQueryClient()
-  return useMutation<AppSettings, Error, Partial<AppSettings>, { previous: AppSettings | undefined }>({
+  return useMutation<
+    AppSettings,
+    Error,
+    Partial<AppSettings>,
+    { previous: AppSettings | undefined }
+  >({
     mutationFn: (data) => api.patch('/admin/settings', data),
     onMutate: async (newSettings) => {
       await queryClient.cancelQueries({ queryKey: ['admin', 'settings'] })
-      const previous = queryClient.getQueryData<AppSettings>(['admin', 'settings'])
+      const previous = queryClient.getQueryData<AppSettings>([
+        'admin',
+        'settings',
+      ])
       queryClient.setQueryData<AppSettings>(['admin', 'settings'], (old) =>
         old ? { ...old, ...newSettings } : old
       )
@@ -43,8 +51,14 @@ function AdminSection() {
   const { data: settings, isPending, isError } = useAdminSettings()
   const updateSettings = useUpdateAdminSettings()
 
-  if (isPending) return <p className="mt-4 text-sm text-muted-foreground">Loading…</p>
-  if (isError) return <p className="mt-4 text-sm text-destructive">Failed to load admin settings.</p>
+  if (isPending)
+    return <p className="text-muted-foreground mt-4 text-sm">Loading…</p>
+  if (isError)
+    return (
+      <p className="text-destructive mt-4 text-sm">
+        Failed to load admin settings.
+      </p>
+    )
 
   function handleRegistrationToggle(checked: boolean) {
     updateSettings.mutate({ registration_enabled: checked })
@@ -77,8 +91,10 @@ export function SettingsPage() {
 
       <section className="mt-6">
         <h2 className="text-lg font-semibold">Account</h2>
-        <p className="mt-2 text-sm text-muted-foreground">Email: {user?.email}</p>
-        <p className="mt-1 text-sm text-muted-foreground">Role: {user?.role}</p>
+        <p className="text-muted-foreground mt-2 text-sm">
+          Email: {user?.email}
+        </p>
+        <p className="text-muted-foreground mt-1 text-sm">Role: {user?.role}</p>
       </section>
 
       <section className="mt-6">

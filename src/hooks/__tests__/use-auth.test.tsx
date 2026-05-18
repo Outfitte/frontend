@@ -3,7 +3,12 @@ import { renderHook, act, waitFor } from '@/test/utils'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/mocks/server'
-import { useLogin, useRegister, useLogout, useRefreshToken } from '@/hooks/use-auth'
+import {
+  useLogin,
+  useRegister,
+  useLogout,
+  useRefreshToken,
+} from '@/hooks/use-auth'
 import { useAuthStore } from '@/stores/auth'
 
 vi.mock('@/lib/toast', () => ({
@@ -33,13 +38,14 @@ describe('useLogin', () => {
   })
 
   it('useLogin should call toast.error with network error message when fetch throws', async () => {
-    server.use(
-      http.post('/api/auth/login', () => HttpResponse.error())
-    )
+    server.use(http.post('/api/auth/login', () => HttpResponse.error()))
     const { result } = renderHook(() => useLogin(), { wrapper: makeWrapper() })
 
     act(() => {
-      result.current.mutate({ username: 'alice@example.com', password: 'secret123' })
+      result.current.mutate({
+        username: 'alice@example.com',
+        password: 'secret123',
+      })
     })
 
     await waitFor(() => expect(result.current.isError).toBe(true))
@@ -50,17 +56,22 @@ describe('useLogin', () => {
 
   it('useLogin should call toast.error with Unknown error when server returns non-JSON error response', async () => {
     server.use(
-      http.post('/api/auth/login', () =>
-        new HttpResponse('Gateway Timeout', {
-          status: 504,
-          headers: { 'Content-Type': 'text/plain' },
-        })
+      http.post(
+        '/api/auth/login',
+        () =>
+          new HttpResponse('Gateway Timeout', {
+            status: 504,
+            headers: { 'Content-Type': 'text/plain' },
+          })
       )
     )
     const { result } = renderHook(() => useLogin(), { wrapper: makeWrapper() })
 
     act(() => {
-      result.current.mutate({ username: 'alice@example.com', password: 'secret123' })
+      result.current.mutate({
+        username: 'alice@example.com',
+        password: 'secret123',
+      })
     })
 
     await waitFor(() => expect(result.current.isError).toBe(true))
@@ -78,7 +89,10 @@ describe('useLogin', () => {
     const { result } = renderHook(() => useLogin(), { wrapper: makeWrapper() })
 
     act(() => {
-      result.current.mutate({ username: 'alice@example.com', password: 'secret123' })
+      result.current.mutate({
+        username: 'alice@example.com',
+        password: 'secret123',
+      })
     })
 
     await waitFor(() => expect(result.current.isError).toBe(true))
@@ -96,7 +110,10 @@ describe('useLogin', () => {
     const { result } = renderHook(() => useLogin(), { wrapper: makeWrapper() })
 
     act(() => {
-      result.current.mutate({ username: 'alice@example.com', password: 'wrongpassword' })
+      result.current.mutate({
+        username: 'alice@example.com',
+        password: 'wrongpassword',
+      })
     })
 
     await waitFor(() => expect(result.current.isError).toBe(true))
@@ -118,7 +135,10 @@ describe('useLogin', () => {
     const { result } = renderHook(() => useLogin(), { wrapper: makeWrapper() })
 
     act(() => {
-      result.current.mutate({ username: 'alice@example.com', password: 'secret123' })
+      result.current.mutate({
+        username: 'alice@example.com',
+        password: 'secret123',
+      })
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -139,10 +159,15 @@ describe('useLogin', () => {
       )
     )
     const onSuccess = vi.fn()
-    const { result } = renderHook(() => useLogin({ onSuccess }), { wrapper: makeWrapper() })
+    const { result } = renderHook(() => useLogin({ onSuccess }), {
+      wrapper: makeWrapper(),
+    })
 
     act(() => {
-      result.current.mutate({ username: 'alice@example.com', password: 'wrongpassword' })
+      result.current.mutate({
+        username: 'alice@example.com',
+        password: 'wrongpassword',
+      })
     })
 
     await waitFor(() => expect(result.current.isError).toBe(true))
@@ -151,7 +176,12 @@ describe('useLogin', () => {
   })
 
   it('useLogin should set user in auth store when GET /users/me returns user data after successful login', async () => {
-    const user = { id: 'user-001', email: 'alice@example.com', role: 'user' as const, created_at: '2024-01-01T00:00:00Z' }
+    const user = {
+      id: 'user-001',
+      email: 'alice@example.com',
+      role: 'user' as const,
+      created_at: '2024-01-01T00:00:00Z',
+    }
     server.use(
       http.post('/api/auth/login', () =>
         HttpResponse.json({
@@ -164,7 +194,10 @@ describe('useLogin', () => {
     const { result } = renderHook(() => useLogin(), { wrapper: makeWrapper() })
 
     act(() => {
-      result.current.mutate({ username: 'alice@example.com', password: 'secret123' })
+      result.current.mutate({
+        username: 'alice@example.com',
+        password: 'secret123',
+      })
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -177,7 +210,12 @@ describe('useLogin', () => {
   })
 
   it('useLogin should call options.onSuccess after tokens and user are set when login succeeds', async () => {
-    const user = { id: 'user-001', email: 'alice@example.com', role: 'user' as const, created_at: '2024-01-01T00:00:00Z' }
+    const user = {
+      id: 'user-001',
+      email: 'alice@example.com',
+      role: 'user' as const,
+      created_at: '2024-01-01T00:00:00Z',
+    }
     server.use(
       http.post('/api/auth/login', () =>
         HttpResponse.json({
@@ -188,10 +226,15 @@ describe('useLogin', () => {
       http.get('/api/users/me', () => HttpResponse.json(user))
     )
     const onSuccess = vi.fn()
-    const { result } = renderHook(() => useLogin({ onSuccess }), { wrapper: makeWrapper() })
+    const { result } = renderHook(() => useLogin({ onSuccess }), {
+      wrapper: makeWrapper(),
+    })
 
     act(() => {
-      result.current.mutate({ username: 'alice@example.com', password: 'secret123' })
+      result.current.mutate({
+        username: 'alice@example.com',
+        password: 'secret123',
+      })
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -222,10 +265,15 @@ describe('useRegister', () => {
         HttpResponse.json({ error: 'Email already in use' }, { status: 409 })
       )
     )
-    const { result } = renderHook(() => useRegister(), { wrapper: makeWrapper() })
+    const { result } = renderHook(() => useRegister(), {
+      wrapper: makeWrapper(),
+    })
 
     act(() => {
-      result.current.mutate({ username: 'alice@example.com', password: 'secret123' })
+      result.current.mutate({
+        username: 'alice@example.com',
+        password: 'secret123',
+      })
     })
 
     await waitFor(() => expect(result.current.isError).toBe(true))
@@ -235,19 +283,33 @@ describe('useRegister', () => {
   })
 
   it('useRegister should set tokens and user in auth store when server returns 201', async () => {
-    const user = { id: 'user-001', email: 'alice@example.com', role: 'user' as const, created_at: '2024-01-01T00:00:00Z' }
+    const user = {
+      id: 'user-001',
+      email: 'alice@example.com',
+      role: 'user' as const,
+      created_at: '2024-01-01T00:00:00Z',
+    }
     server.use(
       http.post('/api/auth/register', () =>
         HttpResponse.json(
-          { user, access_token: 'access-token-abc123', refresh_token: 'refresh-token-xyz789' },
+          {
+            user,
+            access_token: 'access-token-abc123',
+            refresh_token: 'refresh-token-xyz789',
+          },
           { status: 201 }
         )
       )
     )
-    const { result } = renderHook(() => useRegister(), { wrapper: makeWrapper() })
+    const { result } = renderHook(() => useRegister(), {
+      wrapper: makeWrapper(),
+    })
 
     act(() => {
-      result.current.mutate({ username: 'alice@example.com', password: 'secret123' })
+      result.current.mutate({
+        username: 'alice@example.com',
+        password: 'secret123',
+      })
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -265,7 +327,12 @@ describe('useLogout', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
     })
@@ -297,9 +364,14 @@ describe('useLogout', () => {
 
   it('useLogout should clear auth store and invalidate queries when server returns 204', async () => {
     server.use(
-      http.post('/api/auth/logout', () => new HttpResponse(null, { status: 204 }))
+      http.post(
+        '/api/auth/logout',
+        () => new HttpResponse(null, { status: 204 })
+      )
     )
-    const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
+    const queryClient = new QueryClient({
+      defaultOptions: { mutations: { retry: false } },
+    })
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -339,7 +411,9 @@ describe('useRefreshToken', () => {
         HttpResponse.json({ error: 'Refresh token expired' }, { status: 401 })
       )
     )
-    const { result } = renderHook(() => useRefreshToken(), { wrapper: makeWrapper() })
+    const { result } = renderHook(() => useRefreshToken(), {
+      wrapper: makeWrapper(),
+    })
 
     act(() => {
       result.current.mutate({ refresh_token: 'expired-refresh-token-xyz789' })
@@ -361,7 +435,9 @@ describe('useRefreshToken', () => {
         })
       )
     )
-    const { result } = renderHook(() => useRefreshToken(), { wrapper: makeWrapper() })
+    const { result } = renderHook(() => useRefreshToken(), {
+      wrapper: makeWrapper(),
+    })
 
     act(() => {
       result.current.mutate({ refresh_token: 'old-refresh-token-xyz789' })

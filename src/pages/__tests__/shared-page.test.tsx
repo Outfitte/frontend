@@ -3,7 +3,11 @@ import { screen } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/mocks/server'
 import { render } from '@/test/utils'
-import { mockSharedItem, mockSharedOutfit, mockSharedLocation } from '@/test/mocks/fixtures'
+import {
+  mockSharedItem,
+  mockSharedOutfit,
+  mockSharedLocation,
+} from '@/test/mocks/fixtures'
 import { SharedPage } from '@/pages/SharedPage'
 
 function renderPage() {
@@ -55,7 +59,9 @@ describe('SharedPage', () => {
       )
     )
     renderPage()
-    expect(await screen.findByRole('heading', { name: 'Items' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Items' })
+    ).toBeInTheDocument()
     expect(screen.getByText('shared by alice@example.com')).toBeInTheDocument()
     const link = screen.getByRole('link', { name: /View Shared Jacket/i })
     expect(link).toHaveAttribute('href', '/shared/items/item-shared-001')
@@ -78,7 +84,9 @@ describe('SharedPage', () => {
       )
     )
     renderPage()
-    expect(await screen.findByRole('heading', { name: 'Outfits' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Outfits' })
+    ).toBeInTheDocument()
     expect(screen.getByText('shared by bob@example.com')).toBeInTheDocument()
     const link = screen.getByRole('link', { name: /View Shared Casual/i })
     expect(link).toHaveAttribute('href', '/shared/outfits/outfit-shared-001')
@@ -92,7 +100,13 @@ describe('SharedPage', () => {
           outfits: [],
           locations: [
             mockSharedLocation({
-              location: { id: 'loc-shared-001', owner_id: 'user-002', parent_id: null, label: 'Main Closet', created_at: '2026-01-01T00:00:00Z' },
+              location: {
+                id: 'loc-shared-001',
+                owner_id: 'user-002',
+                parent_id: null,
+                label: 'Main Closet',
+                created_at: '2026-01-01T00:00:00Z',
+              },
               items: [{ id: 'i1' }, { id: 'i2' }] as never,
               shared_by: { id: 'user-002', email: 'carol@example.com' },
             }),
@@ -101,7 +115,9 @@ describe('SharedPage', () => {
       )
     )
     renderPage()
-    expect(await screen.findByRole('heading', { name: 'Locations' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Locations' })
+    ).toBeInTheDocument()
     expect(screen.getByText('Main Closet')).toBeInTheDocument()
     expect(screen.getByText('2 items')).toBeInTheDocument()
     const link = screen.getByRole('link', { name: /Main Closet/i })
@@ -134,7 +150,9 @@ describe('SharedPage', () => {
     )
     renderPage()
     await screen.findByTestId('shared-page')
-    expect(screen.queryByRole('heading', { name: 'Outfits' })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: 'Outfits' })
+    ).not.toBeInTheDocument()
   })
 
   it('SharedPage should not render Locations section when locations list is empty', async () => {
@@ -149,7 +167,9 @@ describe('SharedPage', () => {
     )
     renderPage()
     await screen.findByTestId('shared-page')
-    expect(screen.queryByRole('heading', { name: 'Locations' })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: 'Locations' })
+    ).not.toBeInTheDocument()
   })
 
   it('SharedPage should not render Items section when items list is empty', async () => {
@@ -157,14 +177,18 @@ describe('SharedPage', () => {
       http.get('/api/shares/with-me', () =>
         HttpResponse.json({
           items: [],
-          outfits: [mockSharedOutfit({ id: 'outfit-001', name: 'Casual Friday' })],
+          outfits: [
+            mockSharedOutfit({ id: 'outfit-001', name: 'Casual Friday' }),
+          ],
           locations: [],
         })
       )
     )
     renderPage()
     await screen.findByTestId('shared-page')
-    expect(screen.queryByRole('heading', { name: 'Items' })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('heading', { name: 'Items' })
+    ).not.toBeInTheDocument()
   })
 
   it('SharedPage should not show any Create or Add buttons', async () => {

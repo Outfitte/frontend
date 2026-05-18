@@ -9,7 +9,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 
 const schema = z.strictObject({
-  name: z.string().max(200, { error: 'Name must be 200 characters or fewer' }).optional(),
+  name: z
+    .string()
+    .max(200, { error: 'Name must be 200 characters or fewer' })
+    .optional(),
   notes: z.string().optional(),
 })
 
@@ -46,10 +49,18 @@ export function CreateOutfitPage() {
         <h1 className="text-2xl font-bold">New Outfit</h1>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4 max-w-lg">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+        className="max-w-lg space-y-4"
+      >
         <div className="space-y-1">
           <Label htmlFor="name">Name</Label>
-          <Input id="name" {...register('name')} placeholder="e.g. Casual Friday" />
+          <Input
+            id="name"
+            {...register('name')}
+            placeholder="e.g. Casual Friday"
+          />
           {errors.name && (
             <p className="text-destructive text-xs">{errors.name.message}</p>
           )}
@@ -57,12 +68,22 @@ export function CreateOutfitPage() {
 
         <div className="space-y-1">
           <Label htmlFor="notes">Notes</Label>
-          <Textarea id="notes" {...register('notes')} placeholder="Optional notes about this outfit" />
+          <Textarea
+            id="notes"
+            {...register('notes')}
+            placeholder="Optional notes about this outfit"
+          />
         </div>
 
         <div className="flex gap-2">
-          <Button type="submit" disabled={isPending}>Save</Button>
-          <Button type="button" variant="outline" onClick={() => navigate('/outfits')}>
+          <Button type="submit" disabled={isPending}>
+            Save
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate('/outfits')}
+          >
             Cancel
           </Button>
         </div>

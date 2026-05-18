@@ -4,7 +4,13 @@ import { format } from 'date-fns'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { ItemCard, type ItemAction } from '@/components/shared/ItemCard'
-import { useItems, useArchiveItem, useUnarchiveItem, useDeleteItem, type ItemStatus } from '@/hooks/use-items'
+import {
+  useItems,
+  useArchiveItem,
+  useUnarchiveItem,
+  useDeleteItem,
+  type ItemStatus,
+} from '@/hooks/use-items'
 import { useCategories } from '@/hooks/use-categories'
 import { useLocations } from '@/hooks/use-locations'
 import { useLogWear } from '@/hooks/use-wear-logs'
@@ -34,7 +40,9 @@ function sortItems(items: Item[], sort: SortOption): Item[] {
 export function ItemsPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [optimisticallyRemovedIds, setOptimisticallyRemovedIds] = useState<Set<string>>(new Set())
+  const [optimisticallyRemovedIds, setOptimisticallyRemovedIds] = useState<
+    Set<string>
+  >(new Set())
 
   const status = (searchParams.get('status') as ItemStatus) ?? 'active'
   const categoryFilter = searchParams.get('category') ?? ''
@@ -49,9 +57,12 @@ export function ItemsPage() {
   const { mutate: unarchiveItem } = useUnarchiveItem()
   const { mutate: deleteItem } = useDeleteItem()
 
-  const categoryMap = Object.fromEntries((categories ?? []).map((c) => [c.id, c.label]))
+  const categoryMap = Object.fromEntries(
+    (categories ?? []).map((c) => [c.id, c.label])
+  )
 
-  const hasActiveFilters = categoryFilter !== '' || locationFilter !== '' || status === 'archived'
+  const hasActiveFilters =
+    categoryFilter !== '' || locationFilter !== '' || status === 'archived'
 
   const filteredItems = sortItems(
     (items ?? []).filter((item) => {
@@ -135,7 +146,7 @@ export function ItemsPage() {
           aria-label="Category"
           value={categoryFilter}
           onChange={(e) => setParam('category', e.target.value)}
-          className="h-8 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-sm outline-none"
+          className="border-input h-8 rounded-lg border bg-transparent px-2.5 py-1.5 text-sm outline-none"
         >
           <option value="">All categories</option>
           {(categories ?? []).map((cat) => (
@@ -149,7 +160,7 @@ export function ItemsPage() {
           aria-label="Location"
           value={locationFilter}
           onChange={(e) => setParam('location', e.target.value)}
-          className="h-8 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-sm outline-none"
+          className="border-input h-8 rounded-lg border bg-transparent px-2.5 py-1.5 text-sm outline-none"
         >
           <option value="">All locations</option>
           {(locations ?? []).map((loc) => (
@@ -163,7 +174,7 @@ export function ItemsPage() {
           aria-label="Sort"
           value={sort}
           onChange={(e) => setParam('sort', e.target.value)}
-          className="h-8 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-sm outline-none"
+          className="border-input h-8 rounded-lg border bg-transparent px-2.5 py-1.5 text-sm outline-none"
         >
           <option value="newest">Newest</option>
           <option value="oldest">Oldest</option>
@@ -178,18 +189,24 @@ export function ItemsPage() {
       {isLoading && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} data-testid="item-card-skeleton" className="h-64 w-full" />
+            <Skeleton
+              key={i}
+              data-testid="item-card-skeleton"
+              className="h-64 w-full"
+            />
           ))}
         </div>
       )}
       {!isLoading && filteredItems.length === 0 && hasActiveFilters && (
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <p className="text-lg text-muted-foreground">No items match your filters</p>
+          <p className="text-muted-foreground text-lg">
+            No items match your filters
+          </p>
         </div>
       )}
       {!isLoading && filteredItems.length === 0 && !hasActiveFilters && (
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <p className="mb-4 text-lg text-muted-foreground">No items yet</p>
+          <p className="text-muted-foreground mb-4 text-lg">No items yet</p>
           <Button asChild>
             <Link to="/items/new">Add your first item</Link>
           </Button>
@@ -201,7 +218,9 @@ export function ItemsPage() {
             <ItemCard
               key={item.id}
               item={item}
-              categoryLabel={item.category_id ? categoryMap[item.category_id] : undefined}
+              categoryLabel={
+                item.category_id ? categoryMap[item.category_id] : undefined
+              }
               isArchived={item.status !== 'active'}
               onWoreToday={handleWoreToday}
               onAction={handleAction}

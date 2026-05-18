@@ -25,10 +25,10 @@ describe('auth store', () => {
   })
 
   it('logout should clear tokens and succeed when API call throws network error', async () => {
-    server.use(
-      http.post('/api/auth/logout', () => HttpResponse.error())
-    )
-    useAuthStore.getState().setTokens('access-token-abc123', 'refresh-token-xyz789')
+    server.use(http.post('/api/auth/logout', () => HttpResponse.error()))
+    useAuthStore
+      .getState()
+      .setTokens('access-token-abc123', 'refresh-token-xyz789')
 
     await expect(useAuthStore.getState().logout()).resolves.toBeUndefined()
 
@@ -41,9 +41,14 @@ describe('auth store', () => {
 
   it('logout should clear tokens and succeed when API call fails', async () => {
     server.use(
-      http.post('/api/auth/logout', () => new HttpResponse(null, { status: 500 }))
+      http.post(
+        '/api/auth/logout',
+        () => new HttpResponse(null, { status: 500 })
+      )
     )
-    useAuthStore.getState().setTokens('access-token-abc123', 'refresh-token-xyz789')
+    useAuthStore
+      .getState()
+      .setTokens('access-token-abc123', 'refresh-token-xyz789')
 
     await expect(useAuthStore.getState().logout()).resolves.toBeUndefined()
 
@@ -65,7 +70,10 @@ describe('auth store', () => {
 
   it('hydrateFromStorage should clear state and set isHydrating to false when refresh token is invalid', async () => {
     server.use(
-      http.post('/api/auth/refresh', () => new HttpResponse(null, { status: 401 }))
+      http.post(
+        '/api/auth/refresh',
+        () => new HttpResponse(null, { status: 401 })
+      )
     )
     localStorage.setItem('refresh_token', 'invalid-refresh-token-xyz')
 
@@ -80,7 +88,9 @@ describe('auth store', () => {
   })
 
   it('setTokens should store access token in memory and refresh token in memory and localStorage when called', () => {
-    useAuthStore.getState().setTokens('access-token-abc123', 'refresh-token-xyz789')
+    useAuthStore
+      .getState()
+      .setTokens('access-token-abc123', 'refresh-token-xyz789')
 
     const state = useAuthStore.getState()
     expect(state.accessToken).toBe('access-token-abc123')
@@ -89,14 +99,21 @@ describe('auth store', () => {
   })
 
   it('setUser should store user in state when called', () => {
-    const user = { id: 'user-001', email: 'alice@example.com', role: 'user' as const, created_at: '2024-01-01T00:00:00Z' }
+    const user = {
+      id: 'user-001',
+      email: 'alice@example.com',
+      role: 'user' as const,
+      created_at: '2024-01-01T00:00:00Z',
+    }
     useAuthStore.getState().setUser(user)
 
     expect(useAuthStore.getState().user).toEqual(user)
   })
 
   it('isAuthenticated should be true when accessToken is non-null', () => {
-    useAuthStore.getState().setTokens('access-token-abc123', 'refresh-token-xyz789')
+    useAuthStore
+      .getState()
+      .setTokens('access-token-abc123', 'refresh-token-xyz789')
 
     expect(useAuthStore.getState().isAuthenticated).toBe(true)
   })
@@ -109,7 +126,9 @@ describe('auth store', () => {
         return new HttpResponse(null, { status: 204 })
       })
     )
-    useAuthStore.getState().setTokens('access-token-abc123', 'refresh-token-xyz789')
+    useAuthStore
+      .getState()
+      .setTokens('access-token-abc123', 'refresh-token-xyz789')
 
     await useAuthStore.getState().logout()
 
@@ -124,7 +143,10 @@ describe('auth store', () => {
   it('hydrateFromStorage should leave user as null and remain authenticated when GET /users/me fails after refresh', async () => {
     server.use(
       http.post('/api/auth/refresh', () =>
-        HttpResponse.json({ access_token: 'new-access-token-abc123', refresh_token: 'new-refresh-token-xyz789' })
+        HttpResponse.json({
+          access_token: 'new-access-token-abc123',
+          refresh_token: 'new-refresh-token-xyz789',
+        })
       ),
       http.get('/api/users/me', () => new HttpResponse(null, { status: 500 }))
     )
@@ -141,10 +163,18 @@ describe('auth store', () => {
   })
 
   it('hydrateFromStorage should set tokens and user from GET /users/me and set isHydrating to false when refresh token is valid', async () => {
-    const user = { id: 'user-001', email: 'alice@example.com', role: 'user' as const, created_at: '2024-01-01T00:00:00Z' }
+    const user = {
+      id: 'user-001',
+      email: 'alice@example.com',
+      role: 'user' as const,
+      created_at: '2024-01-01T00:00:00Z',
+    }
     server.use(
       http.post('/api/auth/refresh', () =>
-        HttpResponse.json({ access_token: 'new-access-token-abc123', refresh_token: 'new-refresh-token-xyz789' })
+        HttpResponse.json({
+          access_token: 'new-access-token-abc123',
+          refresh_token: 'new-refresh-token-xyz789',
+        })
       ),
       http.get('/api/users/me', () => HttpResponse.json(user))
     )
@@ -158,6 +188,8 @@ describe('auth store', () => {
     expect(state.user).toEqual(user)
     expect(state.isAuthenticated).toBe(true)
     expect(state.isHydrating).toBe(false)
-    expect(localStorage.getItem('refresh_token')).toBe('new-refresh-token-xyz789')
+    expect(localStorage.getItem('refresh_token')).toBe(
+      'new-refresh-token-xyz789'
+    )
   })
 })

@@ -55,10 +55,12 @@ function LocationsSection({ locations }: { locations: SharedLocation[] }) {
           <li key={location.id}>
             <Link
               to={`/shared/locations/${location.id}`}
-              className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted"
+              className="hover:bg-muted flex items-center justify-between rounded-lg border p-3"
             >
               <span className="font-medium">{location.label}</span>
-              <span className="text-sm text-muted-foreground">{items.length} items</span>
+              <span className="text-muted-foreground text-sm">
+                {items.length} items
+              </span>
             </Link>
           </li>
         ))}
@@ -82,19 +84,32 @@ export function SharedPage() {
 
   if (isError) {
     return (
-      <div data-testid="shared-page" className="flex flex-col items-center justify-center py-24">
-        <p className="text-muted-foreground">Failed to load shared items. Please try again.</p>
+      <div
+        data-testid="shared-page"
+        className="flex flex-col items-center justify-center py-24"
+      >
+        <p className="text-muted-foreground">
+          Failed to load shared items. Please try again.
+        </p>
       </div>
     )
   }
 
   const isEmpty =
-    !data || (data.items.length === 0 && data.outfits.length === 0 && data.locations.length === 0)
+    !data ||
+    (data.items.length === 0 &&
+      data.outfits.length === 0 &&
+      data.locations.length === 0)
 
   if (isEmpty) {
     return (
-      <div data-testid="shared-page" className="flex flex-col items-center justify-center py-24">
-        <p className="text-muted-foreground">Nothing has been shared with you yet</p>
+      <div
+        data-testid="shared-page"
+        className="flex flex-col items-center justify-center py-24"
+      >
+        <p className="text-muted-foreground">
+          Nothing has been shared with you yet
+        </p>
       </div>
     )
   }

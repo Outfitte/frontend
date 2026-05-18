@@ -25,12 +25,18 @@ function resolveTargetLabel(
   allLocations: Location[]
 ): string {
   if (share.target_type === 'item') {
-    return allItems.find((i) => i.id === share.target_id)?.name ?? share.target_id
+    return (
+      allItems.find((i) => i.id === share.target_id)?.name ?? share.target_id
+    )
   }
   if (share.target_type === 'outfit') {
-    return allOutfits.find((o) => o.id === share.target_id)?.name ?? share.target_id
+    return (
+      allOutfits.find((o) => o.id === share.target_id)?.name ?? share.target_id
+    )
   }
-  return allLocations.find((l) => l.id === share.target_id)?.label ?? share.target_id
+  return (
+    allLocations.find((l) => l.id === share.target_id)?.label ?? share.target_id
+  )
 }
 
 interface ShareRowProps {
@@ -41,7 +47,13 @@ interface ShareRowProps {
   allLocations: Location[]
 }
 
-function ShareRow({ share, onRevoke, allItems, allOutfits, allLocations }: ShareRowProps) {
+function ShareRow({
+  share,
+  onRevoke,
+  allItems,
+  allOutfits,
+  allLocations,
+}: ShareRowProps) {
   return (
     <li className="flex items-center justify-between rounded-lg border p-3">
       <div className="text-sm">
@@ -49,11 +61,15 @@ function ShareRow({ share, onRevoke, allItems, allOutfits, allLocations }: Share
         <p className="text-muted-foreground">
           {resolveTargetLabel(share, allItems, allOutfits, allLocations)}
         </p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           {format(parseISO(share.created_at), 'MMM d, yyyy')}
         </p>
       </div>
-      <Button variant="destructive" size="sm" onClick={() => onRevoke(share.id)}>
+      <Button
+        variant="destructive"
+        size="sm"
+        onClick={() => onRevoke(share.id)}
+      >
         Revoke
       </Button>
     </li>
@@ -98,14 +114,20 @@ function ShareSection({
 }
 
 export function OutgoingSharesPage() {
-  const { data: shares, isLoading: sharesLoading, isError } = useOutgoingShares()
+  const {
+    data: shares,
+    isLoading: sharesLoading,
+    isError,
+  } = useOutgoingShares()
   const { data: allItems = [], isLoading: itemsLoading } = useItems('all')
   const { data: allOutfits = [], isLoading: outfitsLoading } = useOutfits()
-  const { data: allLocations = [], isLoading: locationsLoading } = useLocations()
+  const { data: allLocations = [], isLoading: locationsLoading } =
+    useLocations()
   const { mutate: revokeShare } = useRevokeShare()
   const [revokeId, setRevokeId] = useState<string | null>(null)
 
-  const isLoading = sharesLoading || itemsLoading || outfitsLoading || locationsLoading
+  const isLoading =
+    sharesLoading || itemsLoading || outfitsLoading || locationsLoading
 
   if (isLoading) {
     return (
@@ -119,16 +141,26 @@ export function OutgoingSharesPage() {
 
   if (isError) {
     return (
-      <div data-testid="outgoing-shares-page" className="flex flex-col items-center justify-center py-24">
-        <p className="text-muted-foreground">Failed to load shares. Please try again.</p>
+      <div
+        data-testid="outgoing-shares-page"
+        className="flex flex-col items-center justify-center py-24"
+      >
+        <p className="text-muted-foreground">
+          Failed to load shares. Please try again.
+        </p>
       </div>
     )
   }
 
   if (!shares || shares.length === 0) {
     return (
-      <div data-testid="outgoing-shares-page" className="flex flex-col items-center justify-center py-24">
-        <p className="text-muted-foreground">You haven&apos;t shared anything yet</p>
+      <div
+        data-testid="outgoing-shares-page"
+        className="flex flex-col items-center justify-center py-24"
+      >
+        <p className="text-muted-foreground">
+          You haven&apos;t shared anything yet
+        </p>
       </div>
     )
   }
@@ -146,15 +178,28 @@ export function OutgoingSharesPage() {
     revokeShare(revokeId, { onSettled: () => setRevokeId(null) })
   }
 
-  const sharedProps = { onRevoke: handleRevoke, allItems, allOutfits, allLocations }
+  const sharedProps = {
+    onRevoke: handleRevoke,
+    allItems,
+    allOutfits,
+    allLocations,
+  }
 
   return (
     <div data-testid="outgoing-shares-page">
       <h1 className="mb-6 text-2xl font-bold">Outgoing Shares</h1>
 
       <ShareSection title="Items" sectionShares={itemShares} {...sharedProps} />
-      <ShareSection title="Outfits" sectionShares={outfitShares} {...sharedProps} />
-      <ShareSection title="Locations" sectionShares={locationShares} {...sharedProps} />
+      <ShareSection
+        title="Outfits"
+        sectionShares={outfitShares}
+        {...sharedProps}
+      />
+      <ShareSection
+        title="Locations"
+        sectionShares={locationShares}
+        {...sharedProps}
+      />
 
       <AlertDialog
         open={revokeId !== null}
@@ -166,7 +211,8 @@ export function OutgoingSharesPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Revoke share?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will remove access for the recipient. This action cannot be undone.
+              This will remove access for the recipient. This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

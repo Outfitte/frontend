@@ -29,7 +29,12 @@ function renderLayout(initialEntries?: string[]) {
 describe('AppLayout', () => {
   beforeEach(() => {
     useAuthStore.setState({
-      user: { id: 'user-1', email: 'alice@example.com', role: 'user', created_at: '2024-01-01' },
+      user: {
+        id: 'user-1',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01',
+      },
       isAuthenticated: true,
       isHydrating: false,
     })
@@ -37,11 +42,19 @@ describe('AppLayout', () => {
 
   afterEach(() => {
     useThemeStore.getState().setTheme('system')
-    useAuthStore.setState({ user: null, isAuthenticated: false, isHydrating: true })
+    useAuthStore.setState({
+      user: null,
+      isAuthenticated: false,
+      isHydrating: true,
+    })
   })
 
   it('AppLayout should show ? initials when no user is authenticated', () => {
-    useAuthStore.setState({ user: null, isAuthenticated: false, isHydrating: false })
+    useAuthStore.setState({
+      user: null,
+      isAuthenticated: false,
+      isHydrating: false,
+    })
     renderLayout()
 
     expect(screen.getByText('?')).toBeInTheDocument()
@@ -51,7 +64,9 @@ describe('AppLayout', () => {
     useThemeStore.getState().setTheme('light')
     renderLayout()
 
-    expect(screen.getByRole('button', { name: /switch to dark mode/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /switch to dark mode/i })
+    ).toBeInTheDocument()
   })
 
   it('AppLayout should render app name when rendered', () => {
@@ -68,7 +83,9 @@ describe('AppLayout', () => {
     expect(screen.getByRole('link', { name: /locations/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /outfits/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /calendar/i })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /shared with me/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: /shared with me/i })
+    ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /my shares/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /settings/i })).toBeInTheDocument()
   })
@@ -174,8 +191,12 @@ describe('AppLayout', () => {
 
     await user.click(screen.getByRole('button', { name: /user menu/i }))
 
-    expect(await screen.findByRole('menuitem', { name: /settings/i })).toBeInTheDocument()
-    expect(await screen.findByRole('menuitem', { name: /log out/i })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('menuitem', { name: /settings/i })
+    ).toBeInTheDocument()
+    expect(
+      await screen.findByRole('menuitem', { name: /log out/i })
+    ).toBeInTheDocument()
   })
 
   it('AppLayout should call logout when Log out is clicked', async () => {
@@ -201,7 +222,9 @@ describe('AppLayout', () => {
     const user = userEvent.setup()
     renderLayout()
 
-    await user.click(screen.getByRole('button', { name: /switch to light mode/i }))
+    await user.click(
+      screen.getByRole('button', { name: /switch to light mode/i })
+    )
 
     expect(useThemeStore.getState().theme).toBe('light')
   })
@@ -211,7 +234,9 @@ describe('AppLayout', () => {
     const user = userEvent.setup()
     renderLayout()
 
-    await user.click(screen.getByRole('button', { name: /switch to dark mode/i }))
+    await user.click(
+      screen.getByRole('button', { name: /switch to dark mode/i })
+    )
 
     expect(useThemeStore.getState().theme).toBe('dark')
   })
