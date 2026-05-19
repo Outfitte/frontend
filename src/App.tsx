@@ -29,7 +29,12 @@ function ProtectedRoute() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const location = useLocation()
   if (!isAuthenticated) {
-    return <Navigate to={`/login?next=${encodeURIComponent(location.pathname)}`} replace />
+    return (
+      <Navigate
+        to={`/login?next=${encodeURIComponent(location.pathname)}`}
+        replace
+      />
+    )
   }
   return <Outlet />
 }
@@ -77,9 +82,18 @@ function App() {
             <Route path="/outfits/:id/edit" element={<EditOutfitPage />} />
             <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/shared" element={<SharedPage />} />
-            <Route path="/shared/items/:id" element={<SharedItemDetailPage />} />
-            <Route path="/shared/outfits/:id" element={<SharedOutfitDetailPage />} />
-            <Route path="/shared/locations/:id" element={<SharedLocationDetailPage />} />
+            <Route
+              path="/shared/items/:id"
+              element={<SharedItemDetailPage />}
+            />
+            <Route
+              path="/shared/outfits/:id"
+              element={<SharedOutfitDetailPage />}
+            />
+            <Route
+              path="/shared/locations/:id"
+              element={<SharedLocationDetailPage />}
+            />
             <Route path="/shares" element={<OutgoingSharesPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>

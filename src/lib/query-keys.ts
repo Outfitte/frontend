@@ -16,13 +16,15 @@ export const queryKeys = {
   },
   outfits: {
     all: ['outfits'] as const,
-    list: (filter?: { from?: string; to?: string }) => ['outfits', 'list', filter] as const,
+    list: (filter?: { from?: string; to?: string }) =>
+      ['outfits', 'list', filter] as const,
     detail: (id: string) => ['outfits', 'detail', id] as const,
     logs: (id: string) => ['outfits', id, 'logs'] as const,
   },
   outfitLogs: {
     all: ['outfit-logs'] as const,
-    range: (from: string, to: string) => ['outfit-logs', 'range', { from, to }] as const,
+    range: (from: string, to: string) =>
+      ['outfit-logs', 'range', { from, to }] as const,
   },
   users: {
     all: ['users'] as const,

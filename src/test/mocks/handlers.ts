@@ -1,5 +1,17 @@
 import { http, HttpResponse } from 'msw'
-import { mockItem, mockCategory, mockLocation, mockChildLocation, mockWearLog, mockPhoto, mockUserSummary, mockOutfit, mockOutfitLog, mockShareView, mockShare } from './fixtures'
+import {
+  mockItem,
+  mockCategory,
+  mockLocation,
+  mockChildLocation,
+  mockWearLog,
+  mockPhoto,
+  mockUserSummary,
+  mockOutfit,
+  mockOutfitLog,
+  mockShareView,
+  mockShare,
+} from './fixtures'
 
 export const handlers = [
   http.get('/api/health', () => {
@@ -16,7 +28,12 @@ export const handlers = [
   http.post('/api/auth/register', () => {
     return HttpResponse.json(
       {
-        user: { id: 'user-001', email: 'user@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' },
+        user: {
+          id: 'user-001',
+          email: 'user@example.com',
+          role: 'user',
+          created_at: '2026-01-01T00:00:00Z',
+        },
         access_token: 'mock-access-token-abc123',
         refresh_token: 'mock-refresh-token-xyz789',
       },
@@ -40,8 +57,10 @@ export const handlers = [
   }),
 
   http.patch('/api/admin/settings', async ({ request }) => {
-    const body = await request.json() as { registration_enabled: boolean }
-    return HttpResponse.json({ registration_enabled: body.registration_enabled })
+    const body = (await request.json()) as { registration_enabled: boolean }
+    return HttpResponse.json({
+      registration_enabled: body.registration_enabled,
+    })
   }),
 
   http.get('/api/users/me', () => {
@@ -70,7 +89,7 @@ export const handlers = [
   }),
 
   http.post('/api/items', async ({ request }) => {
-    const body = await request.json() as Record<string, unknown>
+    const body = (await request.json()) as Record<string, unknown>
     return HttpResponse.json(
       mockItem({ id: 'item-new-001', name: body['name'] as string }),
       { status: 201 }
@@ -82,7 +101,7 @@ export const handlers = [
   }),
 
   http.patch('/api/items/:id', async ({ params, request }) => {
-    const body = await request.json() as Record<string, unknown>
+    const body = (await request.json()) as Record<string, unknown>
     return HttpResponse.json(mockItem({ id: params['id'] as string, ...body }))
   }),
 
@@ -94,7 +113,10 @@ export const handlers = [
 
   http.post('/api/items/:id/photos', ({ params }) => {
     return HttpResponse.json(
-      mockPhoto({ id: 'photo-new-001', media_key: `uploads/${params['id'] as string}/photo-new-001.jpg` }),
+      mockPhoto({
+        id: 'photo-new-001',
+        media_key: `uploads/${params['id'] as string}/photo-new-001.jpg`,
+      }),
       { status: 201 }
     )
   }),
@@ -128,14 +150,23 @@ export const handlers = [
   http.get('/api/items/:id/wear-logs', ({ params }) => {
     return HttpResponse.json([
       mockWearLog({ id: 'wearlog-001', item_id: params['id'] as string }),
-      mockWearLog({ id: 'wearlog-002', item_id: params['id'] as string, worn_on: '2026-04-11', notes: 'Casual day' }),
+      mockWearLog({
+        id: 'wearlog-002',
+        item_id: params['id'] as string,
+        worn_on: '2026-04-11',
+        notes: 'Casual day',
+      }),
     ])
   }),
 
   http.post('/api/items/:id/wear-logs', async ({ params, request }) => {
-    const body = await request.json() as Record<string, unknown>
+    const body = (await request.json()) as Record<string, unknown>
     return HttpResponse.json(
-      mockWearLog({ id: 'wearlog-new-001', item_id: params['id'] as string, worn_on: body['worn_on'] as string }),
+      mockWearLog({
+        id: 'wearlog-new-001',
+        item_id: params['id'] as string,
+        worn_on: body['worn_on'] as string,
+      }),
       { status: 201 }
     )
   }),
@@ -154,7 +185,7 @@ export const handlers = [
   }),
 
   http.post('/api/locations', async ({ request }) => {
-    const body = await request.json() as Record<string, unknown>
+    const body = (await request.json()) as Record<string, unknown>
     return HttpResponse.json(
       mockLocation({ id: 'loc-new-001', label: body['label'] as string }),
       { status: 201 }
@@ -166,8 +197,10 @@ export const handlers = [
   }),
 
   http.patch('/api/locations/:id', async ({ params, request }) => {
-    const body = await request.json() as Record<string, unknown>
-    return HttpResponse.json(mockLocation({ id: params['id'] as string, ...body }))
+    const body = (await request.json()) as Record<string, unknown>
+    return HttpResponse.json(
+      mockLocation({ id: params['id'] as string, ...body })
+    )
   }),
 
   http.delete('/api/locations/:id', () => {
@@ -175,8 +208,10 @@ export const handlers = [
   }),
 
   http.patch('/api/locations/:id/move', async ({ params, request }) => {
-    const body = await request.json() as { parent_id: string | null }
-    return HttpResponse.json(mockLocation({ id: params['id'] as string, parent_id: body.parent_id }))
+    const body = (await request.json()) as { parent_id: string | null }
+    return HttpResponse.json(
+      mockLocation({ id: params['id'] as string, parent_id: body.parent_id })
+    )
   }),
 
   // --- Outfits ---
@@ -189,9 +224,13 @@ export const handlers = [
   }),
 
   http.post('/api/outfits', async ({ request }) => {
-    const body = await request.json() as Record<string, unknown>
+    const body = (await request.json()) as Record<string, unknown>
     return HttpResponse.json(
-      mockOutfit({ id: 'outfit-new-001', name: body['name'] as string, notes: body['notes'] as string }),
+      mockOutfit({
+        id: 'outfit-new-001',
+        name: body['name'] as string,
+        notes: body['notes'] as string,
+      }),
       { status: 201 }
     )
   }),
@@ -201,8 +240,10 @@ export const handlers = [
   }),
 
   http.patch('/api/outfits/:id', async ({ params, request }) => {
-    const body = await request.json() as Record<string, unknown>
-    return HttpResponse.json(mockOutfit({ id: params['id'] as string, ...body }))
+    const body = (await request.json()) as Record<string, unknown>
+    return HttpResponse.json(
+      mockOutfit({ id: params['id'] as string, ...body })
+    )
   }),
 
   http.delete('/api/outfits/:id', () => {
@@ -223,7 +264,10 @@ export const handlers = [
 
   http.post('/api/outfits/:id/photos', ({ params }) => {
     return HttpResponse.json(
-      mockPhoto({ id: 'photo-new-001', media_key: `uploads/${params['id'] as string}/photo-new-001.jpg` }),
+      mockPhoto({
+        id: 'photo-new-001',
+        media_key: `uploads/${params['id'] as string}/photo-new-001.jpg`,
+      }),
       { status: 201 }
     )
   }),
@@ -239,9 +283,13 @@ export const handlers = [
   }),
 
   http.post('/api/outfits/:id/logs', async ({ params, request }) => {
-    const body = await request.json() as Record<string, unknown>
+    const body = (await request.json()) as Record<string, unknown>
     return HttpResponse.json(
-      mockOutfitLog({ id: 'outfitlog-new-001', outfit_id: params['id'] as string, worn_on: body['worn_on'] as string }),
+      mockOutfitLog({
+        id: 'outfitlog-new-001',
+        outfit_id: params['id'] as string,
+        worn_on: body['worn_on'] as string,
+      }),
       { status: 201 }
     )
   }),
@@ -261,14 +309,23 @@ export const handlers = [
   http.get('/api/shares', () => {
     return HttpResponse.json([
       mockShareView({ id: 'share-001' }),
-      mockShareView({ id: 'share-002', target_type: 'outfit', target_id: 'outfit-001' }),
+      mockShareView({
+        id: 'share-002',
+        target_type: 'outfit',
+        target_id: 'outfit-001',
+      }),
     ])
   }),
 
   http.post('/api/shares', async ({ request }) => {
-    const body = await request.json() as Record<string, unknown>
+    const body = (await request.json()) as Record<string, unknown>
     return HttpResponse.json(
-      mockShare({ id: 'share-new-001', recipient_id: body['recipient_id'] as string, target_type: body['target_type'] as 'item' | 'outfit' | 'location', target_id: body['target_id'] as string }),
+      mockShare({
+        id: 'share-new-001',
+        recipient_id: body['recipient_id'] as string,
+        target_type: body['target_type'] as 'item' | 'outfit' | 'location',
+        target_id: body['target_id'] as string,
+      }),
       { status: 201 }
     )
   }),

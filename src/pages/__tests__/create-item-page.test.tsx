@@ -5,7 +5,11 @@ import { Route, Routes } from 'react-router'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/mocks/server'
 import { render } from '@/test/utils'
-import { mockCategory, mockLocation, mockChildLocation } from '@/test/mocks/fixtures'
+import {
+  mockCategory,
+  mockLocation,
+  mockChildLocation,
+} from '@/test/mocks/fixtures'
 import { CreateItemPage } from '@/pages/CreateItemPage'
 
 vi.mock('@/lib/toast', () => ({
@@ -17,7 +21,10 @@ function renderPage() {
     <Routes>
       <Route path="/items/new" element={<CreateItemPage />} />
       <Route path="/items" element={<div data-testid="items-page" />} />
-      <Route path="/items/:id" element={<div data-testid="item-detail-page" />} />
+      <Route
+        path="/items/:id"
+        element={<div data-testid="item-detail-page" />}
+      />
     </Routes>,
     { initialEntries: ['/items/new'] }
   )
@@ -56,7 +63,9 @@ describe('CreateItemPage', () => {
     await user.type(screen.getByLabelText(/currency/i), 'US')
     await user.click(screen.getByRole('button', { name: /save/i }))
 
-    expect(await screen.findByText(/enter a 3-letter currency code/i)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/enter a 3-letter currency code/i)
+    ).toBeInTheDocument()
   })
 
   it('CreateItemPage should show validation error when seller url is not a valid URL', async () => {
@@ -101,7 +110,9 @@ describe('CreateItemPage', () => {
     await user.type(screen.getByLabelText(/price/i), '49.99')
     await user.click(screen.getByRole('button', { name: /save/i }))
 
-    expect(await screen.findByText(/both price and currency are required/i)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/both price and currency are required/i)
+    ).toBeInTheDocument()
   })
 
   it('CreateItemPage should show validation error when currency is set without price', async () => {
@@ -112,7 +123,9 @@ describe('CreateItemPage', () => {
     await user.type(screen.getByLabelText(/currency/i), 'USD')
     await user.click(screen.getByRole('button', { name: /save/i }))
 
-    expect(await screen.findByText(/both price and currency are required/i)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/both price and currency are required/i)
+    ).toBeInTheDocument()
   })
 
   it('CreateItemPage should show validation error when purchase date is in the future', async () => {
@@ -123,7 +136,9 @@ describe('CreateItemPage', () => {
     await user.type(screen.getByLabelText(/purchase date/i), '2099-12-31')
     await user.click(screen.getByRole('button', { name: /save/i }))
 
-    expect(await screen.findByText(/purchase date cannot be in the future/i)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/purchase date cannot be in the future/i)
+    ).toBeInTheDocument()
   })
 
   it('CreateItemPage should show validation error when metadata key exceeds 64 characters', async () => {
@@ -136,7 +151,9 @@ describe('CreateItemPage', () => {
     await user.type(keyInputs[keyInputs.length - 1], 'a'.repeat(65))
     await user.click(screen.getByRole('button', { name: /save/i }))
 
-    expect(await screen.findByText(/key must be 64 characters or fewer/i)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/key must be 64 characters or fewer/i)
+    ).toBeInTheDocument()
   })
 
   it('CreateItemPage should show validation error when metadata key has leading spaces', async () => {
@@ -149,7 +166,9 @@ describe('CreateItemPage', () => {
     await user.type(keyInputs[keyInputs.length - 1], ' leading')
     await user.click(screen.getByRole('button', { name: /save/i }))
 
-    expect(await screen.findByText(/key must not have leading or trailing spaces/i)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/key must not have leading or trailing spaces/i)
+    ).toBeInTheDocument()
   })
 
   it('CreateItemPage should show validation error when metadata key contains invalid characters', async () => {
@@ -162,7 +181,11 @@ describe('CreateItemPage', () => {
     await user.type(keyInputs[keyInputs.length - 1], 'invalid-key!')
     await user.click(screen.getByRole('button', { name: /save/i }))
 
-    expect(await screen.findByText(/key may only contain letters, numbers, and spaces/i)).toBeInTheDocument()
+    expect(
+      await screen.findByText(
+        /key may only contain letters, numbers, and spaces/i
+      )
+    ).toBeInTheDocument()
   })
 
   it('CreateItemPage should show toast error and stay on form when item creation fails', async () => {
@@ -193,10 +216,18 @@ describe('CreateItemPage', () => {
   it('CreateItemPage should render all four sections: Basic Info, Purchase, Custom Fields, Photos', () => {
     renderPage()
 
-    expect(screen.getByRole('heading', { name: /basic info/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /^purchase$/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /custom fields/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /^photos$/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /basic info/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /^purchase$/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /custom fields/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: /^photos$/i })
+    ).toBeInTheDocument()
   })
 
   it('CreateItemPage should populate category dropdown from GET /categories', async () => {
@@ -210,7 +241,9 @@ describe('CreateItemPage', () => {
     )
     renderPage()
 
-    expect(await screen.findByRole('option', { name: 'Jackets' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('option', { name: 'Jackets' })
+    ).toBeInTheDocument()
     expect(screen.getByRole('option', { name: 'Trousers' })).toBeInTheDocument()
   })
 
@@ -223,7 +256,11 @@ describe('CreateItemPage', () => {
             id: 'cat-001',
             label: 'Jackets',
             field_hints: [
-              { key: 'condition', label: 'Condition', placeholder: 'e.g. new, good, worn' },
+              {
+                key: 'condition',
+                label: 'Condition',
+                placeholder: 'e.g. new, good, worn',
+              },
               { key: 'size', label: 'Size', placeholder: 'e.g. S, M, L' },
             ],
           }),
@@ -233,7 +270,10 @@ describe('CreateItemPage', () => {
     renderPage()
 
     await screen.findByRole('option', { name: 'Jackets' })
-    await user.selectOptions(screen.getByRole('combobox', { name: /category/i }), 'cat-001')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /category/i }),
+      'cat-001'
+    )
 
     expect(await screen.findByDisplayValue('condition')).toBeInTheDocument()
     expect(screen.getByDisplayValue('size')).toBeInTheDocument()
@@ -243,14 +283,24 @@ describe('CreateItemPage', () => {
     server.use(
       http.get('/api/locations', () =>
         HttpResponse.json([
-          mockLocation({ id: 'loc-001', label: 'Main Closet', parent_id: null }),
-          mockChildLocation({ id: 'loc-002', label: 'Top Shelf', parent_id: 'loc-001' }),
+          mockLocation({
+            id: 'loc-001',
+            label: 'Main Closet',
+            parent_id: null,
+          }),
+          mockChildLocation({
+            id: 'loc-002',
+            label: 'Top Shelf',
+            parent_id: 'loc-001',
+          }),
         ])
       )
     )
     renderPage()
 
-    const topShelfOption = await screen.findByRole('option', { name: /top shelf/i })
+    const topShelfOption = await screen.findByRole('option', {
+      name: /top shelf/i,
+    })
     expect(topShelfOption.textContent).toMatch(/—/)
   })
 
@@ -281,7 +331,9 @@ describe('CreateItemPage', () => {
     const keyInputs = screen.getAllByPlaceholderText(/key/i)
     expect(keyInputs.length).toBeGreaterThan(0)
 
-    await user.click(screen.getAllByRole('button', { name: /remove field/i })[0])
+    await user.click(
+      screen.getAllByRole('button', { name: /remove field/i })[0]
+    )
 
     expect(screen.queryAllByPlaceholderText(/key/i).length).toBe(0)
   })
@@ -329,8 +381,11 @@ describe('CreateItemPage', () => {
     let createdBody: Record<string, unknown> = {}
     server.use(
       http.post('/api/items', async ({ request }) => {
-        createdBody = await request.json() as Record<string, unknown>
-        return HttpResponse.json({ id: 'item-new-001', name: createdBody['name'] as string }, { status: 201 })
+        createdBody = (await request.json()) as Record<string, unknown>
+        return HttpResponse.json(
+          { id: 'item-new-001', name: createdBody['name'] as string },
+          { status: 201 }
+        )
       })
     )
     renderPage()
@@ -351,7 +406,15 @@ describe('CreateItemPage', () => {
       ),
       http.post('/api/items/:id/photos', ({ params }) => {
         uploadedItemIds.push(params['id'] as string)
-        return HttpResponse.json({ id: 'photo-new-001', media_key: 'uploads/photo.jpg', position: 0, created_at: '2026-01-01T00:00:00Z' }, { status: 201 })
+        return HttpResponse.json(
+          {
+            id: 'photo-new-001',
+            media_key: 'uploads/photo.jpg',
+            position: 0,
+            created_at: '2026-01-01T00:00:00Z',
+          },
+          { status: 201 }
+        )
       })
     )
     renderPage()
@@ -372,14 +435,20 @@ describe('CreateItemPage', () => {
     let capturedBody: Record<string, unknown> = {}
     server.use(
       http.post('/api/items', async ({ request }) => {
-        capturedBody = await request.json() as Record<string, unknown>
-        return HttpResponse.json({ id: 'item-new-001', name: 'Test' }, { status: 201 })
+        capturedBody = (await request.json()) as Record<string, unknown>
+        return HttpResponse.json(
+          { id: 'item-new-001', name: 'Test' },
+          { status: 201 }
+        )
       })
     )
     renderPage()
 
     await user.type(screen.getByLabelText(/^name/i), 'Test')
-    await user.type(screen.getByLabelText(/seller url/i), 'https://example.com/jacket')
+    await user.type(
+      screen.getByLabelText(/seller url/i),
+      'https://example.com/jacket'
+    )
     await user.click(screen.getByRole('button', { name: /save/i }))
 
     await waitFor(() =>
@@ -401,8 +470,11 @@ describe('CreateItemPage', () => {
     let capturedBody: Record<string, unknown> = {}
     server.use(
       http.post('/api/items', async ({ request }) => {
-        capturedBody = await request.json() as Record<string, unknown>
-        return HttpResponse.json({ id: 'item-new-001', name: 'Test' }, { status: 201 })
+        capturedBody = (await request.json()) as Record<string, unknown>
+        return HttpResponse.json(
+          { id: 'item-new-001', name: 'Test' },
+          { status: 201 }
+        )
       })
     )
     renderPage()
@@ -415,7 +487,9 @@ describe('CreateItemPage', () => {
     await user.click(screen.getByRole('button', { name: /save/i }))
 
     await waitFor(() => expect(capturedBody['name']).toBe('Test'))
-    const metadata = capturedBody['metadata'] as Record<string, string> | undefined
+    const metadata = capturedBody['metadata'] as
+      | Record<string, string>
+      | undefined
     expect(metadata?.['material']).toBeUndefined()
   })
 
@@ -424,8 +498,11 @@ describe('CreateItemPage', () => {
     let capturedBody: Record<string, unknown> = {}
     server.use(
       http.post('/api/items', async ({ request }) => {
-        capturedBody = await request.json() as Record<string, unknown>
-        return HttpResponse.json({ id: 'item-new-001', name: 'Test' }, { status: 201 })
+        capturedBody = (await request.json()) as Record<string, unknown>
+        return HttpResponse.json(
+          { id: 'item-new-001', name: 'Test' },
+          { status: 201 }
+        )
       })
     )
     renderPage()
@@ -439,7 +516,9 @@ describe('CreateItemPage', () => {
     await user.click(screen.getByRole('button', { name: /save/i }))
 
     await waitFor(() =>
-      expect((capturedBody['metadata'] as Record<string, string>)?.['material']).toBe('cotton')
+      expect(
+        (capturedBody['metadata'] as Record<string, string>)?.['material']
+      ).toBe('cotton')
     )
   })
 
@@ -451,7 +530,13 @@ describe('CreateItemPage', () => {
           mockCategory({
             id: 'cat-001',
             label: 'Jackets',
-            field_hints: [{ key: 'condition', label: 'Condition', placeholder: 'e.g. good' }],
+            field_hints: [
+              {
+                key: 'condition',
+                label: 'Condition',
+                placeholder: 'e.g. good',
+              },
+            ],
           }),
         ])
       )
@@ -459,10 +544,16 @@ describe('CreateItemPage', () => {
     renderPage()
 
     await screen.findByRole('option', { name: 'Jackets' })
-    await user.selectOptions(screen.getByRole('combobox', { name: /category/i }), 'cat-001')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /category/i }),
+      'cat-001'
+    )
     await screen.findByDisplayValue('condition')
 
-    await user.selectOptions(screen.getByRole('combobox', { name: /category/i }), '')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /category/i }),
+      ''
+    )
 
     expect(screen.queryByDisplayValue('condition')).not.toBeInTheDocument()
   })
@@ -476,19 +567,31 @@ describe('CreateItemPage', () => {
           mockCategory({
             id: 'cat-001',
             label: 'Jackets',
-            field_hints: [{ key: 'condition', label: 'Condition', placeholder: 'e.g. good' }],
+            field_hints: [
+              {
+                key: 'condition',
+                label: 'Condition',
+                placeholder: 'e.g. good',
+              },
+            ],
           }),
         ])
       ),
       http.post('/api/items', async ({ request }) => {
-        capturedBody = await request.json() as Record<string, unknown>
-        return HttpResponse.json({ id: 'item-new-001', name: 'Test' }, { status: 201 })
+        capturedBody = (await request.json()) as Record<string, unknown>
+        return HttpResponse.json(
+          { id: 'item-new-001', name: 'Test' },
+          { status: 201 }
+        )
       })
     )
     renderPage()
 
     await screen.findByRole('option', { name: 'Jackets' })
-    await user.selectOptions(screen.getByRole('combobox', { name: /category/i }), 'cat-001')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /category/i }),
+      'cat-001'
+    )
     await screen.findByDisplayValue('condition')
     // leave hint value empty
 
@@ -508,19 +611,31 @@ describe('CreateItemPage', () => {
           mockCategory({
             id: 'cat-001',
             label: 'Jackets',
-            field_hints: [{ key: 'condition', label: 'Condition', placeholder: 'e.g. good' }],
+            field_hints: [
+              {
+                key: 'condition',
+                label: 'Condition',
+                placeholder: 'e.g. good',
+              },
+            ],
           }),
         ])
       ),
       http.post('/api/items', async ({ request }) => {
-        capturedBody = await request.json() as Record<string, unknown>
-        return HttpResponse.json({ id: 'item-new-001', name: 'Test' }, { status: 201 })
+        capturedBody = (await request.json()) as Record<string, unknown>
+        return HttpResponse.json(
+          { id: 'item-new-001', name: 'Test' },
+          { status: 201 }
+        )
       })
     )
     renderPage()
 
     await screen.findByRole('option', { name: 'Jackets' })
-    await user.selectOptions(screen.getByRole('combobox', { name: /category/i }), 'cat-001')
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: /category/i }),
+      'cat-001'
+    )
 
     await screen.findByDisplayValue('condition')
     // type into the hint value input (the one after the readonly key)
@@ -531,7 +646,9 @@ describe('CreateItemPage', () => {
     await user.click(screen.getByRole('button', { name: /save/i }))
 
     await waitFor(() =>
-      expect((capturedBody['metadata'] as Record<string, string>)?.['condition']).toBe('excellent')
+      expect(
+        (capturedBody['metadata'] as Record<string, string>)?.['condition']
+      ).toBe('excellent')
     )
   })
 })

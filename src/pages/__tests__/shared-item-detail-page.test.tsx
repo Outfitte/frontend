@@ -45,8 +45,16 @@ describe('SharedItemDetailPage', () => {
               seller_url: 'https://example.com/coat',
               metadata: { material: 'wool', size: 'L' },
               photos: [
-                mockPhoto({ id: 'photo-001', media_key: 'uploads/photo-001.jpg', position: 0 }),
-                mockPhoto({ id: 'photo-002', media_key: 'uploads/photo-002.jpg', position: 1 }),
+                mockPhoto({
+                  id: 'photo-001',
+                  media_key: 'uploads/photo-001.jpg',
+                  position: 0,
+                }),
+                mockPhoto({
+                  id: 'photo-002',
+                  media_key: 'uploads/photo-002.jpg',
+                  position: 1,
+                }),
               ],
               shared_by: { id: 'user-002', email: 'alice@example.com' },
             }),
@@ -57,19 +65,30 @@ describe('SharedItemDetailPage', () => {
       ),
       http.get('/api/items/:id/wear-logs', ({ params }) =>
         HttpResponse.json([
-          mockWearLog({ id: 'wearlog-001', item_id: params['id'] as string, worn_on: '2026-03-10', notes: 'Evening event' }),
+          mockWearLog({
+            id: 'wearlog-001',
+            item_id: params['id'] as string,
+            worn_on: '2026-03-10',
+            notes: 'Evening event',
+          }),
         ])
       ),
       http.get('/api/locations', () =>
         HttpResponse.json([
-          mockLocation({ id: 'loc-001', parent_id: null, label: 'Main Closet' }),
-          mockChildLocation({ id: 'loc-002', parent_id: 'loc-001', label: 'Top Shelf' }),
+          mockLocation({
+            id: 'loc-001',
+            parent_id: null,
+            label: 'Main Closet',
+          }),
+          mockChildLocation({
+            id: 'loc-002',
+            parent_id: 'loc-001',
+            label: 'Top Shelf',
+          }),
         ])
       ),
       http.get('/api/categories', () =>
-        HttpResponse.json([
-          mockCategory({ id: 'cat-001', label: 'Coats' }),
-        ])
+        HttpResponse.json([mockCategory({ id: 'cat-001', label: 'Coats' })])
       )
     )
   })
@@ -95,7 +114,9 @@ describe('SharedItemDetailPage', () => {
     )
     renderPage()
 
-    expect(screen.getByTestId('shared-item-detail-skeleton')).toBeInTheDocument()
+    expect(
+      screen.getByTestId('shared-item-detail-skeleton')
+    ).toBeInTheDocument()
   })
 
   // --- Happy path ---
@@ -103,19 +124,25 @@ describe('SharedItemDetailPage', () => {
   it('SharedItemDetailPage should have data-testid shared-item-detail-page on root element', async () => {
     renderPage()
 
-    expect(await screen.findByTestId('shared-item-detail-page')).toBeInTheDocument()
+    expect(
+      await screen.findByTestId('shared-item-detail-page')
+    ).toBeInTheDocument()
   })
 
   it('SharedItemDetailPage should render shared-by banner with sender email above the header', async () => {
     renderPage()
 
-    expect(await screen.findByTestId('shared-by-banner')).toHaveTextContent('shared by alice@example.com')
+    expect(await screen.findByTestId('shared-by-banner')).toHaveTextContent(
+      'shared by alice@example.com'
+    )
   })
 
   it('SharedItemDetailPage should render item name, brand, color, and category as heading and badges', async () => {
     renderPage()
 
-    expect(await screen.findByRole('heading', { name: 'Shared Wool Coat' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Shared Wool Coat' })
+    ).toBeInTheDocument()
     expect(screen.getByText('Burberry')).toBeInTheDocument()
     expect(screen.getByText('camel')).toBeInTheDocument()
     expect(screen.getByText('Coats')).toBeInTheDocument()
@@ -127,7 +154,10 @@ describe('SharedItemDetailPage', () => {
     await screen.findByText('Shared Wool Coat')
     expect(screen.getByTestId('photo-gallery')).toBeInTheDocument()
     expect(screen.getAllByTestId('photo-thumbnail')).toHaveLength(2)
-    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', '/media/uploads/photo-001.jpg')
+    expect(screen.getByTestId('main-photo')).toHaveAttribute(
+      'src',
+      '/media/uploads/photo-001.jpg'
+    )
   })
 
   it('SharedItemDetailPage should render location breadcrumb with ancestor chain', async () => {
@@ -156,7 +186,10 @@ describe('SharedItemDetailPage', () => {
     expect(screen.getByTestId('purchase-section')).toBeInTheDocument()
     expect(screen.getByText(/499\.00/)).toBeInTheDocument()
     expect(screen.getByText(/GBP/)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /seller/i })).toHaveAttribute('href', 'https://example.com/coat')
+    expect(screen.getByRole('link', { name: /seller/i })).toHaveAttribute(
+      'href',
+      'https://example.com/coat'
+    )
   })
 
   it('SharedItemDetailPage should render wear history read-only with wear count and log entries', async () => {
@@ -172,7 +205,13 @@ describe('SharedItemDetailPage', () => {
     server.use(
       http.get('/api/shares/with-me', () =>
         HttpResponse.json({
-          items: [mockSharedItem({ id: ITEM_ID, name: 'Shared Wool Coat', photos: [] })],
+          items: [
+            mockSharedItem({
+              id: ITEM_ID,
+              name: 'Shared Wool Coat',
+              photos: [],
+            }),
+          ],
           outfits: [],
           locations: [],
         })
@@ -213,7 +252,13 @@ describe('SharedItemDetailPage', () => {
     server.use(
       http.get('/api/shares/with-me', () =>
         HttpResponse.json({
-          items: [mockSharedItem({ id: ITEM_ID, name: 'Shared Wool Coat', location_id: null })],
+          items: [
+            mockSharedItem({
+              id: ITEM_ID,
+              name: 'Shared Wool Coat',
+              location_id: null,
+            }),
+          ],
           outfits: [],
           locations: [],
         })
@@ -230,11 +275,17 @@ describe('SharedItemDetailPage', () => {
     renderPage()
 
     await screen.findByText('Shared Wool Coat')
-    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-001'))
+    expect(screen.getByTestId('main-photo')).toHaveAttribute(
+      'src',
+      expect.stringContaining('photo-001')
+    )
 
     await user.click(screen.getByRole('button', { name: /next photo/i }))
 
-    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-002'))
+    expect(screen.getByTestId('main-photo')).toHaveAttribute(
+      'src',
+      expect.stringContaining('photo-002')
+    )
   })
 
   it('SharedItemDetailPage should switch to previous photo when Previous arrow is clicked', async () => {
@@ -243,11 +294,17 @@ describe('SharedItemDetailPage', () => {
 
     await screen.findByText('Shared Wool Coat')
     await user.click(screen.getByRole('button', { name: /next photo/i }))
-    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-002'))
+    expect(screen.getByTestId('main-photo')).toHaveAttribute(
+      'src',
+      expect.stringContaining('photo-002')
+    )
 
     await user.click(screen.getByRole('button', { name: /previous photo/i }))
 
-    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-001'))
+    expect(screen.getByTestId('main-photo')).toHaveAttribute(
+      'src',
+      expect.stringContaining('photo-001')
+    )
   })
 
   it('SharedItemDetailPage should switch to photo when thumbnail is clicked', async () => {
@@ -258,7 +315,10 @@ describe('SharedItemDetailPage', () => {
     const thumbnails = screen.getAllByTestId('photo-thumbnail')
     await user.click(thumbnails[1])
 
-    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-002'))
+    expect(screen.getByTestId('main-photo')).toHaveAttribute(
+      'src',
+      expect.stringContaining('photo-002')
+    )
   })
 
   it('SharedItemDetailPage should wrap to last photo when Previous arrow is clicked on first photo', async () => {
@@ -266,11 +326,17 @@ describe('SharedItemDetailPage', () => {
     renderPage()
 
     await screen.findByText('Shared Wool Coat')
-    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-001'))
+    expect(screen.getByTestId('main-photo')).toHaveAttribute(
+      'src',
+      expect.stringContaining('photo-001')
+    )
 
     await user.click(screen.getByRole('button', { name: /previous photo/i }))
 
-    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-002'))
+    expect(screen.getByTestId('main-photo')).toHaveAttribute(
+      'src',
+      expect.stringContaining('photo-002')
+    )
   })
 
   it('SharedItemDetailPage should wrap to first photo when Next arrow is clicked on last photo', async () => {
@@ -279,11 +345,17 @@ describe('SharedItemDetailPage', () => {
 
     await screen.findByText('Shared Wool Coat')
     await user.click(screen.getByRole('button', { name: /next photo/i }))
-    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-002'))
+    expect(screen.getByTestId('main-photo')).toHaveAttribute(
+      'src',
+      expect.stringContaining('photo-002')
+    )
 
     await user.click(screen.getByRole('button', { name: /next photo/i }))
 
-    expect(screen.getByTestId('main-photo')).toHaveAttribute('src', expect.stringContaining('photo-001'))
+    expect(screen.getByTestId('main-photo')).toHaveAttribute(
+      'src',
+      expect.stringContaining('photo-001')
+    )
   })
 
   it('SharedItemDetailPage should render purchase section when only currency is set', async () => {
@@ -317,13 +389,29 @@ describe('SharedItemDetailPage', () => {
 
     await screen.findByText('Shared Wool Coat')
 
-    expect(screen.queryByRole('link', { name: /edit/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /archive/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /unarchive/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /dispose/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /delete/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /share/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /log wear/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /delete wear log/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: /edit/i })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /archive/i })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /unarchive/i })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /dispose/i })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /delete/i })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /share/i })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /log wear/i })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /delete wear log/i })
+    ).not.toBeInTheDocument()
   })
 })

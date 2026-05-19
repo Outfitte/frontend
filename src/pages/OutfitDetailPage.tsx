@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { format, parseISO, isAfter } from 'date-fns'
 import { useForm } from 'react-hook-form'
@@ -24,7 +24,11 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { useOutfit, useDeleteOutfit } from '@/hooks/use-outfits'
-import { useOutfitLogs, useLogOutfitWear, useDeleteOutfitLog } from '@/hooks/use-outfit-logs'
+import {
+  useOutfitLogs,
+  useLogOutfitWear,
+  useDeleteOutfitLog,
+} from '@/hooks/use-outfit-logs'
 import { useItems } from '@/hooks/use-items'
 import { cn } from '@/lib/utils'
 
@@ -54,12 +58,13 @@ export function OutfitDetailPage() {
   const { mutate: deleteOutfitLog } = useDeleteOutfitLog()
 
   const [activePhotoIdx, setActivePhotoIdx] = useState(0)
+  const [prevId, setPrevId] = useState(id)
+  if (prevId !== id) {
+    setPrevId(id)
+    setActivePhotoIdx(0)
+  }
   const [showWearForm, setShowWearForm] = useState(false)
   const [showShareDialog, setShowShareDialog] = useState(false)
-
-  useEffect(() => {
-    setActivePhotoIdx(0)
-  }, [id])
 
   const {
     register,
@@ -91,8 +96,11 @@ export function OutfitDetailPage() {
 
   if (error || !outfit) {
     return (
-      <div data-testid="outfit-detail-page" className="flex flex-col items-center justify-center py-24">
-        <p className="text-lg text-muted-foreground">Outfit not found</p>
+      <div
+        data-testid="outfit-detail-page"
+        className="flex flex-col items-center justify-center py-24"
+      >
+        <p className="text-muted-foreground text-lg">Outfit not found</p>
         <Button asChild className="mt-4" variant="outline">
           <Link to="/outfits">Back to outfits</Link>
         </Button>
@@ -101,7 +109,9 @@ export function OutfitDetailPage() {
   }
 
   const outfitName = outfit.name ?? 'Untitled outfit'
-  const sortedPhotos = [...outfit.photos].sort((a, b) => a.position - b.position)
+  const sortedPhotos = [...outfit.photos].sort(
+    (a, b) => a.position - b.position
+  )
   const activePhoto = sortedPhotos[activePhotoIdx]
 
   const wearCount = outfitLogs.length
@@ -123,7 +133,11 @@ export function OutfitDetailPage() {
 
   function onWearLogSubmit(values: WearLogFormValues) {
     logWear(
-      { outfitId: id!, worn_on: values.worn_on, notes: values.notes || undefined },
+      {
+        outfitId: id!,
+        worn_on: values.worn_on,
+        notes: values.notes || undefined,
+      },
       {
         onSuccess: () => {
           setShowWearForm(false)
@@ -140,14 +154,18 @@ export function OutfitDetailPage() {
         <div>
           <h1 className="text-2xl font-bold">{outfitName}</h1>
           {outfit.notes && (
-            <p className="mt-1 text-sm text-muted-foreground">{outfit.notes}</p>
+            <p className="text-muted-foreground mt-1 text-sm">{outfit.notes}</p>
           )}
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline" size="sm">
             <Link to={`/outfits/${id}/edit`}>Edit</Link>
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setShowShareDialog(true)}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowShareDialog(true)}
+          >
             Share
           </Button>
           <AlertDialog>
@@ -160,13 +178,15 @@ export function OutfitDetailPage() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete {outfitName}?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. &ldquo;{outfitName}&rdquo; will be permanently
-                  deleted.
+                  This action cannot be undone. &ldquo;{outfitName}&rdquo; will
+                  be permanently deleted.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete}>Confirm delete</AlertDialogAction>
+                <AlertDialogAction onClick={handleDelete}>
+                  Confirm delete
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -180,13 +200,13 @@ export function OutfitDetailPage() {
           {sortedPhotos.length === 0 ? (
             <div
               data-testid="outfit-photo-placeholder"
-              className="flex aspect-square items-center justify-center rounded-xl border bg-muted text-muted-foreground"
+              className="bg-muted text-muted-foreground flex aspect-square items-center justify-center rounded-xl border"
             >
               No photo
             </div>
           ) : (
             <div data-testid="outfit-photo-gallery">
-              <div className="relative aspect-square overflow-hidden rounded-xl border bg-muted">
+              <div className="bg-muted relative aspect-square overflow-hidden rounded-xl border">
                 <img
                   data-testid="outfit-main-photo"
                   src={`/media/${activePhoto.media_key}`}
@@ -199,7 +219,7 @@ export function OutfitDetailPage() {
                       type="button"
                       aria-label="Previous photo"
                       onClick={prevPhoto}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-1 hover:bg-background"
+                      className="bg-background/80 hover:bg-background absolute top-1/2 left-2 -translate-y-1/2 rounded-full p-1"
                     >
                       <ChevronLeftIcon className="h-5 w-5" />
                     </button>
@@ -207,7 +227,7 @@ export function OutfitDetailPage() {
                       type="button"
                       aria-label="Next photo"
                       onClick={nextPhoto}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-1 hover:bg-background"
+                      className="bg-background/80 hover:bg-background absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1"
                     >
                       <ChevronRightIcon className="h-5 w-5" />
                     </button>
@@ -225,7 +245,7 @@ export function OutfitDetailPage() {
                       onClick={() => setActivePhotoIdx(idx)}
                       className={cn(
                         'flex-shrink-0 overflow-hidden rounded-lg border',
-                        idx === activePhotoIdx ? 'ring-2 ring-primary' : ''
+                        idx === activePhotoIdx ? 'ring-primary ring-2' : ''
                       )}
                     >
                       <img
@@ -244,9 +264,11 @@ export function OutfitDetailPage() {
         {/* Right: Items */}
         <div className="space-y-6">
           <div>
-            <p className="mb-2 text-sm font-medium text-muted-foreground">Items</p>
+            <p className="text-muted-foreground mb-2 text-sm font-medium">
+              Items
+            </p>
             {outfit.items.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No items yet</p>
+              <p className="text-muted-foreground text-sm">No items yet</p>
             ) : (
               <ul className="grid grid-cols-2 gap-2">
                 {outfit.items.map((outfitItem) => {
@@ -257,7 +279,7 @@ export function OutfitDetailPage() {
                     <li key={outfitItem.item_id}>
                       <Link
                         to={`/items/${item.id}`}
-                        className="flex flex-col items-center gap-1 rounded-lg border p-2 text-center text-sm hover:bg-muted"
+                        className="hover:bg-muted flex flex-col items-center gap-1 rounded-lg border p-2 text-center text-sm"
                       >
                         {thumbnail ? (
                           <img
@@ -266,7 +288,7 @@ export function OutfitDetailPage() {
                             className="h-16 w-16 rounded object-cover"
                           />
                         ) : (
-                          <div className="flex h-16 w-16 items-center justify-center rounded bg-muted text-xs text-muted-foreground">
+                          <div className="bg-muted text-muted-foreground flex h-16 w-16 items-center justify-center rounded text-xs">
                             No photo
                           </div>
                         )}
@@ -294,7 +316,7 @@ export function OutfitDetailPage() {
         {/* Wear stats */}
         <div className="mb-4 flex gap-6 text-sm">
           <div>
-            <span className="font-medium text-muted-foreground">Worn </span>
+            <span className="text-muted-foreground font-medium">Worn </span>
             <span data-testid="outfit-wear-count" className="font-bold">
               {wearCount}
             </span>
@@ -302,8 +324,12 @@ export function OutfitDetailPage() {
           </div>
           {lastWornDate && (
             <div>
-              <span className="font-medium text-muted-foreground">Last worn </span>
-              <span data-testid="outfit-last-worn">{format(parseISO(lastWornDate), 'MMM d, yyyy')}</span>
+              <span className="text-muted-foreground font-medium">
+                Last worn{' '}
+              </span>
+              <span data-testid="outfit-last-worn">
+                {format(parseISO(lastWornDate), 'MMM d, yyyy')}
+              </span>
             </div>
           )}
         </div>
@@ -318,14 +344,26 @@ export function OutfitDetailPage() {
             <div className="space-y-3">
               <div>
                 <Label htmlFor="worn_on">Date</Label>
-                <Input id="worn_on" type="date" {...register('worn_on')} className="mt-1" />
+                <Input
+                  id="worn_on"
+                  type="date"
+                  {...register('worn_on')}
+                  className="mt-1"
+                />
                 {errors.worn_on && (
-                  <p className="mt-1 text-xs text-destructive">{errors.worn_on.message}</p>
+                  <p className="text-destructive mt-1 text-xs">
+                    {errors.worn_on.message}
+                  </p>
                 )}
               </div>
               <div>
                 <Label htmlFor="notes">Notes</Label>
-                <Textarea id="notes" {...register('notes')} className="mt-1" rows={2} />
+                <Textarea
+                  id="notes"
+                  {...register('notes')}
+                  className="mt-1"
+                  rows={2}
+                />
               </div>
               <div className="flex gap-2">
                 <Button type="submit" size="sm" disabled={isLoggingWear}>
@@ -350,16 +388,25 @@ export function OutfitDetailPage() {
         {/* Wear log list */}
         <ul className="space-y-2">
           {outfitLogs.map((log) => (
-            <li key={log.id} className="flex items-start justify-between rounded-lg border p-3">
+            <li
+              key={log.id}
+              className="flex items-start justify-between rounded-lg border p-3"
+            >
               <div className="text-sm">
-                <p className="font-medium">{format(parseISO(log.worn_on), 'MMM d, yyyy')}</p>
-                {log.notes && <p className="text-muted-foreground">{log.notes}</p>}
+                <p className="font-medium">
+                  {format(parseISO(log.worn_on), 'MMM d, yyyy')}
+                </p>
+                {log.notes && (
+                  <p className="text-muted-foreground">{log.notes}</p>
+                )}
               </div>
               <button
                 type="button"
                 aria-label="Delete wear log"
-                onClick={() => deleteOutfitLog({ outfitId: id!, logId: log.id })}
-                className="ml-2 rounded p-1 text-muted-foreground hover:bg-muted hover:text-destructive"
+                onClick={() =>
+                  deleteOutfitLog({ outfitId: id!, logId: log.id })
+                }
+                className="text-muted-foreground hover:bg-muted hover:text-destructive ml-2 rounded p-1"
               >
                 <Trash2Icon className="h-4 w-4" />
               </button>

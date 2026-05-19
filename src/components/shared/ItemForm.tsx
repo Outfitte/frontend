@@ -73,7 +73,10 @@ const schema = z
       const hasCurrency = !!data.purchase_currency
       return hasPrice === hasCurrency
     },
-    { error: 'Both price and currency are required together', path: ['purchase_price'] }
+    {
+      error: 'Both price and currency are required together',
+      path: ['purchase_price'],
+    }
   )
 
 export type ItemFormValues = z.infer<typeof schema>
@@ -158,7 +161,10 @@ export function ItemForm({
     },
   })
 
-  const { fields, append, remove } = useFieldArray({ control, name: 'metadata' })
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'metadata',
+  })
   const flatLocations = flattenTree(buildLocationTree(locations))
 
   // Auto-clear currency when price is cleared (edit mode pair constraint)
@@ -166,7 +172,10 @@ export function ItemForm({
   const purchaseCurrency = watch('purchase_currency')
   useEffect(() => {
     if (mode === 'edit' && purchasePrice === '' && purchaseCurrency) {
-      setValue('purchase_currency', '', { shouldValidate: false, shouldDirty: true })
+      setValue('purchase_currency', '', {
+        shouldValidate: false,
+        shouldDirty: true,
+      })
     }
   }, [mode, purchasePrice, purchaseCurrency, setValue])
 
@@ -181,13 +190,20 @@ export function ItemForm({
   const currencyRegProps = register('purchase_currency')
   function handleCurrencyChange(e: React.ChangeEvent<HTMLInputElement>) {
     const upper = e.target.value.toUpperCase()
-    setValue('purchase_currency', upper, { shouldValidate: true, shouldDirty: true, shouldTouch: true })
+    setValue('purchase_currency', upper, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    })
   }
 
   function handlePhotoInput(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
     if (files.length === 0) return
-    const newPhotos = files.map((file) => ({ file, preview: URL.createObjectURL(file) }))
+    const newPhotos = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }))
     setQueuedPhotos((prev) => [...prev, ...newPhotos])
     e.target.value = ''
   }
@@ -204,7 +220,12 @@ export function ItemForm({
   }
 
   async function onSubmit(values: ItemFormValues) {
-    const metadata = buildMetadata(values.metadata ?? [], currentHints, hintValues, mode)
+    const metadata = buildMetadata(
+      values.metadata ?? [],
+      currentHints,
+      hintValues,
+      mode
+    )
     const payload: ItemFormPayload = {
       name: values.name,
       brand: values.brand,
@@ -217,7 +238,10 @@ export function ItemForm({
       seller_url: values.seller_url,
       metadata,
     }
-    await onSave(payload, queuedPhotos.map((q) => q.file))
+    await onSave(
+      payload,
+      queuedPhotos.map((q) => q.file)
+    )
   }
 
   const saveLabel = mode === 'edit' ? 'Save Changes' : 'Save'
@@ -232,7 +256,9 @@ export function ItemForm({
             <Label htmlFor="name">Name *</Label>
             <Input id="name" {...register('name')} className="mt-1" />
             {errors.name && (
-              <p className="mt-1 text-xs text-destructive">{errors.name.message}</p>
+              <p className="text-destructive mt-1 text-xs">
+                {errors.name.message}
+              </p>
             )}
           </div>
 
@@ -248,7 +274,7 @@ export function ItemForm({
               aria-label="Category"
               {...catRegProps}
               onChange={handleCategoryChange}
-              className="mt-1 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none"
+              className="border-input mt-1 w-full rounded-md border bg-transparent px-3 py-2 text-sm outline-none"
             >
               <option value="">— No category —</option>
               {categories.map((cat) => (
@@ -270,12 +296,14 @@ export function ItemForm({
               id="location_id"
               aria-label="Location"
               {...register('location_id')}
-              className="mt-1 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none"
+              className="border-input mt-1 w-full rounded-md border bg-transparent px-3 py-2 text-sm outline-none"
             >
               <option value="">— No location —</option>
               {flatLocations.map((loc) => (
                 <option key={loc.id} value={loc.id}>
-                  {'—'.repeat(loc.depth)}{loc.depth > 0 ? ' ' : ''}{loc.label}
+                  {'—'.repeat(loc.depth)}
+                  {loc.depth > 0 ? ' ' : ''}
+                  {loc.label}
                 </option>
               ))}
             </select>
@@ -292,9 +320,15 @@ export function ItemForm({
           <div className="flex gap-4">
             <div className="flex-1">
               <Label htmlFor="purchase_price">Price</Label>
-              <Input id="purchase_price" {...register('purchase_price')} className="mt-1" />
+              <Input
+                id="purchase_price"
+                {...register('purchase_price')}
+                className="mt-1"
+              />
               {errors.purchase_price && (
-                <p className="mt-1 text-xs text-destructive">{errors.purchase_price.message}</p>
+                <p className="text-destructive mt-1 text-xs">
+                  {errors.purchase_price.message}
+                </p>
               )}
             </div>
             <div className="w-28">
@@ -308,7 +342,9 @@ export function ItemForm({
                 className="mt-1"
               />
               {errors.purchase_currency && (
-                <p className="mt-1 text-xs text-destructive">{errors.purchase_currency.message}</p>
+                <p className="text-destructive mt-1 text-xs">
+                  {errors.purchase_currency.message}
+                </p>
               )}
             </div>
           </div>
@@ -322,15 +358,24 @@ export function ItemForm({
               className="mt-1"
             />
             {errors.purchase_date && (
-              <p className="mt-1 text-xs text-destructive">{errors.purchase_date.message}</p>
+              <p className="text-destructive mt-1 text-xs">
+                {errors.purchase_date.message}
+              </p>
             )}
           </div>
 
           <div>
             <Label htmlFor="seller_url">Seller URL</Label>
-            <Input id="seller_url" type="url" {...register('seller_url')} className="mt-1" />
+            <Input
+              id="seller_url"
+              type="url"
+              {...register('seller_url')}
+              className="mt-1"
+            />
             {errors.seller_url && (
-              <p className="mt-1 text-xs text-destructive">{errors.seller_url.message}</p>
+              <p className="text-destructive mt-1 text-xs">
+                {errors.seller_url.message}
+              </p>
             )}
           </div>
         </div>
@@ -349,13 +394,16 @@ export function ItemForm({
                 readOnly
                 value={hint.key}
                 aria-label={`Hint key ${hint.key}`}
-                className="w-40 rounded-md border border-input bg-muted px-3 py-2 text-sm"
+                className="border-input bg-muted w-40 rounded-md border px-3 py-2 text-sm"
               />
               <Input
                 placeholder={hint.placeholder}
                 value={hintValues[hint.key] ?? ''}
                 onChange={(e) =>
-                  setHintValues((prev) => ({ ...prev, [hint.key]: e.target.value }))
+                  setHintValues((prev) => ({
+                    ...prev,
+                    [hint.key]: e.target.value,
+                  }))
                 }
                 className="flex-1"
               />
@@ -389,7 +437,7 @@ export function ItemForm({
           {fields.map((field, idx) => {
             const err = errors.metadata?.[idx]?.key
             return err ? (
-              <p key={field.id} className="text-xs text-destructive">
+              <p key={field.id} className="text-destructive text-xs">
                 {err.message}
               </p>
             ) : null
@@ -421,13 +469,13 @@ export function ItemForm({
                   <img
                     src={`/media/${photo.media_key}`}
                     alt={`Existing photo ${photo.id}`}
-                    className="h-20 w-20 rounded-lg object-cover border"
+                    className="h-20 w-20 rounded-lg border object-cover"
                   />
                   <button
                     type="button"
                     aria-label={`Delete photo ${photo.id}`}
                     onClick={() => handleDeleteExistingPhoto(photo)}
-                    className="absolute -right-2 -top-2 rounded-full bg-destructive text-destructive-foreground p-0.5 leading-none"
+                    className="bg-destructive text-destructive-foreground absolute -top-2 -right-2 rounded-full p-0.5 leading-none"
                   >
                     ✕
                   </button>
@@ -455,13 +503,13 @@ export function ItemForm({
                   <img
                     src={photo.preview}
                     alt={`Photo ${idx + 1}`}
-                    className="h-20 w-20 rounded-lg object-cover border"
+                    className="h-20 w-20 rounded-lg border object-cover"
                   />
                   <button
                     type="button"
                     aria-label={`Remove photo ${idx + 1}`}
                     onClick={() => removeQueuedPhoto(idx)}
-                    className="absolute -right-2 -top-2 rounded-full bg-destructive text-destructive-foreground p-0.5 leading-none"
+                    className="bg-destructive text-destructive-foreground absolute -top-2 -right-2 rounded-full p-0.5 leading-none"
                   >
                     ✕
                   </button>

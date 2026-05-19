@@ -7,7 +7,11 @@ interface CategoryBrowserProps {
   showHints?: boolean
 }
 
-export function CategoryBrowser({ value, onChange, showHints = false }: CategoryBrowserProps) {
+export function CategoryBrowser({
+  value,
+  onChange,
+  showHints = false,
+}: CategoryBrowserProps) {
   const { data: categories, isLoading } = useCategories()
 
   if (isLoading) {
@@ -31,7 +35,7 @@ export function CategoryBrowser({ value, onChange, showHints = false }: Category
         aria-label="Category"
         value={value ?? ''}
         onChange={handleChange}
-        className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none"
+        className="border-input w-full rounded-md border bg-transparent px-3 py-2 text-sm outline-none"
       >
         <option value="">Uncategorised</option>
         {(categories ?? []).map((cat) => (
@@ -41,19 +45,28 @@ export function CategoryBrowser({ value, onChange, showHints = false }: Category
         ))}
       </select>
 
-      {showHints && selectedCategory && selectedCategory.field_hints.length > 0 && (
-        <div data-testid="field-hints-panel" className="rounded-md border border-border bg-muted/40 p-3 space-y-2">
-          {selectedCategory.field_hints.map((hint) => (
-            <div key={hint.key} className="text-sm">
-              <span className="font-mono text-xs text-muted-foreground">{hint.key}</span>
-              {' · '}
-              <span className="font-medium">{hint.label}</span>
-              {' — '}
-              <span className="text-muted-foreground">{hint.placeholder}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      {showHints &&
+        selectedCategory &&
+        selectedCategory.field_hints.length > 0 && (
+          <div
+            data-testid="field-hints-panel"
+            className="border-border bg-muted/40 space-y-2 rounded-md border p-3"
+          >
+            {selectedCategory.field_hints.map((hint) => (
+              <div key={hint.key} className="text-sm">
+                <span className="text-muted-foreground font-mono text-xs">
+                  {hint.key}
+                </span>
+                {' · '}
+                <span className="font-medium">{hint.label}</span>
+                {' — '}
+                <span className="text-muted-foreground">
+                  {hint.placeholder}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
     </div>
   )
 }

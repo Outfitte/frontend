@@ -122,7 +122,10 @@ export function useArchiveItem() {
     },
     onError: (error, _, context) => {
       if (context?.previous !== undefined) {
-        queryClient.setQueryData<Item[]>(queryKeys.items.list(), context.previous)
+        queryClient.setQueryData<Item[]>(
+          queryKeys.items.list(),
+          context.previous
+        )
       }
       toast.error(error.message)
     },
@@ -142,8 +145,12 @@ export function useUnarchiveItem() {
     mutationFn: (id) => api.post<void>(`/items/${id}/unarchive`),
     onMutate: async (id) => {
       // Cancel only the archived list to avoid cancelling unrelated status variants
-      await queryClient.cancelQueries({ queryKey: queryKeys.items.list('archived') })
-      const previous = queryClient.getQueryData<Item[]>(queryKeys.items.list('archived'))
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.items.list('archived'),
+      })
+      const previous = queryClient.getQueryData<Item[]>(
+        queryKeys.items.list('archived')
+      )
       if (previous) {
         queryClient.setQueryData<Item[]>(
           queryKeys.items.list('archived'),
@@ -154,7 +161,10 @@ export function useUnarchiveItem() {
     },
     onError: (error, _, context) => {
       if (context?.previous !== undefined) {
-        queryClient.setQueryData<Item[]>(queryKeys.items.list('archived'), context.previous)
+        queryClient.setQueryData<Item[]>(
+          queryKeys.items.list('archived'),
+          context.previous
+        )
       }
       toast.error(error.message)
     },
@@ -172,7 +182,8 @@ export function useDisposeItem() {
   const queryClient = useQueryClient()
   // No optimistic update — dispose is irreversible; confirm with server before updating UI
   return useMutation<void, ApiError, DisposeVars>({
-    mutationFn: ({ id, reason }) => api.post<void>(`/items/${id}/dispose`, { reason }),
+    mutationFn: ({ id, reason }) =>
+      api.post<void>(`/items/${id}/dispose`, { reason }),
     onSuccess: () => {
       toast.success('Item disposed')
     },

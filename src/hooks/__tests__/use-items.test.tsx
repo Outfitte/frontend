@@ -134,7 +134,9 @@ describe('useCreateItem', () => {
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useCreateItem(), { wrapper })
-    act(() => { result.current.mutate({ name: 'Test Item' }) })
+    act(() => {
+      result.current.mutate({ name: 'Test Item' })
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Validation failed')
@@ -144,12 +146,18 @@ describe('useCreateItem', () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useCreateItem(), { wrapper })
-    act(() => { result.current.mutate({ name: 'Blue Denim Jacket' }) })
+    act(() => {
+      result.current.mutate({ name: 'Blue Denim Jacket' })
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data).toEqual(mockItem({ id: 'item-new-001', name: 'Blue Denim Jacket' }))
+    expect(result.current.data).toEqual(
+      mockItem({ id: 'item-new-001', name: 'Blue Denim Jacket' })
+    )
     const { toast } = await import('@/lib/toast')
     expect(toast.success).toHaveBeenCalled()
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.all,
+    })
   })
 })
 
@@ -168,7 +176,12 @@ describe('useUpdateItem', () => {
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useUpdateItem(), { wrapper })
-    act(() => { result.current.mutate({ id: 'item-missing', data: { name: 'Updated Name' } }) })
+    act(() => {
+      result.current.mutate({
+        id: 'item-missing',
+        data: { name: 'Updated Name' },
+      })
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Item not found')
@@ -178,12 +191,21 @@ describe('useUpdateItem', () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useUpdateItem(), { wrapper })
-    act(() => { result.current.mutate({ id: 'item-001', data: { name: 'Updated Blue Denim Jacket' } }) })
+    act(() => {
+      result.current.mutate({
+        id: 'item-001',
+        data: { name: 'Updated Blue Denim Jacket' },
+      })
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     const { toast } = await import('@/lib/toast')
     expect(toast.success).toHaveBeenCalled()
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.all })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.detail('item-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.all,
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.detail('item-001'),
+    })
   })
 })
 
@@ -202,7 +224,9 @@ describe('useDeleteItem', () => {
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useDeleteItem(), { wrapper })
-    act(() => { result.current.mutate('item-missing') })
+    act(() => {
+      result.current.mutate('item-missing')
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Item not found')
@@ -212,11 +236,15 @@ describe('useDeleteItem', () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useDeleteItem(), { wrapper })
-    act(() => { result.current.mutate('item-001') })
+    act(() => {
+      result.current.mutate('item-001')
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     const { toast } = await import('@/lib/toast')
     expect(toast.success).toHaveBeenCalled()
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.all,
+    })
   })
 })
 
@@ -239,7 +267,9 @@ describe('useArchiveItem', () => {
       mockItem({ id: 'item-002', name: 'Red Wool Coat' }),
     ])
     const { result } = renderHook(() => useArchiveItem(), { wrapper })
-    act(() => { result.current.mutate('item-001') })
+    act(() => {
+      result.current.mutate('item-001')
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     const data = queryClient.getQueryData<Item[]>(queryKeys.items.list())
     expect(data).toHaveLength(2)
@@ -257,7 +287,9 @@ describe('useArchiveItem', () => {
     // No pre-seeded data — covers the false branches of if (previous) in onMutate
     // and if (context?.previous !== undefined) in onError
     const { result } = renderHook(() => useArchiveItem(), { wrapper })
-    act(() => { result.current.mutate('item-001') })
+    act(() => {
+      result.current.mutate('item-001')
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(queryClient.getQueryData(queryKeys.items.list())).toBeUndefined()
     const { toast } = await import('@/lib/toast')
@@ -272,12 +304,18 @@ describe('useArchiveItem', () => {
       mockItem({ id: 'item-002', name: 'Red Wool Coat' }),
     ])
     const { result } = renderHook(() => useArchiveItem(), { wrapper })
-    act(() => { result.current.mutate('item-001') })
+    act(() => {
+      result.current.mutate('item-001')
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     const { toast } = await import('@/lib/toast')
     expect(toast.success).toHaveBeenCalled()
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.all })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.detail('item-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.all,
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.detail('item-001'),
+    })
   })
 })
 
@@ -300,9 +338,13 @@ describe('useUnarchiveItem', () => {
       mockItem({ id: 'item-002', name: 'Red Wool Coat' }),
     ])
     const { result } = renderHook(() => useUnarchiveItem(), { wrapper })
-    act(() => { result.current.mutate('item-001') })
+    act(() => {
+      result.current.mutate('item-001')
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
-    const data = queryClient.getQueryData<Item[]>(queryKeys.items.list('archived'))
+    const data = queryClient.getQueryData<Item[]>(
+      queryKeys.items.list('archived')
+    )
     expect(data).toHaveLength(2)
     const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Unarchive failed')
@@ -318,9 +360,13 @@ describe('useUnarchiveItem', () => {
     // No pre-seeded data — covers the false branches of if (previous) in onMutate
     // and if (context?.previous !== undefined) in onError
     const { result } = renderHook(() => useUnarchiveItem(), { wrapper })
-    act(() => { result.current.mutate('item-001') })
+    act(() => {
+      result.current.mutate('item-001')
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(queryClient.getQueryData(queryKeys.items.list('archived'))).toBeUndefined()
+    expect(
+      queryClient.getQueryData(queryKeys.items.list('archived'))
+    ).toBeUndefined()
     const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Unarchive failed')
   })
@@ -333,12 +379,18 @@ describe('useUnarchiveItem', () => {
       mockItem({ id: 'item-002', name: 'Red Wool Coat' }),
     ])
     const { result } = renderHook(() => useUnarchiveItem(), { wrapper })
-    act(() => { result.current.mutate('item-001') })
+    act(() => {
+      result.current.mutate('item-001')
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     const { toast } = await import('@/lib/toast')
     expect(toast.success).toHaveBeenCalled()
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.all })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.detail('item-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.all,
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.detail('item-001'),
+    })
   })
 })
 
@@ -357,7 +409,9 @@ describe('useDisposeItem', () => {
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useDisposeItem(), { wrapper })
-    act(() => { result.current.mutate({ id: 'item-001', reason: 'donated' }) })
+    act(() => {
+      result.current.mutate({ id: 'item-001', reason: 'donated' })
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Dispose failed')
@@ -367,20 +421,26 @@ describe('useDisposeItem', () => {
     let capturedBody: Record<string, unknown> | undefined
     server.use(
       http.post('/api/items/:id/dispose', async ({ request }) => {
-        capturedBody = await request.json() as Record<string, unknown>
+        capturedBody = (await request.json()) as Record<string, unknown>
         return new HttpResponse(null, { status: 204 })
       })
     )
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useDisposeItem(), { wrapper })
-    act(() => { result.current.mutate({ id: 'item-001', reason: 'donated' }) })
+    act(() => {
+      result.current.mutate({ id: 'item-001', reason: 'donated' })
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(capturedBody).toEqual({ reason: 'donated' })
     const { toast } = await import('@/lib/toast')
     expect(toast.success).toHaveBeenCalled()
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.all })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.detail('item-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.all,
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.detail('item-001'),
+    })
   })
 })
 
@@ -399,7 +459,9 @@ describe('useAssignLocation', () => {
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useAssignLocation(), { wrapper })
-    act(() => { result.current.mutate({ id: 'item-missing', location_id: 'loc-001' }) })
+    act(() => {
+      result.current.mutate({ id: 'item-missing', location_id: 'loc-001' })
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Item not found')
@@ -409,18 +471,22 @@ describe('useAssignLocation', () => {
     let capturedBody: Record<string, unknown> | undefined
     server.use(
       http.patch('/api/items/:id/location', async ({ request }) => {
-        capturedBody = await request.json() as Record<string, unknown>
+        capturedBody = (await request.json()) as Record<string, unknown>
         return new HttpResponse(null, { status: 204 })
       })
     )
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useAssignLocation(), { wrapper })
-    act(() => { result.current.mutate({ id: 'item-001', location_id: 'loc-002' }) })
+    act(() => {
+      result.current.mutate({ id: 'item-001', location_id: 'loc-002' })
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(capturedBody).toEqual({ location_id: 'loc-002' })
     const { toast } = await import('@/lib/toast')
     expect(toast.success).toHaveBeenCalled()
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.detail('item-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.detail('item-001'),
+    })
   })
 })

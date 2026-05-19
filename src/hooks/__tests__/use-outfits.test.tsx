@@ -66,7 +66,10 @@ describe('useOutfits', () => {
       })
     )
     const { wrapper } = makeWrapper()
-    const { result } = renderHook(() => useOutfits({ from: '2026-01-01', to: '2026-01-31' }), { wrapper })
+    const { result } = renderHook(
+      () => useOutfits({ from: '2026-01-01', to: '2026-01-31' }),
+      { wrapper }
+    )
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(capturedUrl).toContain('from=2026-01-01')
     expect(capturedUrl).toContain('to=2026-01-31')
@@ -102,7 +105,9 @@ describe('useOutfit', () => {
       )
     )
     const { wrapper } = makeWrapper()
-    const { result } = renderHook(() => useOutfit('outfit-missing'), { wrapper })
+    const { result } = renderHook(() => useOutfit('outfit-missing'), {
+      wrapper,
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(result.current.error?.status).toBe(404)
     expect(result.current.error?.message).toBe('Outfit not found')
@@ -131,7 +136,9 @@ describe('useCreateOutfit', () => {
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useCreateOutfit(), { wrapper })
-    act(() => { result.current.mutate({ name: 'Test Outfit' }) })
+    act(() => {
+      result.current.mutate({ name: 'Test Outfit' })
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Validation failed')
@@ -141,14 +148,22 @@ describe('useCreateOutfit', () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useCreateOutfit(), { wrapper })
-    act(() => { result.current.mutate({ name: 'Casual Friday', notes: 'Weekend look' }) })
+    act(() => {
+      result.current.mutate({ name: 'Casual Friday', notes: 'Weekend look' })
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(result.current.data).toEqual(
-      mockOutfit({ id: 'outfit-new-001', name: 'Casual Friday', notes: 'Weekend look' })
+      mockOutfit({
+        id: 'outfit-new-001',
+        name: 'Casual Friday',
+        notes: 'Weekend look',
+      })
     )
     const { toast } = await import('@/lib/toast')
     expect(toast.success).toHaveBeenCalled()
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfits.all,
+    })
   })
 })
 
@@ -167,7 +182,12 @@ describe('useUpdateOutfit', () => {
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useUpdateOutfit(), { wrapper })
-    act(() => { result.current.mutate({ id: 'outfit-missing', data: { name: 'Updated Name' } }) })
+    act(() => {
+      result.current.mutate({
+        id: 'outfit-missing',
+        data: { name: 'Updated Name' },
+      })
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Outfit not found')
@@ -177,12 +197,21 @@ describe('useUpdateOutfit', () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useUpdateOutfit(), { wrapper })
-    act(() => { result.current.mutate({ id: 'outfit-001', data: { name: 'Updated Casual Friday' } }) })
+    act(() => {
+      result.current.mutate({
+        id: 'outfit-001',
+        data: { name: 'Updated Casual Friday' },
+      })
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     const { toast } = await import('@/lib/toast')
     expect(toast.success).toHaveBeenCalled()
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.all })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.detail('outfit-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfits.all,
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfits.detail('outfit-001'),
+    })
   })
 })
 
@@ -201,7 +230,9 @@ describe('useDeleteOutfit', () => {
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useDeleteOutfit(), { wrapper })
-    act(() => { result.current.mutate('outfit-missing') })
+    act(() => {
+      result.current.mutate('outfit-missing')
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     const { toast } = await import('@/lib/toast')
     expect(toast.error).toHaveBeenCalledWith('Outfit not found')
@@ -211,10 +242,14 @@ describe('useDeleteOutfit', () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useDeleteOutfit(), { wrapper })
-    act(() => { result.current.mutate('outfit-001') })
+    act(() => {
+      result.current.mutate('outfit-001')
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     const { toast } = await import('@/lib/toast')
     expect(toast.success).toHaveBeenCalled()
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.outfits.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.outfits.all,
+    })
   })
 })

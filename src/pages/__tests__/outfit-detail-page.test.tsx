@@ -5,7 +5,13 @@ import { Route, Routes } from 'react-router'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/mocks/server'
 import { render } from '@/test/utils'
-import { mockOutfit, mockOutfitLog, mockOutfitItem, mockItem, mockPhoto } from '@/test/mocks/fixtures'
+import {
+  mockOutfit,
+  mockOutfitLog,
+  mockOutfitItem,
+  mockItem,
+  mockPhoto,
+} from '@/test/mocks/fixtures'
 import { OutfitDetailPage } from '@/pages/OutfitDetailPage'
 import { toast } from '@/lib/toast'
 
@@ -35,16 +41,34 @@ describe('OutfitDetailPage', () => {
             notes: 'Weekend look',
             items: [],
             photos: [
-              mockPhoto({ id: 'photo-001', media_key: 'uploads/outfit-photo-001.jpg', position: 0 }),
-              mockPhoto({ id: 'photo-002', media_key: 'uploads/outfit-photo-002.jpg', position: 1 }),
+              mockPhoto({
+                id: 'photo-001',
+                media_key: 'uploads/outfit-photo-001.jpg',
+                position: 0,
+              }),
+              mockPhoto({
+                id: 'photo-002',
+                media_key: 'uploads/outfit-photo-002.jpg',
+                position: 1,
+              }),
             ],
           })
         )
       ),
       http.get('/api/outfits/:id/logs', () =>
         HttpResponse.json([
-          mockOutfitLog({ id: 'outfitlog-001', outfit_id: OUTFIT_ID, worn_on: '2026-04-10', notes: 'Felt great' }),
-          mockOutfitLog({ id: 'outfitlog-002', outfit_id: OUTFIT_ID, worn_on: '2026-04-11', notes: 'Second wear' }),
+          mockOutfitLog({
+            id: 'outfitlog-001',
+            outfit_id: OUTFIT_ID,
+            worn_on: '2026-04-10',
+            notes: 'Felt great',
+          }),
+          mockOutfitLog({
+            id: 'outfitlog-002',
+            outfit_id: OUTFIT_ID,
+            worn_on: '2026-04-11',
+            notes: 'Second wear',
+          }),
         ])
       ),
       http.get('/api/items', () =>
@@ -107,7 +131,13 @@ describe('OutfitDetailPage', () => {
   it('OutfitDetailPage should display outfit notes when present', async () => {
     server.use(
       http.get('/api/outfits/:id', () =>
-        HttpResponse.json(mockOutfit({ id: OUTFIT_ID, name: 'Casual Friday', notes: 'Weekend look' }))
+        HttpResponse.json(
+          mockOutfit({
+            id: OUTFIT_ID,
+            name: 'Casual Friday',
+            notes: 'Weekend look',
+          })
+        )
       )
     )
     renderPage()
@@ -118,7 +148,9 @@ describe('OutfitDetailPage', () => {
   it('OutfitDetailPage should not display notes section when notes is null', async () => {
     server.use(
       http.get('/api/outfits/:id', () =>
-        HttpResponse.json(mockOutfit({ id: OUTFIT_ID, name: 'Casual Friday', notes: null }))
+        HttpResponse.json(
+          mockOutfit({ id: OUTFIT_ID, name: 'Casual Friday', notes: null })
+        )
       )
     )
     renderPage()
@@ -130,7 +162,9 @@ describe('OutfitDetailPage', () => {
   it('OutfitDetailPage should render outfit name as heading', async () => {
     renderPage()
 
-    expect(await screen.findByRole('heading', { name: 'Casual Friday' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Casual Friday' })
+    ).toBeInTheDocument()
   })
 
   it('OutfitDetailPage should render Untitled outfit placeholder when name is null', async () => {
@@ -141,7 +175,9 @@ describe('OutfitDetailPage', () => {
     )
     renderPage()
 
-    expect(await screen.findByRole('heading', { name: /untitled outfit/i })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: /untitled outfit/i })
+    ).toBeInTheDocument()
   })
 
   it('OutfitDetailPage should have edit link navigating to /outfits/:id/edit', async () => {
@@ -188,7 +224,9 @@ describe('OutfitDetailPage', () => {
   it('OutfitDetailPage should show outfit-photo-placeholder when outfit has no photos', async () => {
     server.use(
       http.get('/api/outfits/:id', () =>
-        HttpResponse.json(mockOutfit({ id: OUTFIT_ID, name: 'Casual Friday', photos: [] }))
+        HttpResponse.json(
+          mockOutfit({ id: OUTFIT_ID, name: 'Casual Friday', photos: [] })
+        )
       )
     )
     renderPage()
@@ -292,8 +330,16 @@ describe('OutfitDetailPage', () => {
             id: OUTFIT_ID,
             name: 'Casual Friday',
             items: [
-              mockOutfitItem({ outfit_id: OUTFIT_ID, item_id: 'item-001', position: 0 }),
-              mockOutfitItem({ outfit_id: OUTFIT_ID, item_id: 'item-002', position: 1 }),
+              mockOutfitItem({
+                outfit_id: OUTFIT_ID,
+                item_id: 'item-001',
+                position: 0,
+              }),
+              mockOutfitItem({
+                outfit_id: OUTFIT_ID,
+                item_id: 'item-002',
+                position: 1,
+              }),
             ],
           })
         )
@@ -314,7 +360,11 @@ describe('OutfitDetailPage', () => {
             id: OUTFIT_ID,
             name: 'Casual Friday',
             items: [
-              mockOutfitItem({ outfit_id: OUTFIT_ID, item_id: 'item-999', position: 0 }),
+              mockOutfitItem({
+                outfit_id: OUTFIT_ID,
+                item_id: 'item-999',
+                position: 0,
+              }),
             ],
           })
         )
@@ -323,7 +373,9 @@ describe('OutfitDetailPage', () => {
     renderPage()
 
     await screen.findByText('Casual Friday')
-    expect(screen.queryByRole('link', { name: /item-999/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: /item-999/i })
+    ).not.toBeInTheDocument()
   })
 
   it('OutfitDetailPage should show no-photo placeholder for items without a thumbnail', async () => {
@@ -333,7 +385,13 @@ describe('OutfitDetailPage', () => {
           mockOutfit({
             id: OUTFIT_ID,
             name: 'Casual Friday',
-            items: [mockOutfitItem({ outfit_id: OUTFIT_ID, item_id: 'item-001', position: 0 })],
+            items: [
+              mockOutfitItem({
+                outfit_id: OUTFIT_ID,
+                item_id: 'item-001',
+                position: 0,
+              }),
+            ],
           })
         )
       ),
@@ -346,7 +404,9 @@ describe('OutfitDetailPage', () => {
     renderPage()
 
     await screen.findByText('Blue Denim Jacket')
-    expect(screen.getByText('Blue Denim Jacket').closest('a')).toBeInTheDocument()
+    expect(
+      screen.getByText('Blue Denim Jacket').closest('a')
+    ).toBeInTheDocument()
   })
 
   it('OutfitDetailPage should render item links to /items/:id', async () => {
@@ -356,7 +416,13 @@ describe('OutfitDetailPage', () => {
           mockOutfit({
             id: OUTFIT_ID,
             name: 'Casual Friday',
-            items: [mockOutfitItem({ outfit_id: OUTFIT_ID, item_id: 'item-001', position: 0 })],
+            items: [
+              mockOutfitItem({
+                outfit_id: OUTFIT_ID,
+                item_id: 'item-001',
+                position: 0,
+              }),
+            ],
           })
         )
       )
@@ -364,10 +430,9 @@ describe('OutfitDetailPage', () => {
     renderPage()
 
     await screen.findByText('Blue Denim Jacket')
-    expect(screen.getByRole('link', { name: /blue denim jacket/i })).toHaveAttribute(
-      'href',
-      '/items/item-001'
-    )
+    expect(
+      screen.getByRole('link', { name: /blue denim jacket/i })
+    ).toHaveAttribute('href', '/items/item-001')
   })
 
   // --- Wear history ---
@@ -384,7 +449,9 @@ describe('OutfitDetailPage', () => {
     await user.type(dateInput, '2099-12-31')
     await user.click(screen.getByRole('button', { name: /^save$/i }))
 
-    expect(await screen.findByText(/date cannot be in the future/i)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/date cannot be in the future/i)
+    ).toBeInTheDocument()
   })
 
   it('OutfitDetailPage should render each wear log row with date and notes', async () => {
@@ -407,7 +474,9 @@ describe('OutfitDetailPage', () => {
 
     await screen.findByText('Second wear')
     // Logs sorted descending by date; index 0 is outfitlog-002 (2026-04-11)
-    await user.click(screen.getAllByRole('button', { name: /delete wear log/i })[0])
+    await user.click(
+      screen.getAllByRole('button', { name: /delete wear log/i })[0]
+    )
 
     await waitFor(() => expect(deletedLogId).toBe('outfitlog-002'))
   })
@@ -421,9 +490,7 @@ describe('OutfitDetailPage', () => {
   })
 
   it('OutfitDetailPage should not show last worn date when outfit has no wear logs', async () => {
-    server.use(
-      http.get('/api/outfits/:id/logs', () => HttpResponse.json([]))
-    )
+    server.use(http.get('/api/outfits/:id/logs', () => HttpResponse.json([])))
     renderPage()
 
     await screen.findByText('Casual Friday')
@@ -462,7 +529,11 @@ describe('OutfitDetailPage', () => {
       http.post('/api/outfits/:id/logs', async ({ request }) => {
         capturedBody = await request.json()
         return HttpResponse.json(
-          mockOutfitLog({ id: 'outfitlog-new', outfit_id: OUTFIT_ID, worn_on: '2026-04-14' }),
+          mockOutfitLog({
+            id: 'outfitlog-new',
+            outfit_id: OUTFIT_ID,
+            worn_on: '2026-04-14',
+          }),
           { status: 201 }
         )
       })
@@ -477,8 +548,12 @@ describe('OutfitDetailPage', () => {
     await user.type(dateInput, '2026-04-14')
     await user.click(screen.getByRole('button', { name: /^save$/i }))
 
-    await waitFor(() => expect(capturedBody).toMatchObject({ worn_on: '2026-04-14' }))
-    await waitFor(() => expect(screen.queryByLabelText(/date/i)).not.toBeInTheDocument())
+    await waitFor(() =>
+      expect(capturedBody).toMatchObject({ worn_on: '2026-04-14' })
+    )
+    await waitFor(() =>
+      expect(screen.queryByLabelText(/date/i)).not.toBeInTheDocument()
+    )
   })
 
   it('OutfitDetailPage should render Share button in header action group', async () => {
@@ -507,6 +582,8 @@ describe('OutfitDetailPage', () => {
     await screen.findByRole('dialog')
     await user.click(screen.getByRole('button', { name: /^cancel$/i }))
 
-    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    )
   })
 })

@@ -40,7 +40,9 @@ describe('ShareDialog', () => {
 
   it('ShareDialog should stay open show inline error and not toast when API returns 409', async () => {
     server.use(
-      http.post('/api/shares', () => HttpResponse.json({ error: 'Already shared' }, { status: 409 }))
+      http.post('/api/shares', () =>
+        HttpResponse.json({ error: 'Already shared' }, { status: 409 })
+      )
     )
     const user = userEvent.setup()
     render(<ShareDialog {...baseProps} />)
@@ -56,7 +58,9 @@ describe('ShareDialog', () => {
 
   it('ShareDialog should stay open show inline error and not toast when API returns 422', async () => {
     server.use(
-      http.post('/api/shares', () => HttpResponse.json({ error: 'Cannot share with self' }, { status: 422 }))
+      http.post('/api/shares', () =>
+        HttpResponse.json({ error: 'Cannot share with self' }, { status: 422 })
+      )
     )
     const user = userEvent.setup()
     render(<ShareDialog {...baseProps} />)
@@ -65,14 +69,18 @@ describe('ShareDialog', () => {
     await user.click(screen.getByText('alice@example.com'))
     await user.click(screen.getByRole('button', { name: 'Share' }))
 
-    expect(await screen.findByText('Cannot share with self')).toBeInTheDocument()
+    expect(
+      await screen.findByText('Cannot share with self')
+    ).toBeInTheDocument()
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     expect(toast.error).not.toHaveBeenCalled()
   })
 
   it('ShareDialog should show toast error on failures other than 409 or 422', async () => {
     server.use(
-      http.post('/api/shares', () => HttpResponse.json({ error: 'Internal server error' }, { status: 500 }))
+      http.post('/api/shares', () =>
+        HttpResponse.json({ error: 'Internal server error' }, { status: 500 })
+      )
     )
     const user = userEvent.setup()
     render(<ShareDialog {...baseProps} />)
@@ -95,7 +103,9 @@ describe('ShareDialog', () => {
 
   it('ShareDialog should show empty message when all users are the authenticated user', async () => {
     server.use(
-      http.get('/api/users', () => HttpResponse.json([{ id: 'user-001', email: 'user@example.com' }]))
+      http.get('/api/users', () =>
+        HttpResponse.json([{ id: 'user-001', email: 'user@example.com' }])
+      )
     )
     render(<ShareDialog {...baseProps} />)
 
@@ -106,7 +116,9 @@ describe('ShareDialog', () => {
     server.use(
       http.get('/api/users', async () => {
         await new Promise((resolve) => setTimeout(resolve, 200))
-        return HttpResponse.json([{ id: 'user-002', email: 'alice@example.com' }])
+        return HttpResponse.json([
+          { id: 'user-002', email: 'alice@example.com' },
+        ])
       })
     )
     render(<ShareDialog {...baseProps} />)
@@ -128,7 +140,13 @@ describe('ShareDialog', () => {
       http.post('/api/shares', async () => {
         await new Promise((resolve) => setTimeout(resolve, 200))
         return HttpResponse.json(
-          { id: 'share-new', recipient_id: 'user-002', target_type: 'item', target_id: 'item-001', created_at: '2026-01-01T00:00:00Z' },
+          {
+            id: 'share-new',
+            recipient_id: 'user-002',
+            target_type: 'item',
+            target_id: 'item-001',
+            created_at: '2026-01-01T00:00:00Z',
+          },
           { status: 201 }
         )
       })
@@ -151,7 +169,13 @@ describe('ShareDialog', () => {
       http.post('/api/shares', async ({ request }) => {
         capturedBody = await request.json()
         return HttpResponse.json(
-          { id: 'share-new', recipient_id: 'user-002', target_type: 'item', target_id: 'item-001', created_at: '2026-01-01T00:00:00Z' },
+          {
+            id: 'share-new',
+            recipient_id: 'user-002',
+            target_type: 'item',
+            target_id: 'item-001',
+            created_at: '2026-01-01T00:00:00Z',
+          },
           { status: 201 }
         )
       })
@@ -163,7 +187,11 @@ describe('ShareDialog', () => {
     await user.click(screen.getByRole('button', { name: 'Share' }))
 
     await vi.waitFor(() => {
-      expect(capturedBody).toEqual({ recipient_id: 'user-002', target_type: 'item', target_id: 'item-001' })
+      expect(capturedBody).toEqual({
+        recipient_id: 'user-002',
+        target_type: 'item',
+        target_id: 'item-001',
+      })
     })
   })
 

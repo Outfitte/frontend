@@ -103,7 +103,9 @@ describe('useCreateLocation', () => {
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useCreateLocation(), { wrapper })
-    act(() => { result.current.mutate({ label: 'Bedroom' }) })
+    act(() => {
+      result.current.mutate({ label: 'Bedroom' })
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(toast.error).toHaveBeenCalledWith('Validation failed')
   })
@@ -117,36 +119,52 @@ describe('useCreateLocation', () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useCreateLocation(), { wrapper })
-    act(() => { result.current.mutate({ label: 'Bedroom' }) })
+    act(() => {
+      result.current.mutate({ label: 'Bedroom' })
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.locations.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.locations.all,
+    })
   })
 
   it('useCreateLocation should call toast.success and invalidate locations list on success', async () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useCreateLocation(), { wrapper })
-    act(() => { result.current.mutate({ label: 'Bedroom' }) })
+    act(() => {
+      result.current.mutate({ label: 'Bedroom' })
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data).toEqual(mockLocation({ id: 'loc-new-001', label: 'Bedroom' }))
+    expect(result.current.data).toEqual(
+      mockLocation({ id: 'loc-new-001', label: 'Bedroom' })
+    )
     expect(toast.success).toHaveBeenCalled()
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.locations.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.locations.all,
+    })
   })
 
   it('useCreateLocation should send parent_id in body when creating a child location', async () => {
     let capturedBody: Record<string, unknown> | undefined
     server.use(
       http.post('/api/locations', async ({ request }) => {
-        capturedBody = await request.json() as Record<string, unknown>
+        capturedBody = (await request.json()) as Record<string, unknown>
         return HttpResponse.json(
-          mockLocation({ id: 'loc-new-001', label: 'Top Shelf', parent_id: 'loc-001' }),
+          mockLocation({
+            id: 'loc-new-001',
+            label: 'Top Shelf',
+            parent_id: 'loc-001',
+          }),
           { status: 201 }
         )
       })
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useCreateLocation(), { wrapper })
-    act(() => { result.current.mutate({ label: 'Top Shelf', parent_id: 'loc-001' }) })
+    act(() => {
+      result.current.mutate({ label: 'Top Shelf', parent_id: 'loc-001' })
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(capturedBody).toEqual({ label: 'Top Shelf', parent_id: 'loc-001' })
   })
@@ -167,7 +185,9 @@ describe('useUpdateLocation', () => {
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useUpdateLocation(), { wrapper })
-    act(() => { result.current.mutate({ id: 'loc-missing', label: 'New Label' }) })
+    act(() => {
+      result.current.mutate({ id: 'loc-missing', label: 'New Label' })
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(toast.error).toHaveBeenCalledWith('Location not found')
   })
@@ -181,21 +201,33 @@ describe('useUpdateLocation', () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useUpdateLocation(), { wrapper })
-    act(() => { result.current.mutate({ id: 'loc-missing', label: 'New Label' }) })
+    act(() => {
+      result.current.mutate({ id: 'loc-missing', label: 'New Label' })
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.locations.all })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.locations.detail('loc-missing') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.locations.all,
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.locations.detail('loc-missing'),
+    })
   })
 
   it('useUpdateLocation should call toast.success and invalidate list and detail on success', async () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useUpdateLocation(), { wrapper })
-    act(() => { result.current.mutate({ id: 'loc-001', label: 'Updated Closet' }) })
+    act(() => {
+      result.current.mutate({ id: 'loc-001', label: 'Updated Closet' })
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(toast.success).toHaveBeenCalled()
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.locations.all })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.locations.detail('loc-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.locations.all,
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.locations.detail('loc-001'),
+    })
   })
 })
 
@@ -214,7 +246,9 @@ describe('useDeleteLocation', () => {
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useDeleteLocation(), { wrapper })
-    act(() => { result.current.mutate('loc-001') })
+    act(() => {
+      result.current.mutate('loc-001')
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(result.current.error?.status).toBe(409)
     expect(toast.error).toHaveBeenCalledWith('Location has children')
@@ -223,12 +257,17 @@ describe('useDeleteLocation', () => {
   it('useDeleteLocation should call toast.error when DELETE /locations/:id returns 409 with assigned items', async () => {
     server.use(
       http.delete('/api/locations/:id', () =>
-        HttpResponse.json({ error: 'Location has assigned items' }, { status: 409 })
+        HttpResponse.json(
+          { error: 'Location has assigned items' },
+          { status: 409 }
+        )
       )
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useDeleteLocation(), { wrapper })
-    act(() => { result.current.mutate('loc-001') })
+    act(() => {
+      result.current.mutate('loc-001')
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(result.current.error?.status).toBe(409)
     expect(toast.error).toHaveBeenCalledWith('Location has assigned items')
@@ -243,19 +282,27 @@ describe('useDeleteLocation', () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useDeleteLocation(), { wrapper })
-    act(() => { result.current.mutate('loc-001') })
+    act(() => {
+      result.current.mutate('loc-001')
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.locations.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.locations.all,
+    })
   })
 
   it('useDeleteLocation should call toast.success and invalidate locations list on success', async () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useDeleteLocation(), { wrapper })
-    act(() => { result.current.mutate('loc-001') })
+    act(() => {
+      result.current.mutate('loc-001')
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(toast.success).toHaveBeenCalled()
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.locations.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.locations.all,
+    })
   })
 })
 
@@ -269,12 +316,17 @@ describe('useMoveLocation', () => {
   it('useMoveLocation should call toast.error when PATCH /locations/:id/move returns 409 cycle', async () => {
     server.use(
       http.patch('/api/locations/:id/move', () =>
-        HttpResponse.json({ error: 'Move would create a cycle' }, { status: 409 })
+        HttpResponse.json(
+          { error: 'Move would create a cycle' },
+          { status: 409 }
+        )
       )
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useMoveLocation(), { wrapper })
-    act(() => { result.current.mutate({ id: 'loc-001', parent_id: 'loc-002' }) })
+    act(() => {
+      result.current.mutate({ id: 'loc-001', parent_id: 'loc-002' })
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(result.current.error?.status).toBe(409)
     expect(toast.error).toHaveBeenCalledWith('Move would create a cycle')
@@ -283,39 +335,56 @@ describe('useMoveLocation', () => {
   it('useMoveLocation should invalidate locations list when PATCH /locations/:id/move returns 409', async () => {
     server.use(
       http.patch('/api/locations/:id/move', () =>
-        HttpResponse.json({ error: 'Move would create a cycle' }, { status: 409 })
+        HttpResponse.json(
+          { error: 'Move would create a cycle' },
+          { status: 409 }
+        )
       )
     )
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useMoveLocation(), { wrapper })
-    act(() => { result.current.mutate({ id: 'loc-001', parent_id: 'loc-002' }) })
+    act(() => {
+      result.current.mutate({ id: 'loc-001', parent_id: 'loc-002' })
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.locations.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.locations.all,
+    })
   })
 
   it('useMoveLocation should call toast.success and invalidate locations list on success', async () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useMoveLocation(), { wrapper })
-    act(() => { result.current.mutate({ id: 'loc-002', parent_id: null }) })
+    act(() => {
+      result.current.mutate({ id: 'loc-002', parent_id: null })
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data).toEqual(mockLocation({ id: 'loc-002', parent_id: null }))
+    expect(result.current.data).toEqual(
+      mockLocation({ id: 'loc-002', parent_id: null })
+    )
     expect(toast.success).toHaveBeenCalled()
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.locations.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.locations.all,
+    })
   })
 
   it('useMoveLocation should send parent_id in body when PATCH /locations/:id/move', async () => {
     let capturedBody: Record<string, unknown> | undefined
     server.use(
       http.patch('/api/locations/:id/move', async ({ request }) => {
-        capturedBody = await request.json() as Record<string, unknown>
-        return HttpResponse.json(mockLocation({ id: 'loc-002', parent_id: null }))
+        capturedBody = (await request.json()) as Record<string, unknown>
+        return HttpResponse.json(
+          mockLocation({ id: 'loc-002', parent_id: null })
+        )
       })
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useMoveLocation(), { wrapper })
-    act(() => { result.current.mutate({ id: 'loc-002', parent_id: null }) })
+    act(() => {
+      result.current.mutate({ id: 'loc-002', parent_id: null })
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(capturedBody).toEqual({ parent_id: null })
   })

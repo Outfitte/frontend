@@ -8,7 +8,12 @@ import App from '@/App'
 
 function LocationDisplay() {
   const location = useLocation()
-  return <div data-testid="location">{location.pathname}{location.search}</div>
+  return (
+    <div data-testid="location">
+      {location.pathname}
+      {location.search}
+    </div>
+  )
 }
 
 function AppWithLocation() {
@@ -42,7 +47,9 @@ describe('Routing', () => {
   it('App should redirect to /login preserving return URL when unauthenticated user visits /settings', () => {
     render(<AppWithLocation />, { initialEntries: ['/settings'] })
     expect(screen.getByTestId('login-page')).toBeInTheDocument()
-    expect(screen.getByTestId('location')).toHaveTextContent('/login?next=%2Fsettings')
+    expect(screen.getByTestId('location')).toHaveTextContent(
+      '/login?next=%2Fsettings'
+    )
   })
 
   it('App should redirect to /login when unauthenticated user visits /items', () => {
@@ -68,38 +75,53 @@ describe('Routing', () => {
   it('App should redirect to /login when unauthenticated user visits /locations', () => {
     render(<AppWithLocation />, { initialEntries: ['/locations'] })
     expect(screen.getByTestId('login-page')).toBeInTheDocument()
-    expect(screen.getByTestId('location')).toHaveTextContent('/login?next=%2Flocations')
+    expect(screen.getByTestId('location')).toHaveTextContent(
+      '/login?next=%2Flocations'
+    )
   })
 
   it('App should redirect to /login when unauthenticated user visits /outfits', () => {
     render(<AppWithLocation />, { initialEntries: ['/outfits'] })
     expect(screen.getByTestId('login-page')).toBeInTheDocument()
-    expect(screen.getByTestId('location')).toHaveTextContent('/login?next=%2Foutfits')
+    expect(screen.getByTestId('location')).toHaveTextContent(
+      '/login?next=%2Foutfits'
+    )
   })
 
   it('App should redirect to /login when unauthenticated user visits /outfits/new', () => {
     render(<AppWithLocation />, { initialEntries: ['/outfits/new'] })
     expect(screen.getByTestId('login-page')).toBeInTheDocument()
-    expect(screen.getByTestId('location')).toHaveTextContent('/login?next=%2Foutfits%2Fnew')
+    expect(screen.getByTestId('location')).toHaveTextContent(
+      '/login?next=%2Foutfits%2Fnew'
+    )
   })
 
   it('App should redirect to /login when unauthenticated user visits /calendar', () => {
     render(<AppWithLocation />, { initialEntries: ['/calendar'] })
     expect(screen.getByTestId('login-page')).toBeInTheDocument()
-    expect(screen.getByTestId('location')).toHaveTextContent('/login?next=%2Fcalendar')
+    expect(screen.getByTestId('location')).toHaveTextContent(
+      '/login?next=%2Fcalendar'
+    )
   })
 
   it('App should redirect to /login when unauthenticated user visits /shared', () => {
     render(<AppWithLocation />, { initialEntries: ['/shared'] })
     expect(screen.getByTestId('login-page')).toBeInTheDocument()
-    expect(screen.getByTestId('location')).toHaveTextContent('/login?next=%2Fshared')
+    expect(screen.getByTestId('location')).toHaveTextContent(
+      '/login?next=%2Fshared'
+    )
   })
 
   it('App should redirect to / when authenticated user visits /login', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
       hydrateFromStorage: async () => {},
@@ -113,7 +135,12 @@ describe('Routing', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
       hydrateFromStorage: async () => {},
@@ -124,7 +151,9 @@ describe('Routing', () => {
   })
 
   it('App should render 404 page when route does not exist', () => {
-    render(<AppWithLocation />, { initialEntries: ['/this-route-does-not-exist'] })
+    render(<AppWithLocation />, {
+      initialEntries: ['/this-route-does-not-exist'],
+    })
     expect(screen.getByTestId('not-found-page')).toBeInTheDocument()
   })
 
@@ -163,7 +192,12 @@ describe('Routing', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
       hydrateFromStorage: async () => {},
@@ -181,7 +215,12 @@ describe('Routing', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
       hydrateFromStorage: async () => {},
@@ -194,7 +233,12 @@ describe('Routing', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
       hydrateFromStorage: async () => {},
@@ -207,7 +251,12 @@ describe('Routing', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
       hydrateFromStorage: async () => {},
@@ -220,7 +269,12 @@ describe('Routing', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
       hydrateFromStorage: async () => {},
@@ -233,7 +287,12 @@ describe('Routing', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
       hydrateFromStorage: async () => {},
@@ -246,7 +305,12 @@ describe('Routing', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
       hydrateFromStorage: async () => {},
@@ -264,7 +328,12 @@ describe('Routing', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
       hydrateFromStorage: async () => {},
@@ -274,7 +343,9 @@ describe('Routing', () => {
   })
 
   it('App should redirect to /login when unauthenticated user visits /outfits/:id/edit', () => {
-    render(<AppWithLocation />, { initialEntries: ['/outfits/outfit-001/edit'] })
+    render(<AppWithLocation />, {
+      initialEntries: ['/outfits/outfit-001/edit'],
+    })
     expect(screen.getByTestId('login-page')).toBeInTheDocument()
   })
 
@@ -282,12 +353,19 @@ describe('Routing', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
       hydrateFromStorage: async () => {},
     })
-    render(<AppWithLocation />, { initialEntries: ['/outfits/outfit-001/edit'] })
+    render(<AppWithLocation />, {
+      initialEntries: ['/outfits/outfit-001/edit'],
+    })
     expect(await screen.findByTestId('edit-outfit-page')).toBeInTheDocument()
   })
 
@@ -295,7 +373,12 @@ describe('Routing', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
       hydrateFromStorage: async () => {},
@@ -313,20 +396,32 @@ describe('Routing', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
       hydrateFromStorage: async () => {},
     })
     render(<AppWithLocation />, { initialEntries: ['/shares'] })
-    expect(await screen.findByTestId('outgoing-shares-page')).toBeInTheDocument()
+    expect(
+      await screen.findByTestId('outgoing-shares-page')
+    ).toBeInTheDocument()
   })
 
   it('App should render shared page when authenticated user visits /shared', async () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
       hydrateFromStorage: async () => {},
@@ -344,17 +439,26 @@ describe('Routing', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
       hydrateFromStorage: async () => {},
     })
     render(<AppWithLocation />, { initialEntries: ['/shared/items/item-001'] })
-    expect(await screen.findByTestId('shared-item-detail-page')).toBeInTheDocument()
+    expect(
+      await screen.findByTestId('shared-item-detail-page')
+    ).toBeInTheDocument()
   })
 
   it('App should redirect to /login when unauthenticated user visits /shared/outfits/:id', () => {
-    render(<AppWithLocation />, { initialEntries: ['/shared/outfits/outfit-001'] })
+    render(<AppWithLocation />, {
+      initialEntries: ['/shared/outfits/outfit-001'],
+    })
     expect(screen.getByTestId('login-page')).toBeInTheDocument()
   })
 
@@ -362,17 +466,28 @@ describe('Routing', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
       hydrateFromStorage: async () => {},
     })
-    render(<AppWithLocation />, { initialEntries: ['/shared/outfits/outfit-001'] })
-    expect(await screen.findByTestId('shared-outfit-detail-page')).toBeInTheDocument()
+    render(<AppWithLocation />, {
+      initialEntries: ['/shared/outfits/outfit-001'],
+    })
+    expect(
+      await screen.findByTestId('shared-outfit-detail-page')
+    ).toBeInTheDocument()
   })
 
   it('App should redirect to /login when unauthenticated user visits /shared/locations/:id', () => {
-    render(<AppWithLocation />, { initialEntries: ['/shared/locations/loc-001'] })
+    render(<AppWithLocation />, {
+      initialEntries: ['/shared/locations/loc-001'],
+    })
     expect(screen.getByTestId('login-page')).toBeInTheDocument()
   })
 
@@ -380,20 +495,34 @@ describe('Routing', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
       hydrateFromStorage: async () => {},
     })
-    render(<AppWithLocation />, { initialEntries: ['/shared/locations/loc-001'] })
-    expect(await screen.findByTestId('shared-location-detail-page')).toBeInTheDocument()
+    render(<AppWithLocation />, {
+      initialEntries: ['/shared/locations/loc-001'],
+    })
+    expect(
+      await screen.findByTestId('shared-location-detail-page')
+    ).toBeInTheDocument()
   })
 
   it('App should render settings page when authenticated user visits /settings', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
       hydrateFromStorage: async () => {},
@@ -406,7 +535,12 @@ describe('Routing', () => {
     useAuthStore.setState({
       accessToken: 'access-token-abc123',
       refreshToken: 'refresh-token-xyz789',
-      user: { id: 'user-001', email: 'alice@example.com', role: 'user', created_at: '2024-01-01T00:00:00Z' },
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
       isAuthenticated: true,
       isHydrating: false,
       hydrateFromStorage: async () => {},
@@ -420,7 +554,9 @@ describe('Routing', () => {
     render(<AppWithLocation />, { initialEntries: ['/items'] })
 
     expect(screen.getByTestId('login-page')).toBeInTheDocument()
-    expect(screen.getByTestId('location')).toHaveTextContent('/login?next=%2Fitems')
+    expect(screen.getByTestId('location')).toHaveTextContent(
+      '/login?next=%2Fitems'
+    )
 
     await user.type(screen.getByLabelText(/email/i), 'alice@example.com')
     await user.type(screen.getByLabelText(/password/i), 'secret123')

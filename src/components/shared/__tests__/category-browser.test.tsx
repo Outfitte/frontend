@@ -31,7 +31,9 @@ describe('CategoryBrowser', () => {
 
   it('CategoryBrowser should show only Uncategorised option when categories fail to load', async () => {
     server.use(
-      http.get('/api/categories', () => HttpResponse.json('error', { status: 500 }))
+      http.get('/api/categories', () =>
+        HttpResponse.json('error', { status: 500 })
+      )
     )
     renderBrowser()
 
@@ -48,14 +50,20 @@ describe('CategoryBrowser', () => {
 
     const select = await screen.findByRole('combobox', { name: /category/i })
     expect(select).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: /uncategorised/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('option', { name: /uncategorised/i })
+    ).toBeInTheDocument()
   })
 
   it('CategoryBrowser should render categories with label and field hint count', async () => {
     renderBrowser()
 
-    expect(await screen.findByRole('option', { name: /jackets/i })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: /trousers/i })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('option', { name: /jackets/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('option', { name: /trousers/i })
+    ).toBeInTheDocument()
   })
 
   it('CategoryBrowser should show field hint count for each category', async () => {
@@ -69,8 +77,12 @@ describe('CategoryBrowser', () => {
     )
     renderBrowser()
 
-    expect(await screen.findByRole('option', { name: /jackets.*2/i })).toBeInTheDocument()
-    expect(screen.getByRole('option', { name: /trousers.*0/i })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('option', { name: /jackets.*2/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('option', { name: /trousers.*0/i })
+    ).toBeInTheDocument()
   })
 
   it('CategoryBrowser should call onChange with category id when a category is selected', async () => {
@@ -124,8 +136,16 @@ describe('CategoryBrowser', () => {
             id: 'cat-001',
             label: 'Jackets',
             field_hints: [
-              mockFieldHint({ key: 'condition', label: 'Condition', placeholder: 'e.g. new, good, worn' }),
-              mockFieldHint({ key: 'size', label: 'Size', placeholder: 'e.g. S, M, L, XL' }),
+              mockFieldHint({
+                key: 'condition',
+                label: 'Condition',
+                placeholder: 'e.g. new, good, worn',
+              }),
+              mockFieldHint({
+                key: 'size',
+                label: 'Size',
+                placeholder: 'e.g. S, M, L, XL',
+              }),
             ],
           }),
         ])
@@ -148,7 +168,11 @@ describe('CategoryBrowser', () => {
             id: 'cat-001',
             label: 'Jackets',
             field_hints: [
-              mockFieldHint({ key: 'material', label: 'Material', placeholder: 'e.g. wool, cotton' }),
+              mockFieldHint({
+                key: 'material',
+                label: 'Material',
+                placeholder: 'e.g. wool, cotton',
+              }),
             ],
           }),
         ])

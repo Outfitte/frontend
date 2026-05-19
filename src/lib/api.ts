@@ -43,7 +43,11 @@ async function executeRequest(
   return fetch(`${BASE_URL}${path}`, {
     method,
     headers,
-    body: isFormData ? (body as FormData) : body !== undefined ? JSON.stringify(body) : undefined,
+    body: isFormData
+      ? (body as FormData)
+      : body !== undefined
+        ? JSON.stringify(body)
+        : undefined,
   })
 }
 
@@ -58,7 +62,12 @@ async function doRefresh(): Promise<void> {
 
   if (!refreshResponse.ok) {
     localStorage.removeItem('refresh_token')
-    useAuthStore.setState({ accessToken: null, refreshToken: null, user: null, isAuthenticated: false })
+    useAuthStore.setState({
+      accessToken: null,
+      refreshToken: null,
+      user: null,
+      isAuthenticated: false,
+    })
     const message = await parseErrorBody(refreshResponse)
     throw new ApiError(refreshResponse.status, message)
   }
@@ -94,7 +103,11 @@ async function parseResponse<T>(response: Response): Promise<T> {
   return response.json() as Promise<T>
 }
 
-async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+async function request<T>(
+  method: string,
+  path: string,
+  body?: unknown
+): Promise<T> {
   let response: Response
   try {
     response = await executeRequest(method, path, body)
@@ -111,8 +124,11 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 
 export const api = {
   get: <T>(path: string): Promise<T> => request<T>('GET', path),
-  post: <T>(path: string, body?: unknown): Promise<T> => request<T>('POST', path, body),
-  patch: <T>(path: string, body?: unknown): Promise<T> => request<T>('PATCH', path, body),
+  post: <T>(path: string, body?: unknown): Promise<T> =>
+    request<T>('POST', path, body),
+  patch: <T>(path: string, body?: unknown): Promise<T> =>
+    request<T>('PATCH', path, body),
   delete: <T>(path: string): Promise<T> => request<T>('DELETE', path),
-  upload: <T>(path: string, body: FormData): Promise<T> => request<T>('POST', path, body),
+  upload: <T>(path: string, body: FormData): Promise<T> =>
+    request<T>('POST', path, body),
 }

@@ -87,7 +87,9 @@ describe('useUploadPhoto', () => {
       })
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.detail('item-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.detail('item-001'),
+    })
   })
 
   it('useUploadPhoto should include Authorization header when access token is set', async () => {
@@ -96,7 +98,10 @@ describe('useUploadPhoto', () => {
       http.post('/api/items/:id/photos', ({ request }) => {
         capturedAuthHeader = request.headers.get('Authorization')
         return HttpResponse.json(
-          mockPhoto({ id: 'photo-new-001', media_key: 'uploads/item-001/photo-new-001.jpg' }),
+          mockPhoto({
+            id: 'photo-new-001',
+            media_key: 'uploads/item-001/photo-new-001.jpg',
+          }),
           { status: 201 }
         )
       })
@@ -120,7 +125,10 @@ describe('useUploadPhoto', () => {
       http.post('/api/items/:id/photos', ({ request }) => {
         capturedAuthHeader = request.headers.get('Authorization')
         return HttpResponse.json(
-          mockPhoto({ id: 'photo-new-001', media_key: 'uploads/item-001/photo-new-001.jpg' }),
+          mockPhoto({
+            id: 'photo-new-001',
+            media_key: 'uploads/item-001/photo-new-001.jpg',
+          }),
           { status: 201 }
         )
       })
@@ -141,7 +149,10 @@ describe('useUploadPhoto', () => {
     server.use(
       http.post('/api/items/:id/photos', ({ params }) =>
         HttpResponse.json(
-          mockPhoto({ id: 'photo-new-001', media_key: `uploads/${params['id'] as string}/photo-new-001.jpg` }),
+          mockPhoto({
+            id: 'photo-new-001',
+            media_key: `uploads/${params['id'] as string}/photo-new-001.jpg`,
+          }),
           { status: 201 }
         )
       )
@@ -157,11 +168,16 @@ describe('useUploadPhoto', () => {
     })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(result.current.data).toEqual(
-      mockPhoto({ id: 'photo-new-001', media_key: 'uploads/item-001/photo-new-001.jpg' })
+      mockPhoto({
+        id: 'photo-new-001',
+        media_key: 'uploads/item-001/photo-new-001.jpg',
+      })
     )
     const { toast } = await import('@/lib/toast')
     expect(toast.success).toHaveBeenCalledWith('Photo uploaded')
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.detail('item-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.detail('item-001'),
+    })
   })
 })
 
@@ -181,7 +197,10 @@ describe('useDeletePhoto', () => {
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useDeletePhoto(), { wrapper })
     act(() => {
-      result.current.mutate({ itemId: 'item-001', key: 'uploads/item-001/photo-001.jpg' })
+      result.current.mutate({
+        itemId: 'item-001',
+        key: 'uploads/item-001/photo-001.jpg',
+      })
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
     const { toast } = await import('@/lib/toast')
@@ -198,28 +217,39 @@ describe('useDeletePhoto', () => {
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useDeletePhoto(), { wrapper })
     act(() => {
-      result.current.mutate({ itemId: 'item-001', key: 'uploads/item-001/photo-001.jpg' })
+      result.current.mutate({
+        itemId: 'item-001',
+        key: 'uploads/item-001/photo-001.jpg',
+      })
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.detail('item-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.detail('item-001'),
+    })
   })
 
   it('useDeletePhoto should call toast.success and invalidate item detail when DELETE /items/:id/photos/:key returns 204', async () => {
     server.use(
-      http.delete('/api/items/:id/photos/:key', () =>
-        new HttpResponse(null, { status: 204 })
+      http.delete(
+        '/api/items/:id/photos/:key',
+        () => new HttpResponse(null, { status: 204 })
       )
     )
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useDeletePhoto(), { wrapper })
     act(() => {
-      result.current.mutate({ itemId: 'item-001', key: 'uploads/item-001/photo-001.jpg' })
+      result.current.mutate({
+        itemId: 'item-001',
+        key: 'uploads/item-001/photo-001.jpg',
+      })
     })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     const { toast } = await import('@/lib/toast')
     expect(toast.success).toHaveBeenCalledWith('Photo deleted')
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.detail('item-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.detail('item-001'),
+    })
   })
 
   it('useDeletePhoto should URL-encode photo key containing path separators', async () => {
@@ -233,7 +263,10 @@ describe('useDeletePhoto', () => {
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useDeletePhoto(), { wrapper })
     act(() => {
-      result.current.mutate({ itemId: 'item-001', key: 'items/uuid-1/uuid-2/filename.jpg' })
+      result.current.mutate({
+        itemId: 'item-001',
+        key: 'items/uuid-1/uuid-2/filename.jpg',
+      })
     })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(capturedUrl).toContain('items%2Fuuid-1%2Fuuid-2%2Ffilename.jpg')

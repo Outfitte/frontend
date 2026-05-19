@@ -6,7 +6,12 @@ import { useAuthStore } from '@/stores/auth'
 
 describe('api', () => {
   beforeEach(() => {
-    useAuthStore.setState({ accessToken: null, refreshToken: null, user: null, isAuthenticated: false })
+    useAuthStore.setState({
+      accessToken: null,
+      refreshToken: null,
+      user: null,
+      isAuthenticated: false,
+    })
     localStorage.clear()
   })
 
@@ -96,11 +101,13 @@ describe('api', () => {
 
   it('api.get should throw ApiError with Unknown error message when response body is not JSON', async () => {
     server.use(
-      http.get('/api/not-json', () =>
-        new HttpResponse('Gateway Timeout', {
-          status: 504,
-          headers: { 'Content-Type': 'text/plain' },
-        })
+      http.get(
+        '/api/not-json',
+        () =>
+          new HttpResponse('Gateway Timeout', {
+            status: 504,
+            headers: { 'Content-Type': 'text/plain' },
+          })
       )
     )
     await expect(api.get('/not-json')).rejects.toMatchObject({
@@ -110,10 +117,8 @@ describe('api', () => {
   })
 
   it('api.get should surface network errors as ApiError', async () => {
-    server.use(
-      http.get('/api/netfail', () => HttpResponse.error())
-    )
-    const err = await api.get('/netfail').catch((e) => e) as ApiError
+    server.use(http.get('/api/netfail', () => HttpResponse.error()))
+    const err = (await api.get('/netfail').catch((e) => e)) as ApiError
     expect(err).toBeInstanceOf(ApiError)
     expect(err.status).toBe(0)
   })
@@ -141,7 +146,11 @@ describe('api', () => {
 
   it('api.get should make only one refresh call when two requests receive 401 simultaneously', async () => {
     let refreshCallCount = 0
-    useAuthStore.setState({ accessToken: 'expired-token', refreshToken: 'valid-refresh-xyz789', isAuthenticated: true })
+    useAuthStore.setState({
+      accessToken: 'expired-token',
+      refreshToken: 'valid-refresh-xyz789',
+      isAuthenticated: true,
+    })
 
     server.use(
       http.get('/api/concurrent-1', ({ request }) => {
@@ -211,7 +220,11 @@ describe('api', () => {
   // --- Happy path ---
 
   it('api.get should attach Authorization header when auth store has a token', async () => {
-    useAuthStore.setState({ accessToken: 'valid-token-abc123', refreshToken: null, isAuthenticated: true })
+    useAuthStore.setState({
+      accessToken: 'valid-token-abc123',
+      refreshToken: null,
+      isAuthenticated: true,
+    })
     let capturedAuth: string | null = null
     server.use(
       http.get('/api/check-auth', ({ request }) => {
@@ -238,7 +251,10 @@ describe('api', () => {
     server.use(
       http.post('/api/items', async ({ request }) => {
         capturedBody = await request.json()
-        return HttpResponse.json({ id: 'item-002', name: 'New Item' }, { status: 201 })
+        return HttpResponse.json(
+          { id: 'item-002', name: 'New Item' },
+          { status: 201 }
+        )
       })
     )
     const result = await api.post<{ id: string; name: string }>('/items', {
@@ -256,9 +272,12 @@ describe('api', () => {
         return HttpResponse.json({ id: 'item-001', name: 'Updated Item' })
       })
     )
-    const result = await api.patch<{ id: string; name: string }>('/items/item-001', {
-      name: 'Updated Item',
-    })
+    const result = await api.patch<{ id: string; name: string }>(
+      '/items/item-001',
+      {
+        name: 'Updated Item',
+      }
+    )
     expect(capturedBody).toEqual({ name: 'Updated Item' })
     expect(result).toEqual({ id: 'item-001', name: 'Updated Item' })
   })
@@ -282,8 +301,13 @@ describe('api', () => {
       )
     )
     const formData = new FormData()
-    formData.append('photo', new File(['img'], 'photo.jpg', { type: 'image/jpeg' }))
-    await expect(api.upload('/items/item-001/photos', formData)).rejects.toMatchObject({
+    formData.append(
+      'photo',
+      new File(['img'], 'photo.jpg', { type: 'image/jpeg' })
+    )
+    await expect(
+      api.upload('/items/item-001/photos', formData)
+    ).rejects.toMatchObject({
       status: 413,
       message: 'File too large',
     })
@@ -294,8 +318,13 @@ describe('api', () => {
       http.post('/api/items/item-001/photos', () => HttpResponse.error())
     )
     const formData = new FormData()
-    formData.append('photo', new File(['img'], 'photo.jpg', { type: 'image/jpeg' }))
-    const err = await api.upload('/items/item-001/photos', formData).catch((e) => e) as ApiError
+    formData.append(
+      'photo',
+      new File(['img'], 'photo.jpg', { type: 'image/jpeg' })
+    )
+    const err = (await api
+      .upload('/items/item-001/photos', formData)
+      .catch((e) => e)) as ApiError
     expect(err).toBeInstanceOf(ApiError)
     expect(err.status).toBe(0)
   })
@@ -309,7 +338,10 @@ describe('api', () => {
       })
     )
     const formData = new FormData()
-    formData.append('photo', new File(['img'], 'photo.jpg', { type: 'image/jpeg' }))
+    formData.append(
+      'photo',
+      new File(['img'], 'photo.jpg', { type: 'image/jpeg' })
+    )
     await api.upload('/items/item-001/photos', formData)
     expect(capturedContentType).not.toContain('application/json')
   })
@@ -319,14 +351,29 @@ describe('api', () => {
     server.use(
       http.post('/api/items/item-001/photos', async ({ request }) => {
         receivedFormData = await request.formData()
-        return HttpResponse.json({ id: 'photo-new-001', media_key: 'uploads/item-001/photo-new-001.jpg' }, { status: 201 })
+        return HttpResponse.json(
+          {
+            id: 'photo-new-001',
+            media_key: 'uploads/item-001/photo-new-001.jpg',
+          },
+          { status: 201 }
+        )
       })
     )
     const formData = new FormData()
-    formData.append('photo', new File(['img'], 'photo.jpg', { type: 'image/jpeg' }))
-    const result = await api.upload<{ id: string }>('/items/item-001/photos', formData)
+    formData.append(
+      'photo',
+      new File(['img'], 'photo.jpg', { type: 'image/jpeg' })
+    )
+    const result = await api.upload<{ id: string }>(
+      '/items/item-001/photos',
+      formData
+    )
     expect(receivedFormData?.has('photo')).toBe(true)
-    expect(result).toEqual({ id: 'photo-new-001', media_key: 'uploads/item-001/photo-new-001.jpg' })
+    expect(result).toEqual({
+      id: 'photo-new-001',
+      media_key: 'uploads/item-001/photo-new-001.jpg',
+    })
   })
 
   it('api.get should retry with new token after 401 triggers refresh', async () => {
@@ -354,13 +401,18 @@ describe('api', () => {
             refresh_token: 'new-refresh-token-xyz789',
           })
         }
-        return HttpResponse.json({ error: 'Invalid refresh token' }, { status: 401 })
+        return HttpResponse.json(
+          { error: 'Invalid refresh token' },
+          { status: 401 }
+        )
       })
     )
 
     const result = await api.get<{ secret: string }>('/protected-resource')
     expect(result).toEqual({ secret: 'data' })
     expect(requestCount).toBe(2)
-    expect(useAuthStore.getState().accessToken).toBe('fresh-access-token-abc123')
+    expect(useAuthStore.getState().accessToken).toBe(
+      'fresh-access-token-abc123'
+    )
   })
 })

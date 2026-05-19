@@ -22,7 +22,8 @@ export function LoginPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const next = searchParams.get('next')
-  const safePath = next && next.startsWith('/') && !next.startsWith('//') ? next : '/'
+  const safePath =
+    next && next.startsWith('/') && !next.startsWith('//') ? next : '/'
   const login = useLogin({ onSuccess: () => navigate(safePath) })
 
   const {
@@ -38,13 +39,20 @@ export function LoginPage() {
   }
 
   return (
-    <div data-testid="login-page" className="flex min-h-screen items-center justify-center">
+    <div
+      data-testid="login-page"
+      className="flex min-h-screen items-center justify-center"
+    >
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-center text-2xl">Outfitte</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            noValidate
+            className="flex flex-col gap-4"
+          >
             {login.isError && (
               <p role="alert" className="text-destructive text-sm">
                 {login.error.message}
@@ -52,9 +60,16 @@ export function LoginPage() {
             )}
             <div className="grid gap-1">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" autoComplete="email" {...register('email')} />
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                {...register('email')}
+              />
               {errors.email && (
-                <p className="text-destructive text-xs">{errors.email.message}</p>
+                <p className="text-destructive text-xs">
+                  {errors.email.message}
+                </p>
               )}
             </div>
             <div className="grid gap-1">
@@ -66,7 +81,9 @@ export function LoginPage() {
                 {...register('password')}
               />
               {errors.password && (
-                <p className="text-destructive text-xs">{errors.password.message}</p>
+                <p className="text-destructive text-xs">
+                  {errors.password.message}
+                </p>
               )}
             </div>
             <Button type="submit" disabled={login.isPending} className="w-full">
@@ -74,7 +91,10 @@ export function LoginPage() {
             </Button>
             <p className="text-muted-foreground text-center text-sm">
               Don&apos;t have an account?{' '}
-              <Link to="/register" className="text-primary underline-offset-4 hover:underline">
+              <Link
+                to="/register"
+                className="text-primary underline-offset-4 hover:underline"
+              >
                 Register
               </Link>
             </p>

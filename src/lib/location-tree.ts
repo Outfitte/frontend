@@ -27,7 +27,9 @@ export function buildLocationTree(locations: Location[]): LocationTreeNode[] {
   return roots
 }
 
-export function flattenTree(tree: LocationTreeNode[]): (Location & { depth: number })[] {
+export function flattenTree(
+  tree: LocationTreeNode[]
+): (Location & { depth: number })[] {
   const result: (Location & { depth: number })[] = []
   const stack: { node: LocationTreeNode; depth: number }[] = []
   for (let i = tree.length - 1; i >= 0; i--) {

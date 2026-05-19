@@ -32,7 +32,8 @@ async function postAuth<T>(path: string, body: unknown): Promise<T> {
   }
   if (response.status === 204) return undefined as T
   const data = await response.json().catch(() => ({ error: 'Unknown error' }))
-  if (!response.ok) throw new ApiError(response.status, data.error ?? 'Unknown error')
+  if (!response.ok)
+    throw new ApiError(response.status, data.error ?? 'Unknown error')
   return data as T
 }
 
@@ -58,7 +59,8 @@ export function useLogin(options?: UseLoginOptions) {
   const { setTokens, setUser } = useAuthStore()
 
   return useMutation<TokenPair, ApiError, Credentials>({
-    mutationFn: (credentials) => postAuth<TokenPair>('/auth/login', credentials),
+    mutationFn: (credentials) =>
+      postAuth<TokenPair>('/auth/login', credentials),
     onSuccess: async (data) => {
       setTokens(data.access_token, data.refresh_token)
       const user = await fetchMe()
@@ -73,7 +75,8 @@ export function useRegister() {
   const { setTokens, setUser } = useAuthStore()
 
   return useMutation<RegisterResponse, ApiError, Credentials>({
-    mutationFn: (credentials) => postAuth<RegisterResponse>('/auth/register', credentials),
+    mutationFn: (credentials) =>
+      postAuth<RegisterResponse>('/auth/register', credentials),
     onSuccess: (data) => {
       setTokens(data.access_token, data.refresh_token)
       setUser(data.user)
@@ -87,7 +90,8 @@ export function useLogout() {
   const { refreshToken } = useAuthStore()
 
   return useMutation<void, ApiError>({
-    mutationFn: () => postAuth<void>('/auth/logout', { refresh_token: refreshToken }),
+    mutationFn: () =>
+      postAuth<void>('/auth/logout', { refresh_token: refreshToken }),
     onSuccess: async () => {
       clearAuthState()
       await queryClient.invalidateQueries()

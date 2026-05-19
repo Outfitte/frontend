@@ -6,7 +6,11 @@ import { server } from '@/test/mocks/server'
 import { mockWearLog } from '@/test/mocks/fixtures'
 import { queryKeys } from '@/lib/query-keys'
 import { toast } from '@/lib/toast'
-import { useWearLogs, useLogWear, useDeleteWearLog } from '@/hooks/use-wear-logs'
+import {
+  useWearLogs,
+  useLogWear,
+  useDeleteWearLog,
+} from '@/hooks/use-wear-logs'
 
 vi.mock('@/lib/toast', () => ({
   toast: { error: vi.fn(), success: vi.fn(), info: vi.fn() },
@@ -46,7 +50,9 @@ describe('useWearLogs', () => {
       )
     )
     const { wrapper } = makeWrapper()
-    const { result } = renderHook(() => useWearLogs('item-missing'), { wrapper })
+    const { result } = renderHook(() => useWearLogs('item-missing'), {
+      wrapper,
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(result.current.error?.message).toBe('Item not found')
   })
@@ -63,9 +69,21 @@ describe('useWearLogs', () => {
 
   it('useWearLogs should return WearLog[] ordered by worn_on desc when fetch succeeds', async () => {
     const logs = [
-      mockWearLog({ id: 'wearlog-001', item_id: 'item-001', worn_on: '2026-04-10' }),
-      mockWearLog({ id: 'wearlog-002', item_id: 'item-001', worn_on: '2026-04-12' }),
-      mockWearLog({ id: 'wearlog-003', item_id: 'item-001', worn_on: '2026-04-11' }),
+      mockWearLog({
+        id: 'wearlog-001',
+        item_id: 'item-001',
+        worn_on: '2026-04-10',
+      }),
+      mockWearLog({
+        id: 'wearlog-002',
+        item_id: 'item-001',
+        worn_on: '2026-04-12',
+      }),
+      mockWearLog({
+        id: 'wearlog-003',
+        item_id: 'item-001',
+        worn_on: '2026-04-11',
+      }),
     ]
     server.use(
       http.get('/api/items/:id/wear-logs', () => HttpResponse.json(logs))
@@ -88,7 +106,10 @@ describe('useLogWear', () => {
   it('useLogWear should call toast.error when POST /items/:id/wear-logs returns 422 future date', async () => {
     server.use(
       http.post('/api/items/:id/wear-logs', () =>
-        HttpResponse.json({ error: 'worn_on cannot be in the future' }, { status: 422 })
+        HttpResponse.json(
+          { error: 'worn_on cannot be in the future' },
+          { status: 422 }
+        )
       )
     )
     const { wrapper } = makeWrapper()
@@ -119,13 +140,24 @@ describe('useLogWear', () => {
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useLogWear(), { wrapper })
     act(() => {
-      result.current.mutate({ itemId: 'item-001', worn_on: '2026-04-15', notes: 'Team meeting' })
+      result.current.mutate({
+        itemId: 'item-001',
+        worn_on: '2026-04-15',
+        notes: 'Team meeting',
+      })
     })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(result.current.data).toMatchObject({ id: 'wearlog-new-001', worn_on: '2026-04-15' })
+    expect(result.current.data).toMatchObject({
+      id: 'wearlog-new-001',
+      worn_on: '2026-04-15',
+    })
     expect(toast.success).toHaveBeenCalledWith('Wear logged')
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.wearLogs('item-001') })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.detail('item-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.wearLogs('item-001'),
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.detail('item-001'),
+    })
   })
 })
 
@@ -164,14 +196,19 @@ describe('useDeleteWearLog', () => {
       result.current.mutate({ itemId: 'item-001', logId: 'wearlog-missing' })
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.wearLogs('item-001') })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.detail('item-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.wearLogs('item-001'),
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.detail('item-001'),
+    })
   })
 
   it('useDeleteWearLog should call toast.success and invalidate wear logs and item detail when DELETE returns 204', async () => {
     server.use(
-      http.delete('/api/items/:id/wear-logs/:logID', () =>
-        new HttpResponse(null, { status: 204 })
+      http.delete(
+        '/api/items/:id/wear-logs/:logID',
+        () => new HttpResponse(null, { status: 204 })
       )
     )
     const { queryClient, wrapper } = makeWrapper()
@@ -182,7 +219,11 @@ describe('useDeleteWearLog', () => {
     })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(toast.success).toHaveBeenCalledWith('Wear log deleted')
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.wearLogs('item-001') })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.detail('item-001') })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.wearLogs('item-001'),
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.detail('item-001'),
+    })
   })
 })

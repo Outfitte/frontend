@@ -17,23 +17,33 @@ describe('queryKeys', () => {
   })
 
   it('queryKeys.items.list should produce different keys when given different statuses', () => {
-    expect(queryKeys.items.list('active')).not.toEqual(queryKeys.items.list('archived'))
+    expect(queryKeys.items.list('active')).not.toEqual(
+      queryKeys.items.list('archived')
+    )
   })
 
   it('queryKeys.items.detail should produce different keys when given different ids', () => {
-    expect(queryKeys.items.detail('item-001')).not.toEqual(queryKeys.items.detail('item-002'))
+    expect(queryKeys.items.detail('item-001')).not.toEqual(
+      queryKeys.items.detail('item-002')
+    )
   })
 
   it('queryKeys.items.wearLogs should produce different keys when given different ids', () => {
-    expect(queryKeys.items.wearLogs('item-001')).not.toEqual(queryKeys.items.wearLogs('item-002'))
+    expect(queryKeys.items.wearLogs('item-001')).not.toEqual(
+      queryKeys.items.wearLogs('item-002')
+    )
   })
 
   it('queryKeys.items.detail should not collide with queryKeys.items.wearLogs for same id', () => {
-    expect(queryKeys.items.detail('item-001')).not.toEqual(queryKeys.items.wearLogs('item-001'))
+    expect(queryKeys.items.detail('item-001')).not.toEqual(
+      queryKeys.items.wearLogs('item-001')
+    )
   })
 
   it('queryKeys.locations.detail should produce different keys when given different ids', () => {
-    expect(queryKeys.locations.detail('loc-001')).not.toEqual(queryKeys.locations.detail('loc-002'))
+    expect(queryKeys.locations.detail('loc-001')).not.toEqual(
+      queryKeys.locations.detail('loc-002')
+    )
   })
 
   it('queryKeys.items.list should not collide with queryKeys.items.all', () => {
@@ -65,22 +75,28 @@ describe('queryKeys', () => {
   })
 
   it('queryKeys.outfits.list should produce different keys when given different date ranges', () => {
-    expect(queryKeys.outfits.list({ from: '2026-01-01', to: '2026-01-31' })).not.toEqual(
-      queryKeys.outfits.list({ from: '2026-02-01', to: '2026-02-28' }),
+    expect(
+      queryKeys.outfits.list({ from: '2026-01-01', to: '2026-01-31' })
+    ).not.toEqual(
+      queryKeys.outfits.list({ from: '2026-02-01', to: '2026-02-28' })
     )
   })
 
   it('queryKeys.outfits.detail should produce different keys when given different ids', () => {
-    expect(queryKeys.outfits.detail('outfit-001')).not.toEqual(queryKeys.outfits.detail('outfit-002'))
+    expect(queryKeys.outfits.detail('outfit-001')).not.toEqual(
+      queryKeys.outfits.detail('outfit-002')
+    )
   })
 
   it('queryKeys.outfits.logs should not collide with queryKeys.outfits.detail for same id', () => {
-    expect(queryKeys.outfits.logs('outfit-001')).not.toEqual(queryKeys.outfits.detail('outfit-001'))
+    expect(queryKeys.outfits.logs('outfit-001')).not.toEqual(
+      queryKeys.outfits.detail('outfit-001')
+    )
   })
 
   it('queryKeys.outfitLogs.range should produce different keys when given different date pairs', () => {
     expect(queryKeys.outfitLogs.range('2026-01-01', '2026-01-31')).not.toEqual(
-      queryKeys.outfitLogs.range('2026-02-01', '2026-02-28'),
+      queryKeys.outfitLogs.range('2026-02-01', '2026-02-28')
     )
   })
 
@@ -99,23 +115,43 @@ describe('queryKeys', () => {
   })
 
   it('queryKeys.items.list should return scoped list key when given no status', () => {
-    expect(queryKeys.items.list()).toEqual(['items', 'list', { status: undefined }])
+    expect(queryKeys.items.list()).toEqual([
+      'items',
+      'list',
+      { status: undefined },
+    ])
   })
 
   it('queryKeys.items.list should return scoped list key with status when given active', () => {
-    expect(queryKeys.items.list('active')).toEqual(['items', 'list', { status: 'active' }])
+    expect(queryKeys.items.list('active')).toEqual([
+      'items',
+      'list',
+      { status: 'active' },
+    ])
   })
 
   it('queryKeys.items.list should return scoped list key with status when given archived', () => {
-    expect(queryKeys.items.list('archived')).toEqual(['items', 'list', { status: 'archived' }])
+    expect(queryKeys.items.list('archived')).toEqual([
+      'items',
+      'list',
+      { status: 'archived' },
+    ])
   })
 
   it('queryKeys.items.detail should return scoped detail key when given item id', () => {
-    expect(queryKeys.items.detail('item-abc')).toEqual(['items', 'detail', 'item-abc'])
+    expect(queryKeys.items.detail('item-abc')).toEqual([
+      'items',
+      'detail',
+      'item-abc',
+    ])
   })
 
   it('queryKeys.items.wearLogs should return scoped wear-logs key when given item id', () => {
-    expect(queryKeys.items.wearLogs('item-abc')).toEqual(['items', 'item-abc', 'wear-logs'])
+    expect(queryKeys.items.wearLogs('item-abc')).toEqual([
+      'items',
+      'item-abc',
+      'wear-logs',
+    ])
   })
 
   it('queryKeys.locations.all should return the base locations key', () => {
@@ -127,7 +163,11 @@ describe('queryKeys', () => {
   })
 
   it('queryKeys.locations.detail should return scoped detail key when given location id', () => {
-    expect(queryKeys.locations.detail('loc-xyz')).toEqual(['locations', 'detail', 'loc-xyz'])
+    expect(queryKeys.locations.detail('loc-xyz')).toEqual([
+      'locations',
+      'detail',
+      'loc-xyz',
+    ])
   })
 
   it('queryKeys.categories.all should return the base categories key', () => {
@@ -147,19 +187,25 @@ describe('queryKeys', () => {
   })
 
   it('queryKeys.outfits.list should return scoped list key with dates when given a date range', () => {
-    expect(queryKeys.outfits.list({ from: '2026-01-01', to: '2026-01-31' })).toEqual([
-      'outfits',
-      'list',
-      { from: '2026-01-01', to: '2026-01-31' },
-    ])
+    expect(
+      queryKeys.outfits.list({ from: '2026-01-01', to: '2026-01-31' })
+    ).toEqual(['outfits', 'list', { from: '2026-01-01', to: '2026-01-31' }])
   })
 
   it('queryKeys.outfits.detail should return scoped detail key when given outfit id', () => {
-    expect(queryKeys.outfits.detail('outfit-abc')).toEqual(['outfits', 'detail', 'outfit-abc'])
+    expect(queryKeys.outfits.detail('outfit-abc')).toEqual([
+      'outfits',
+      'detail',
+      'outfit-abc',
+    ])
   })
 
   it('queryKeys.outfits.logs should return scoped logs key when given outfit id', () => {
-    expect(queryKeys.outfits.logs('outfit-abc')).toEqual(['outfits', 'outfit-abc', 'logs'])
+    expect(queryKeys.outfits.logs('outfit-abc')).toEqual([
+      'outfits',
+      'outfit-abc',
+      'logs',
+    ])
   })
 
   it('queryKeys.outfitLogs.range should return scoped range key when given date range', () => {

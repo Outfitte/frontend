@@ -61,7 +61,7 @@ export function mockItem(overrides: Partial<Item> = {}): Item {
     id: 'item-001',
     owner_id: 'user-001',
     name: 'Blue Denim Jacket',
-    brand: 'Levi\'s',
+    brand: "Levi's",
     category_id: 'cat-001',
     color: 'blue',
     status: 'active',
@@ -114,7 +114,11 @@ export function mockCategory(overrides: Partial<Category> = {}): Category {
     is_preset: true,
     field_hints: [
       mockFieldHint(),
-      mockFieldHint({ key: 'size', label: 'Size', placeholder: 'e.g. S, M, L, XL' }),
+      mockFieldHint({
+        key: 'size',
+        label: 'Size',
+        placeholder: 'e.g. S, M, L, XL',
+      }),
     ],
     ...overrides,
   }
@@ -132,7 +136,9 @@ export function mockWearLog(overrides: Partial<WearLog> = {}): WearLog {
   }
 }
 
-export function mockOutfitItem(overrides: Partial<OutfitItem> = {}): OutfitItem {
+export function mockOutfitItem(
+  overrides: Partial<OutfitItem> = {}
+): OutfitItem {
   return {
     outfit_id: 'outfit-001',
     item_id: 'item-001',
@@ -167,7 +173,9 @@ export function mockOutfitLog(overrides: Partial<OutfitLog> = {}): OutfitLog {
   }
 }
 
-export function mockUserSummary(overrides: Partial<UserSummary> = {}): UserSummary {
+export function mockUserSummary(
+  overrides: Partial<UserSummary> = {}
+): UserSummary {
   return {
     id: 'user-001',
     email: 'user@example.com',
@@ -197,7 +205,9 @@ export function mockShareView(overrides: Partial<ShareView> = {}): ShareView {
   }
 }
 
-export function mockSharedItem(overrides: Partial<SharedItem> = {}): SharedItem {
+export function mockSharedItem(
+  overrides: Partial<SharedItem> = {}
+): SharedItem {
   return {
     ...mockItem(),
     shared_by: mockUserSummary(),
@@ -205,7 +215,9 @@ export function mockSharedItem(overrides: Partial<SharedItem> = {}): SharedItem 
   }
 }
 
-export function mockSharedOutfit(overrides: Partial<SharedOutfit> = {}): SharedOutfit {
+export function mockSharedOutfit(
+  overrides: Partial<SharedOutfit> = {}
+): SharedOutfit {
   return {
     ...mockOutfit(),
     shared_by: mockUserSummary(),
@@ -213,7 +225,9 @@ export function mockSharedOutfit(overrides: Partial<SharedOutfit> = {}): SharedO
   }
 }
 
-export function mockSharedLocation(overrides: Partial<SharedLocation> = {}): SharedLocation {
+export function mockSharedLocation(
+  overrides: Partial<SharedLocation> = {}
+): SharedLocation {
   return {
     location: mockLocation(),
     items: [],

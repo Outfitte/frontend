@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -28,11 +28,12 @@ export function ItemPicker({
   title = 'Add Item',
 }: ItemPickerProps) {
   const [search, setSearch] = useState('')
+  const [prevOpen, setPrevOpen] = useState(open)
+  if (prevOpen !== open && !open) {
+    setPrevOpen(open)
+    setSearch('')
+  }
   const { data: items, isLoading, isError } = useItems('active')
-
-  useEffect(() => {
-    if (!open) setSearch('')
-  }, [open])
 
   const excludeSet = useMemo(() => new Set(excludeItemIds), [excludeItemIds])
 
@@ -52,7 +53,12 @@ export function ItemPicker({
   }
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) onClose()
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -70,11 +76,17 @@ export function ItemPicker({
               ))}
             </div>
           ) : isError ? (
-            <p data-testid="item-picker-error" className="py-4 text-center text-sm text-destructive">
+            <p
+              data-testid="item-picker-error"
+              className="text-destructive py-4 text-center text-sm"
+            >
               Failed to load items. Please try again.
             </p>
           ) : filtered.length === 0 ? (
-            <p data-testid="item-picker-empty" className="py-4 text-center text-sm text-muted-foreground">
+            <p
+              data-testid="item-picker-empty"
+              className="text-muted-foreground py-4 text-center text-sm"
+            >
               No items found
             </p>
           ) : (
@@ -83,7 +95,7 @@ export function ItemPicker({
                 const firstPhoto = item.photos[0]
                 return (
                   <li key={item.id} className="flex items-center gap-3 py-2">
-                    <div className="h-10 w-10 shrink-0 overflow-hidden rounded bg-muted">
+                    <div className="bg-muted h-10 w-10 shrink-0 overflow-hidden rounded">
                       {firstPhoto ? (
                         <img
                           src={`/media/${firstPhoto.media_key}`}
@@ -91,15 +103,19 @@ export function ItemPicker({
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                        <div className="text-muted-foreground flex h-full w-full items-center justify-center text-xs">
                           ?
                         </div>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{item.name}</p>
+                      <p className="truncate text-sm font-medium">
+                        {item.name}
+                      </p>
                       {item.brand && (
-                        <p className="truncate text-xs text-muted-foreground">{item.brand}</p>
+                        <p className="text-muted-foreground truncate text-xs">
+                          {item.brand}
+                        </p>
                       )}
                     </div>
                     <Button size="sm" onClick={() => handleSelect(item.id)}>

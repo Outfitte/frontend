@@ -16,7 +16,10 @@ function renderPage() {
     <Routes>
       <Route path="/outfits/new" element={<CreateOutfitPage />} />
       <Route path="/outfits" element={<div data-testid="outfits-page" />} />
-      <Route path="/outfits/:id/edit" element={<div data-testid="edit-outfit-page" />} />
+      <Route
+        path="/outfits/:id/edit"
+        element={<div data-testid="edit-outfit-page" />}
+      />
     </Routes>,
     { initialEntries: ['/outfits/new'] }
   )
@@ -49,7 +52,9 @@ describe('CreateOutfitPage', () => {
     await user.type(screen.getByLabelText(/name/i), 'a'.repeat(201))
     await user.click(screen.getByRole('button', { name: /save/i }))
 
-    expect(await screen.findByText(/200 characters or fewer/i)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/200 characters or fewer/i)
+    ).toBeInTheDocument()
     expect(screen.getByTestId('create-outfit-page')).toBeInTheDocument()
   })
 
@@ -93,9 +98,17 @@ describe('CreateOutfitPage', () => {
     let capturedBody: Record<string, unknown> = {}
     server.use(
       http.post('/api/outfits', async ({ request }) => {
-        capturedBody = await request.json() as Record<string, unknown>
+        capturedBody = (await request.json()) as Record<string, unknown>
         return HttpResponse.json(
-          { id: 'outfit-new-001', name: capturedBody['name'] as string, notes: capturedBody['notes'], items: [], photos: [], owner_id: 'user-001', created_at: '2026-01-01T00:00:00Z' },
+          {
+            id: 'outfit-new-001',
+            name: capturedBody['name'] as string,
+            notes: capturedBody['notes'],
+            items: [],
+            photos: [],
+            owner_id: 'user-001',
+            created_at: '2026-01-01T00:00:00Z',
+          },
           { status: 201 }
         )
       })

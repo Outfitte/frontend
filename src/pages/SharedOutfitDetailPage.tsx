@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { format, parseISO } from 'date-fns'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
@@ -13,14 +13,15 @@ export function SharedOutfitDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { data, isLoading } = useSharedWithMe()
   const [activePhotoIdx, setActivePhotoIdx] = useState(0)
+  const [prevId, setPrevId] = useState(id)
+  if (prevId !== id) {
+    setPrevId(id)
+    setActivePhotoIdx(0)
+  }
 
   const outfit = data?.outfits.find((o) => o.id === id)
 
   const { data: outfitLogs = [] } = useOutfitLogs(outfit ? id : undefined)
-
-  useEffect(() => {
-    setActivePhotoIdx(0)
-  }, [id])
 
   if (isLoading) {
     return (
@@ -39,8 +40,11 @@ export function SharedOutfitDetailPage() {
 
   if (!outfit) {
     return (
-      <div data-testid="shared-outfit-detail-page" className="flex flex-col items-center justify-center py-24">
-        <p className="text-lg text-muted-foreground">Outfit not found</p>
+      <div
+        data-testid="shared-outfit-detail-page"
+        className="flex flex-col items-center justify-center py-24"
+      >
+        <p className="text-muted-foreground text-lg">Outfit not found</p>
         <Button asChild className="mt-4" variant="outline">
           <Link to="/shared">Back to shared</Link>
         </Button>
@@ -49,7 +53,9 @@ export function SharedOutfitDetailPage() {
   }
 
   const outfitName = outfit.name ?? 'Untitled outfit'
-  const sortedPhotos = [...outfit.photos].sort((a, b) => a.position - b.position)
+  const sortedPhotos = [...outfit.photos].sort(
+    (a, b) => a.position - b.position
+  )
   const activePhoto = sortedPhotos[activePhotoIdx]
 
   const sharedItems = data?.items ?? []
@@ -67,7 +73,10 @@ export function SharedOutfitDetailPage() {
   return (
     <div data-testid="shared-outfit-detail-page">
       {/* Shared-by banner */}
-      <div data-testid="shared-by-banner" className="mb-4 rounded-md bg-muted px-4 py-2 text-sm text-muted-foreground">
+      <div
+        data-testid="shared-by-banner"
+        className="bg-muted text-muted-foreground mb-4 rounded-md px-4 py-2 text-sm"
+      >
         shared by {outfit.shared_by.email}
       </div>
 
@@ -75,7 +84,7 @@ export function SharedOutfitDetailPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold">{outfitName}</h1>
         {outfit.notes && (
-          <p className="mt-1 text-sm text-muted-foreground">{outfit.notes}</p>
+          <p className="text-muted-foreground mt-1 text-sm">{outfit.notes}</p>
         )}
       </div>
 
@@ -86,13 +95,13 @@ export function SharedOutfitDetailPage() {
           {sortedPhotos.length === 0 ? (
             <div
               data-testid="outfit-photo-placeholder"
-              className="flex aspect-square items-center justify-center rounded-xl border bg-muted text-muted-foreground"
+              className="bg-muted text-muted-foreground flex aspect-square items-center justify-center rounded-xl border"
             >
               No photo
             </div>
           ) : (
             <div data-testid="outfit-photo-gallery">
-              <div className="relative aspect-square overflow-hidden rounded-xl border bg-muted">
+              <div className="bg-muted relative aspect-square overflow-hidden rounded-xl border">
                 <img
                   data-testid="outfit-main-photo"
                   src={`/media/${activePhoto.media_key}`}
@@ -105,7 +114,7 @@ export function SharedOutfitDetailPage() {
                       type="button"
                       aria-label="Previous photo"
                       onClick={prevPhoto}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-1 hover:bg-background"
+                      className="bg-background/80 hover:bg-background absolute top-1/2 left-2 -translate-y-1/2 rounded-full p-1"
                     >
                       <ChevronLeftIcon className="h-5 w-5" />
                     </button>
@@ -113,7 +122,7 @@ export function SharedOutfitDetailPage() {
                       type="button"
                       aria-label="Next photo"
                       onClick={nextPhoto}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-background/80 p-1 hover:bg-background"
+                      className="bg-background/80 hover:bg-background absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1"
                     >
                       <ChevronRightIcon className="h-5 w-5" />
                     </button>
@@ -131,7 +140,7 @@ export function SharedOutfitDetailPage() {
                       onClick={() => setActivePhotoIdx(idx)}
                       className={cn(
                         'flex-shrink-0 overflow-hidden rounded-lg border',
-                        idx === activePhotoIdx ? 'ring-2 ring-primary' : ''
+                        idx === activePhotoIdx ? 'ring-primary ring-2' : ''
                       )}
                     >
                       <img
@@ -150,13 +159,17 @@ export function SharedOutfitDetailPage() {
         {/* Right: Items grid */}
         <div className="space-y-6">
           <div>
-            <p className="mb-2 text-sm font-medium text-muted-foreground">Items</p>
+            <p className="text-muted-foreground mb-2 text-sm font-medium">
+              Items
+            </p>
             {outfit.items.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No items</p>
+              <p className="text-muted-foreground text-sm">No items</p>
             ) : (
               <ul className="grid grid-cols-2 gap-2">
                 {outfit.items.map((outfitItem) => {
-                  const sharedItem = sharedItems.find((i) => i.id === outfitItem.item_id)
+                  const sharedItem = sharedItems.find(
+                    (i) => i.id === outfitItem.item_id
+                  )
                   const thumbnail = sharedItem?.photos[0]
                   const itemName = sharedItem?.name ?? outfitItem.item_id
 
@@ -165,7 +178,7 @@ export function SharedOutfitDetailPage() {
                       <li key={outfitItem.item_id} data-testid="outfit-item">
                         <Link
                           to={`/shared/items/${sharedItem.id}`}
-                          className="flex flex-col items-center gap-1 rounded-lg border p-2 text-center text-sm hover:bg-muted"
+                          className="hover:bg-muted flex flex-col items-center gap-1 rounded-lg border p-2 text-center text-sm"
                         >
                           {thumbnail ? (
                             <img
@@ -174,7 +187,7 @@ export function SharedOutfitDetailPage() {
                               className="h-16 w-16 rounded object-cover"
                             />
                           ) : (
-                            <div className="flex h-16 w-16 items-center justify-center rounded bg-muted text-xs text-muted-foreground">
+                            <div className="bg-muted text-muted-foreground flex h-16 w-16 items-center justify-center rounded text-xs">
                               No photo
                             </div>
                           )}
@@ -185,9 +198,12 @@ export function SharedOutfitDetailPage() {
                   }
 
                   return (
-                    <li key={outfitItem.item_id} data-testid="outfit-item-unlinked">
+                    <li
+                      key={outfitItem.item_id}
+                      data-testid="outfit-item-unlinked"
+                    >
                       <div className="flex flex-col items-center gap-1 rounded-lg border p-2 text-center text-sm opacity-60">
-                        <div className="flex h-16 w-16 items-center justify-center rounded bg-muted text-xs text-muted-foreground">
+                        <div className="bg-muted text-muted-foreground flex h-16 w-16 items-center justify-center rounded text-xs">
                           No access
                         </div>
                         <span className="text-muted-foreground">Item</span>
@@ -207,7 +223,7 @@ export function SharedOutfitDetailPage() {
         <h2 className="mb-4 text-lg font-semibold">Wear History</h2>
         <div className="mb-4 flex gap-6 text-sm">
           <div>
-            <span className="font-medium text-muted-foreground">Worn </span>
+            <span className="text-muted-foreground font-medium">Worn </span>
             <span data-testid="outfit-wear-count" className="font-bold">
               {wearCount}
             </span>
@@ -215,8 +231,12 @@ export function SharedOutfitDetailPage() {
           </div>
           {lastWornDate && (
             <div>
-              <span className="font-medium text-muted-foreground">Last worn </span>
-              <span data-testid="outfit-last-worn">{format(parseISO(lastWornDate), 'MMM d, yyyy')}</span>
+              <span className="text-muted-foreground font-medium">
+                Last worn{' '}
+              </span>
+              <span data-testid="outfit-last-worn">
+                {format(parseISO(lastWornDate), 'MMM d, yyyy')}
+              </span>
             </div>
           )}
         </div>
@@ -224,8 +244,12 @@ export function SharedOutfitDetailPage() {
           {outfitLogs.map((log) => (
             <li key={log.id} className="rounded-lg border p-3">
               <div className="text-sm">
-                <p className="font-medium">{format(parseISO(log.worn_on), 'MMM d, yyyy')}</p>
-                {log.notes && <p className="text-muted-foreground">{log.notes}</p>}
+                <p className="font-medium">
+                  {format(parseISO(log.worn_on), 'MMM d, yyyy')}
+                </p>
+                {log.notes && (
+                  <p className="text-muted-foreground">{log.notes}</p>
+                )}
               </div>
             </li>
           ))}

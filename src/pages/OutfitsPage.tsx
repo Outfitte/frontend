@@ -23,10 +23,13 @@ function sortOutfits(outfits: Outfit[], sort: SortOption): Outfit[] {
 export function OutfitsPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [optimisticallyRemovedIds, setOptimisticallyRemovedIds] = useState<Set<string>>(new Set())
+  const [optimisticallyRemovedIds, setOptimisticallyRemovedIds] = useState<
+    Set<string>
+  >(new Set())
 
   const rawSort = searchParams.get('sort')
-  const sort: SortOption = rawSort === 'oldest' || rawSort === 'name' ? rawSort : 'newest'
+  const sort: SortOption =
+    rawSort === 'oldest' || rawSort === 'name' ? rawSort : 'newest'
 
   const { isLoading, data: outfits } = useOutfits()
   const { mutate: deleteOutfit } = useDeleteOutfit()
@@ -73,7 +76,7 @@ export function OutfitsPage() {
           aria-label="Sort"
           value={sort}
           onChange={(e) => setParam('sort', e.target.value)}
-          className="h-8 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-sm outline-none"
+          className="border-input h-8 rounded-lg border bg-transparent px-2.5 py-1.5 text-sm outline-none"
         >
           <option value="newest">Newest</option>
           <option value="oldest">Oldest</option>
@@ -87,13 +90,17 @@ export function OutfitsPage() {
       {isLoading && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} data-testid="outfit-card-skeleton" className="h-64 w-full" />
+            <Skeleton
+              key={i}
+              data-testid="outfit-card-skeleton"
+              className="h-64 w-full"
+            />
           ))}
         </div>
       )}
       {!isLoading && visibleOutfits.length === 0 && (
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <p className="mb-4 text-lg text-muted-foreground">No outfits yet</p>
+          <p className="text-muted-foreground mb-4 text-lg">No outfits yet</p>
           <Button asChild>
             <Link to="/outfits/new">Create your first outfit</Link>
           </Button>
@@ -102,7 +109,11 @@ export function OutfitsPage() {
       {!isLoading && visibleOutfits.length > 0 && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {visibleOutfits.map((outfit) => (
-            <OutfitCard key={outfit.id} outfit={outfit} onAction={handleAction} />
+            <OutfitCard
+              key={outfit.id}
+              outfit={outfit}
+              onAction={handleAction}
+            />
           ))}
         </div>
       )}

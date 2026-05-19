@@ -43,9 +43,7 @@ describe('useCategories', () => {
       mockCategory({ id: 'cat-001', label: 'Jackets' }),
       mockCategory({ id: 'cat-002', label: 'Trousers', field_hints: [] }),
     ]
-    server.use(
-      http.get('/api/categories', () => HttpResponse.json(categories))
-    )
+    server.use(http.get('/api/categories', () => HttpResponse.json(categories)))
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useCategories(), { wrapper })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -65,8 +63,16 @@ describe('useCategories', () => {
       is_preset: true,
       field_hints: [
         { key: 'size', label: 'Size', placeholder: 'e.g. S, M, L, XL' },
-        { key: 'fabric', label: 'Fabric', placeholder: 'e.g. cotton, polyester' },
-        { key: 'fit', label: 'Fit', placeholder: 'e.g. slim, relaxed, oversized' },
+        {
+          key: 'fabric',
+          label: 'Fabric',
+          placeholder: 'e.g. cotton, polyester',
+        },
+        {
+          key: 'fit',
+          label: 'Fit',
+          placeholder: 'e.g. slim, relaxed, oversized',
+        },
       ],
     })
     server.use(

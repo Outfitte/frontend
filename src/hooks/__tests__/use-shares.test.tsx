@@ -45,7 +45,11 @@ describe('useCreateShare', () => {
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useCreateShare(), { wrapper })
     act(() => {
-      result.current.mutate({ recipient_id: 'user-002', target_type: 'item', target_id: 'item-001' })
+      result.current.mutate({
+        recipient_id: 'user-002',
+        target_type: 'item',
+        target_id: 'item-001',
+      })
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(toast.error).not.toHaveBeenCalled()
@@ -60,7 +64,11 @@ describe('useCreateShare', () => {
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useCreateShare(), { wrapper })
     act(() => {
-      result.current.mutate({ recipient_id: 'user-001', target_type: 'item', target_id: 'item-001' })
+      result.current.mutate({
+        recipient_id: 'user-001',
+        target_type: 'item',
+        target_id: 'item-001',
+      })
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(toast.error).not.toHaveBeenCalled()
@@ -75,7 +83,11 @@ describe('useCreateShare', () => {
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useCreateShare(), { wrapper })
     act(() => {
-      result.current.mutate({ recipient_id: 'user-002', target_type: 'item', target_id: 'item-missing' })
+      result.current.mutate({
+        recipient_id: 'user-002',
+        target_type: 'item',
+        target_id: 'item-missing',
+      })
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(toast.error).toHaveBeenCalledWith('Target not found')
@@ -86,20 +98,31 @@ describe('useCreateShare', () => {
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useCreateShare(), { wrapper })
     act(() => {
-      result.current.mutate({ recipient_id: 'user-002', target_type: 'item', target_id: 'item-001' })
+      result.current.mutate({
+        recipient_id: 'user-002',
+        target_type: 'item',
+        target_id: 'item-001',
+      })
     })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(toast.success).toHaveBeenCalled()
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.shares.outgoing })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.shares.outgoing,
+    })
   })
 
   it('useCreateShare should post recipient_id, target_type, target_id to POST /shares', async () => {
     let capturedBody: Record<string, unknown> | undefined
     server.use(
       http.post('/api/shares', async ({ request }) => {
-        capturedBody = await request.json() as Record<string, unknown>
+        capturedBody = (await request.json()) as Record<string, unknown>
         return HttpResponse.json(
-          mockShare({ id: 'share-new-001', recipient_id: 'user-002', target_type: 'outfit', target_id: 'outfit-001' }),
+          mockShare({
+            id: 'share-new-001',
+            recipient_id: 'user-002',
+            target_type: 'outfit',
+            target_id: 'outfit-001',
+          }),
           { status: 201 }
         )
       })
@@ -107,10 +130,18 @@ describe('useCreateShare', () => {
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useCreateShare(), { wrapper })
     act(() => {
-      result.current.mutate({ recipient_id: 'user-002', target_type: 'outfit', target_id: 'outfit-001' })
+      result.current.mutate({
+        recipient_id: 'user-002',
+        target_type: 'outfit',
+        target_id: 'outfit-001',
+      })
     })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(capturedBody).toEqual({ recipient_id: 'user-002', target_type: 'outfit', target_id: 'outfit-001' })
+    expect(capturedBody).toEqual({
+      recipient_id: 'user-002',
+      target_type: 'outfit',
+      target_id: 'outfit-001',
+    })
   })
 })
 
@@ -129,7 +160,9 @@ describe('useRevokeShare', () => {
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useRevokeShare(), { wrapper })
-    act(() => { result.current.mutate('share-missing') })
+    act(() => {
+      result.current.mutate('share-missing')
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(toast.error).toHaveBeenCalledWith('Share not found')
   })
@@ -143,20 +176,28 @@ describe('useRevokeShare', () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useRevokeShare(), { wrapper })
-    act(() => { result.current.mutate('share-missing') })
+    act(() => {
+      result.current.mutate('share-missing')
+    })
     await waitFor(() => expect(result.current.isError).toBe(true))
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.shares.outgoing })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.shares.outgoing,
+    })
   })
 
   it('useRevokeShare should call toast.success and invalidate shares.outgoing when DELETE /shares/:id returns 204', async () => {
     const { queryClient, wrapper } = makeWrapper()
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useRevokeShare(), { wrapper })
-    act(() => { result.current.mutate('share-001') })
+    act(() => {
+      result.current.mutate('share-001')
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(result.current.data).toBeUndefined()
     expect(toast.success).toHaveBeenCalled()
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.shares.outgoing })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.shares.outgoing,
+    })
   })
 })
 
@@ -184,7 +225,11 @@ describe('useOutgoingShares', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(result.current.data).toEqual([
       mockShareView({ id: 'share-001' }),
-      mockShareView({ id: 'share-002', target_type: 'outfit', target_id: 'outfit-001' }),
+      mockShareView({
+        id: 'share-002',
+        target_type: 'outfit',
+        target_id: 'outfit-001',
+      }),
     ])
   })
 })

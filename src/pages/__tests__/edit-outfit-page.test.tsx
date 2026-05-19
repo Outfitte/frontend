@@ -5,7 +5,12 @@ import { Route, Routes } from 'react-router'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/mocks/server'
 import { render } from '@/test/utils'
-import { mockOutfit, mockOutfitItem, mockItem, mockPhoto } from '@/test/mocks/fixtures'
+import {
+  mockOutfit,
+  mockOutfitItem,
+  mockItem,
+  mockPhoto,
+} from '@/test/mocks/fixtures'
 import { EditOutfitPage } from '@/pages/EditOutfitPage'
 
 vi.mock('@/lib/toast', () => ({
@@ -16,7 +21,10 @@ function renderPage(id = 'outfit-001') {
   return render(
     <Routes>
       <Route path="/outfits/:id/edit" element={<EditOutfitPage />} />
-      <Route path="/outfits/:id" element={<div data-testid="outfit-detail-page" />} />
+      <Route
+        path="/outfits/:id"
+        element={<div data-testid="outfit-detail-page" />}
+      />
     </Routes>,
     { initialEntries: [`/outfits/${id}/edit`] }
   )
@@ -52,7 +60,13 @@ describe('EditOutfitPage', () => {
     const user = userEvent.setup()
     server.use(
       http.get('/api/outfits/:id', () =>
-        HttpResponse.json(mockOutfit({ id: 'outfit-001', name: 'Casual Friday', notes: 'Weekend' }))
+        HttpResponse.json(
+          mockOutfit({
+            id: 'outfit-001',
+            name: 'Casual Friday',
+            notes: 'Weekend',
+          })
+        )
       ),
       http.patch('/api/outfits/:id', () =>
         HttpResponse.json({ error: 'Server error' }, { status: 500 })
@@ -70,7 +84,9 @@ describe('EditOutfitPage', () => {
   it('EditOutfitPage should show empty inputs when outfit name and notes are null', async () => {
     server.use(
       http.get('/api/outfits/:id', () =>
-        HttpResponse.json(mockOutfit({ id: 'outfit-001', name: null, notes: null }))
+        HttpResponse.json(
+          mockOutfit({ id: 'outfit-001', name: null, notes: null })
+        )
       )
     )
     renderPage()
@@ -83,7 +99,13 @@ describe('EditOutfitPage', () => {
   it('EditOutfitPage should pre-populate name and notes from existing outfit', async () => {
     server.use(
       http.get('/api/outfits/:id', () =>
-        HttpResponse.json(mockOutfit({ id: 'outfit-001', name: 'Casual Friday', notes: 'Weekend look' }))
+        HttpResponse.json(
+          mockOutfit({
+            id: 'outfit-001',
+            name: 'Casual Friday',
+            notes: 'Weekend look',
+          })
+        )
       )
     )
     renderPage()
@@ -97,7 +119,13 @@ describe('EditOutfitPage', () => {
     let patchBody: Record<string, unknown> = {}
     server.use(
       http.get('/api/outfits/:id', () =>
-        HttpResponse.json(mockOutfit({ id: 'outfit-001', name: 'Casual Friday', notes: 'Weekend look' }))
+        HttpResponse.json(
+          mockOutfit({
+            id: 'outfit-001',
+            name: 'Casual Friday',
+            notes: 'Weekend look',
+          })
+        )
       ),
       http.patch('/api/outfits/:id', async ({ request }) => {
         patchBody = (await request.json()) as Record<string, unknown>
@@ -121,7 +149,9 @@ describe('EditOutfitPage', () => {
     const user = userEvent.setup()
     server.use(
       http.get('/api/outfits/:id', () =>
-        HttpResponse.json(mockOutfit({ id: 'outfit-001', name: 'Casual Friday' }))
+        HttpResponse.json(
+          mockOutfit({ id: 'outfit-001', name: 'Casual Friday' })
+        )
       ),
       http.patch('/api/outfits/:id', () =>
         HttpResponse.json(mockOutfit({ id: 'outfit-001' }))
@@ -139,7 +169,9 @@ describe('EditOutfitPage', () => {
     const user = userEvent.setup()
     server.use(
       http.get('/api/outfits/:id', () =>
-        HttpResponse.json(mockOutfit({ id: 'outfit-001', name: 'Casual Friday' }))
+        HttpResponse.json(
+          mockOutfit({ id: 'outfit-001', name: 'Casual Friday' })
+        )
       )
     )
     renderPage()
@@ -157,7 +189,9 @@ describe('EditOutfitPage', () => {
     const user = userEvent.setup()
     server.use(
       http.get('/api/outfits/:id', () =>
-        HttpResponse.json(mockOutfit({ id: 'outfit-001', name: 'Casual Friday', items: [] }))
+        HttpResponse.json(
+          mockOutfit({ id: 'outfit-001', name: 'Casual Friday', items: [] })
+        )
       ),
       http.post('/api/outfits/:id/items', () =>
         HttpResponse.json({ error: 'Server error' }, { status: 500 })
@@ -184,7 +218,9 @@ describe('EditOutfitPage', () => {
           mockOutfit({
             id: 'outfit-001',
             name: 'Casual Friday',
-            items: [mockOutfitItem({ outfit_id: 'outfit-001', item_id: 'item-001' })],
+            items: [
+              mockOutfitItem({ outfit_id: 'outfit-001', item_id: 'item-001' }),
+            ],
           })
         )
       ),
@@ -212,14 +248,22 @@ describe('EditOutfitPage', () => {
             name: 'Casual Friday',
             items: [
               mockOutfitItem({ outfit_id: 'outfit-001', item_id: 'item-001' }),
-              mockOutfitItem({ outfit_id: 'outfit-001', item_id: 'item-002', position: 2 }),
+              mockOutfitItem({
+                outfit_id: 'outfit-001',
+                item_id: 'item-002',
+                position: 2,
+              }),
             ],
           })
         )
       ),
       http.get('/api/items', () =>
         HttpResponse.json([
-          mockItem({ id: 'item-001', name: 'Blue Jacket', photos: [mockPhoto({ media_key: 'uploads/jacket.jpg' })] }),
+          mockItem({
+            id: 'item-001',
+            name: 'Blue Jacket',
+            photos: [mockPhoto({ media_key: 'uploads/jacket.jpg' })],
+          }),
           mockItem({ id: 'item-002', name: 'White Tee', photos: [] }),
         ])
       )
@@ -235,7 +279,9 @@ describe('EditOutfitPage', () => {
     const user = userEvent.setup()
     server.use(
       http.get('/api/outfits/:id', () =>
-        HttpResponse.json(mockOutfit({ id: 'outfit-001', name: 'Casual Friday', items: [] }))
+        HttpResponse.json(
+          mockOutfit({ id: 'outfit-001', name: 'Casual Friday', items: [] })
+        )
       )
     )
     renderPage()
@@ -256,11 +302,18 @@ describe('EditOutfitPage', () => {
             mockOutfit({
               id: 'outfit-001',
               name: 'Casual Friday',
-              items: [mockOutfitItem({ outfit_id: 'outfit-001', item_id: 'item-001' })],
+              items: [
+                mockOutfitItem({
+                  outfit_id: 'outfit-001',
+                  item_id: 'item-001',
+                }),
+              ],
             })
           )
         }
-        return HttpResponse.json(mockOutfit({ id: 'outfit-001', name: 'Casual Friday', items: [] }))
+        return HttpResponse.json(
+          mockOutfit({ id: 'outfit-001', name: 'Casual Friday', items: [] })
+        )
       }),
       http.post('/api/outfits/:id/items', () => {
         addCalled = true
@@ -286,13 +339,17 @@ describe('EditOutfitPage', () => {
     server.use(
       http.get('/api/outfits/:id', () => {
         if (removeCalled) {
-          return HttpResponse.json(mockOutfit({ id: 'outfit-001', name: 'Casual Friday', items: [] }))
+          return HttpResponse.json(
+            mockOutfit({ id: 'outfit-001', name: 'Casual Friday', items: [] })
+          )
         }
         return HttpResponse.json(
           mockOutfit({
             id: 'outfit-001',
             name: 'Casual Friday',
-            items: [mockOutfitItem({ outfit_id: 'outfit-001', item_id: 'item-001' })],
+            items: [
+              mockOutfitItem({ outfit_id: 'outfit-001', item_id: 'item-001' }),
+            ],
           })
         )
       }),
@@ -310,7 +367,9 @@ describe('EditOutfitPage', () => {
     await user.click(screen.getByRole('button', { name: /remove/i }))
 
     await waitFor(() => expect(removeCalled).toBe(true))
-    await waitFor(() => expect(screen.queryByText('Blue Jacket')).not.toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.queryByText('Blue Jacket')).not.toBeInTheDocument()
+    )
   })
 
   it('EditOutfitPage should exclude items already in the outfit from ItemPicker', async () => {
@@ -321,7 +380,9 @@ describe('EditOutfitPage', () => {
           mockOutfit({
             id: 'outfit-001',
             name: 'Casual Friday',
-            items: [mockOutfitItem({ outfit_id: 'outfit-001', item_id: 'item-001' })],
+            items: [
+              mockOutfitItem({ outfit_id: 'outfit-001', item_id: 'item-001' }),
+            ],
           })
         )
       ),
@@ -351,8 +412,14 @@ describe('EditOutfitPage', () => {
             id: 'outfit-001',
             name: 'Casual Friday',
             photos: [
-              mockPhoto({ id: 'photo-001', media_key: 'uploads/photo-001.jpg' }),
-              mockPhoto({ id: 'photo-002', media_key: 'uploads/photo-002.jpg' }),
+              mockPhoto({
+                id: 'photo-001',
+                media_key: 'uploads/photo-001.jpg',
+              }),
+              mockPhoto({
+                id: 'photo-002',
+                media_key: 'uploads/photo-002.jpg',
+              }),
             ],
           })
         )
@@ -361,8 +428,12 @@ describe('EditOutfitPage', () => {
     renderPage()
 
     await screen.findByTestId('edit-outfit-page')
-    expect(screen.getByRole('button', { name: /delete photo photo-001/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /delete photo photo-002/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /delete photo photo-001/i })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /delete photo photo-002/i })
+    ).toBeInTheDocument()
   })
 
   it('EditOutfitPage should call useDeleteOutfitPhoto and remove photo from view when delete is clicked', async () => {
@@ -373,7 +444,12 @@ describe('EditOutfitPage', () => {
           mockOutfit({
             id: 'outfit-001',
             name: 'Casual Friday',
-            photos: [mockPhoto({ id: 'photo-001', media_key: 'uploads/photo-001.jpg' })],
+            photos: [
+              mockPhoto({
+                id: 'photo-001',
+                media_key: 'uploads/photo-001.jpg',
+              }),
+            ],
           })
         )
       ),
@@ -386,17 +462,23 @@ describe('EditOutfitPage', () => {
     renderPage()
 
     await screen.findByRole('button', { name: /delete photo photo-001/i })
-    await user.click(screen.getByRole('button', { name: /delete photo photo-001/i }))
+    await user.click(
+      screen.getByRole('button', { name: /delete photo photo-001/i })
+    )
 
     await waitFor(() => expect(deletedKeys.length).toBe(1))
-    expect(screen.queryByRole('button', { name: /delete photo photo-001/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /delete photo photo-001/i })
+    ).not.toBeInTheDocument()
   })
 
   it('EditOutfitPage should show queued photo preview when file input is used', async () => {
     const user = userEvent.setup()
     server.use(
       http.get('/api/outfits/:id', () =>
-        HttpResponse.json(mockOutfit({ id: 'outfit-001', name: 'Casual Friday', photos: [] }))
+        HttpResponse.json(
+          mockOutfit({ id: 'outfit-001', name: 'Casual Friday', photos: [] })
+        )
       )
     )
     renderPage()
@@ -414,7 +496,9 @@ describe('EditOutfitPage', () => {
     const user = userEvent.setup()
     server.use(
       http.get('/api/outfits/:id', () =>
-        HttpResponse.json(mockOutfit({ id: 'outfit-001', name: 'Casual Friday', photos: [] }))
+        HttpResponse.json(
+          mockOutfit({ id: 'outfit-001', name: 'Casual Friday', photos: [] })
+        )
       ),
       http.patch('/api/outfits/:id', () =>
         HttpResponse.json(mockOutfit({ id: 'outfit-001' }))
@@ -439,7 +523,9 @@ describe('EditOutfitPage', () => {
     const uploadedIds: string[] = []
     server.use(
       http.get('/api/outfits/:id', () =>
-        HttpResponse.json(mockOutfit({ id: 'outfit-001', name: 'Casual Friday', photos: [] }))
+        HttpResponse.json(
+          mockOutfit({ id: 'outfit-001', name: 'Casual Friday', photos: [] })
+        )
       ),
       http.patch('/api/outfits/:id', () =>
         HttpResponse.json(mockOutfit({ id: 'outfit-001' }))

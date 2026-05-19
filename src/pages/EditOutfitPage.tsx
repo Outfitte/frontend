@@ -6,7 +6,10 @@ import { z } from 'zod'
 import { useOutfit, useUpdateOutfit } from '@/hooks/use-outfits'
 import { useItems } from '@/hooks/use-items'
 import { useAddOutfitItem, useRemoveOutfitItem } from '@/hooks/use-outfit-items'
-import { useUploadOutfitPhoto, useDeleteOutfitPhoto } from '@/hooks/use-outfit-photos'
+import {
+  useUploadOutfitPhoto,
+  useDeleteOutfitPhoto,
+} from '@/hooks/use-outfit-photos'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -64,7 +67,9 @@ function EditOutfitForm({ outfit, outfitId }: EditOutfitFormProps) {
   const { mutateAsync: deletePhoto } = useDeleteOutfitPhoto()
 
   const [pickerOpen, setPickerOpen] = useState(false)
-  const [queuedPhotos, setQueuedPhotos] = useState<Array<{ file: File; preview: string }>>([])
+  const [queuedPhotos, setQueuedPhotos] = useState<
+    Array<{ file: File; preview: string }>
+  >([])
   const [currentPhotos, setCurrentPhotos] = useState<Photo[]>(outfit.photos)
 
   useEffect(() => {
@@ -150,12 +155,20 @@ function EditOutfitForm({ outfit, outfitId }: EditOutfitFormProps) {
         <h1 className="text-2xl font-bold">Edit Outfit</h1>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6 max-w-2xl">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+        className="max-w-2xl space-y-6"
+      >
         {/* ── Name & notes ──────────────────────────────────────────────── */}
         <section className="space-y-4">
           <div className="space-y-1">
             <Label htmlFor="name">Name</Label>
-            <Input id="name" {...register('name')} placeholder="e.g. Casual Friday" />
+            <Input
+              id="name"
+              {...register('name')}
+              placeholder="e.g. Casual Friday"
+            />
           </div>
 
           <div className="space-y-1">
@@ -175,8 +188,11 @@ function EditOutfitForm({ outfit, outfitId }: EditOutfitFormProps) {
             {resolvedItems.map((item) => {
               const firstPhoto = item.photos[0]
               return (
-                <li key={item.id} className="flex items-center gap-3 rounded border p-2">
-                  <div className="h-10 w-10 shrink-0 overflow-hidden rounded bg-muted">
+                <li
+                  key={item.id}
+                  className="flex items-center gap-3 rounded border p-2"
+                >
+                  <div className="bg-muted h-10 w-10 shrink-0 overflow-hidden rounded">
                     {firstPhoto ? (
                       <img
                         src={`/media/${firstPhoto.media_key}`}
@@ -184,12 +200,14 @@ function EditOutfitForm({ outfit, outfitId }: EditOutfitFormProps) {
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                      <div className="text-muted-foreground flex h-full w-full items-center justify-center text-xs">
                         ?
                       </div>
                     )}
                   </div>
-                  <span className="flex-1 text-sm font-medium">{item.name}</span>
+                  <span className="flex-1 text-sm font-medium">
+                    {item.name}
+                  </span>
                   <Button
                     type="button"
                     size="sm"
@@ -202,7 +220,12 @@ function EditOutfitForm({ outfit, outfitId }: EditOutfitFormProps) {
               )
             })}
           </ul>
-          <Button type="button" variant="outline" size="sm" onClick={() => setPickerOpen(true)}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setPickerOpen(true)}
+          >
             Add item
           </Button>
           <ItemPicker
@@ -224,13 +247,13 @@ function EditOutfitForm({ outfit, outfitId }: EditOutfitFormProps) {
                     <img
                       src={`/media/${photo.media_key}`}
                       alt={`Existing photo ${photo.id}`}
-                      className="h-20 w-20 rounded-lg object-cover border"
+                      className="h-20 w-20 rounded-lg border object-cover"
                     />
                     <button
                       type="button"
                       aria-label={`Delete photo ${photo.id}`}
                       onClick={() => handleDeletePhoto(photo)}
-                      className="absolute -right-2 -top-2 rounded-full bg-destructive text-destructive-foreground p-0.5 leading-none"
+                      className="bg-destructive text-destructive-foreground absolute -top-2 -right-2 rounded-full p-0.5 leading-none"
                     >
                       ✕
                     </button>
@@ -258,7 +281,7 @@ function EditOutfitForm({ outfit, outfitId }: EditOutfitFormProps) {
                     <img
                       src={photo.preview}
                       alt={`Photo ${idx + 1}`}
-                      className="h-20 w-20 rounded-lg object-cover border"
+                      className="h-20 w-20 rounded-lg border object-cover"
                     />
                   </div>
                 ))}

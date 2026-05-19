@@ -31,18 +31,18 @@ npm run dev
 
 ## Commands
 
-| Task | Command |
-|---|---|
-| Dev server | `npm run dev` |
-| Production build | `npm run build` |
-| Preview build | `npm run preview` |
-| Run tests (once) | `npm test` |
-| Run tests (watch) | `npm run test:watch` |
-| Coverage report | `npm run test:coverage` |
-| Lint | `npm run lint` |
-| Lint + autofix | `npm run lint:fix` |
-| Format | `npm run format` |
-| Check formatting | `npm run format:check` |
+| Task              | Command                 |
+| ----------------- | ----------------------- |
+| Dev server        | `npm run dev`           |
+| Production build  | `npm run build`         |
+| Preview build     | `npm run preview`       |
+| Run tests (once)  | `npm test`              |
+| Run tests (watch) | `npm run test:watch`    |
+| Coverage report   | `npm run test:coverage` |
+| Lint              | `npm run lint`          |
+| Lint + autofix    | `npm run lint:fix`      |
+| Format            | `npm run format`        |
+| Check formatting  | `npm run format:check`  |
 
 ## Docker
 
@@ -55,8 +55,8 @@ The multi-stage Dockerfile builds with Node 22 Alpine and serves the static outp
 
 ## Environment variables
 
-| Variable | Description |
-|---|---|
+| Variable      | Description                                                      |
+| ------------- | ---------------------------------------------------------------- |
 | `BACKEND_URL` | URL of the backend API server (used by Vite dev proxy and nginx) |
 
 Copy `.env.example` to `.env` and set `BACKEND_URL`:

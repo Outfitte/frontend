@@ -10,7 +10,9 @@ export function useOutfitLogs(outfitId?: string) {
     queryFn: () =>
       api
         .get<OutfitLog[]>(`/outfits/${outfitId}/logs`)
-        .then((logs) => logs.sort((a, b) => b.worn_on.localeCompare(a.worn_on))),
+        .then((logs) =>
+          logs.sort((a, b) => b.worn_on.localeCompare(a.worn_on))
+        ),
     enabled: !!outfitId,
   })
 }
@@ -44,7 +46,9 @@ export function useLogOutfitWear() {
       toast.error(error.message)
     },
     onSettled: (_, __, { outfitId }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.outfits.logs(outfitId) })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.outfits.logs(outfitId),
+      })
       queryClient.invalidateQueries({ queryKey: queryKeys.outfitLogs.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.items.all })
     },
@@ -69,7 +73,9 @@ export function useUpdateOutfitLog() {
       toast.error(error.message)
     },
     onSettled: (_, __, { outfitId }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.outfits.logs(outfitId) })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.outfits.logs(outfitId),
+      })
       queryClient.invalidateQueries({ queryKey: queryKeys.outfitLogs.all })
     },
   })
@@ -92,7 +98,9 @@ export function useDeleteOutfitLog() {
       toast.error(error.message)
     },
     onSettled: (_, __, { outfitId }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.outfits.logs(outfitId) })
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.outfits.logs(outfitId),
+      })
       queryClient.invalidateQueries({ queryKey: queryKeys.outfitLogs.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.items.all })
     },
