@@ -16,10 +16,12 @@ interface ItemCardProps {
   categoryLabel?: string
   isArchived?: boolean
   isReadOnly?: boolean
+  isLocked?: boolean
   sharedByEmail?: string
   linkTo?: string
   onWoreToday?: (itemId: string) => void
   onAction?: (action: ItemAction, itemId: string) => void
+  onTransfer?: (itemId: string) => void
 }
 
 export function ItemCard({
@@ -27,10 +29,12 @@ export function ItemCard({
   categoryLabel,
   isArchived,
   isReadOnly,
+  isLocked,
   sharedByEmail,
   linkTo,
   onWoreToday,
   onAction,
+  onTransfer,
 }: ItemCardProps) {
   const firstPhoto = item.photos[0]
   const href = linkTo ?? `/items/${item.id}`
@@ -96,8 +100,16 @@ export function ItemCard({
                 shared by {sharedByEmail}
               </span>
             )}
+            {!isReadOnly && isLocked && (
+              <span
+                data-testid="item-locked-badge"
+                className="mt-1 inline-block rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-800"
+              >
+                Transfer pending
+              </span>
+            )}
           </div>
-          {!isReadOnly && (
+          {!isReadOnly && !isLocked && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
@@ -125,6 +137,14 @@ export function ItemCard({
                     Archive
                   </DropdownMenuItem>
                 )}
+                {onTransfer && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={() => onTransfer(item.id)}>
+                      Transfer…
+                    </DropdownMenuItem>
+                  </>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onSelect={() => onAction?.('dispose', item.id)}
@@ -141,7 +161,7 @@ export function ItemCard({
             </DropdownMenu>
           )}
         </div>
-        {!isReadOnly && (
+        {!isReadOnly && !isLocked && (
           <button
             type="button"
             onClick={() => onWoreToday?.(item.id)}
