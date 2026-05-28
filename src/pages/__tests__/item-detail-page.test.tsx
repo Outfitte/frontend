@@ -12,8 +12,10 @@ import {
   mockChildLocation,
   mockCategory,
   mockPhoto,
+  mockItemTransferView,
 } from '@/test/mocks/fixtures'
 import { ItemDetailPage } from '@/pages/ItemDetailPage'
+import { toast } from '@/lib/toast'
 
 vi.mock('@/lib/toast', () => ({
   toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() },
@@ -94,7 +96,9 @@ describe('ItemDetailPage', () => {
       ),
       http.get('/api/categories', () =>
         HttpResponse.json([mockCategory({ id: 'cat-001', label: 'Jackets' })])
-      )
+      ),
+      // Default: no pending transfers — item is unlocked
+      http.get('/api/transfers/outgoing', () => HttpResponse.json([]))
     )
   })
 
@@ -747,6 +751,165 @@ describe('ItemDetailPage', () => {
 
     await screen.findByText('Blue Denim Jacket')
     await user.click(screen.getByRole('button', { name: /^share$/i }))
+    await screen.findByRole('dialog')
+    await user.click(screen.getByRole('button', { name: /^cancel$/i }))
+
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    )
+  })
+
+  // --- Lock / Transfer tests ---
+
+  it('ItemDetailPage should render transfer pending banner when item has a pending outgoing transfer', async () => {
+    server.use(
+      http.get('/api/transfers/outgoing', () =>
+        HttpResponse.json([
+          mockItemTransferView({ id: 'transfer-001', item_id: ITEM_ID, status: 'pending' }),
+        ])
+      )
+    )
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    expect(screen.getByTestId('item-transfer-banner')).toBeInTheDocument()
+    expect(screen.getByTestId('item-transfer-banner')).toHaveTextContent(
+      /pending transfer/i
+    )
+    expect(
+      screen.getByRole('link', { name: /transfers/i })
+    ).toBeInTheDocument()
+  })
+
+  it('ItemDetailPage should hide all action affordances when item is locked by pending transfer', async () => {
+    server.use(
+      http.get('/api/transfers/outgoing', () =>
+        HttpResponse.json([
+          mockItemTransferView({ id: 'transfer-001', item_id: ITEM_ID, status: 'pending' }),
+        ])
+      )
+    )
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+
+    // Edit link
+    expect(screen.queryByRole('link', { name: /^edit$/i })).not.toBeInTheDocument()
+    // Archive button
+    expect(screen.queryByRole('button', { name: /^archive$/i })).not.toBeInTheDocument()
+    // Share button
+    expect(screen.queryByRole('button', { name: /^share$/i })).not.toBeInTheDocument()
+    // Dispose button
+    expect(screen.queryByRole('button', { name: /^dispose$/i })).not.toBeInTheDocument()
+    // Delete button
+    expect(screen.queryByRole('button', { name: /^delete$/i })).not.toBeInTheDocument()
+    // Log wear button
+    expect(screen.queryByRole('button', { name: /^log wear$/i })).not.toBeInTheDocument()
+    // Delete wear log buttons
+    expect(screen.queryAllByRole('button', { name: /delete wear log/i })).toHaveLength(0)
+  })
+
+  it('ItemDetailPage should not show Transfer button when item is locked by pending transfer', async () => {
+    server.use(
+      http.get('/api/transfers/outgoing', () =>
+        HttpResponse.json([
+          mockItemTransferView({ id: 'transfer-001', item_id: ITEM_ID, status: 'pending' }),
+        ])
+      )
+    )
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    expect(
+      screen.queryByRole('button', { name: /^transfer$/i })
+    ).not.toBeInTheDocument()
+  })
+
+  it('ItemDetailPage should not show Transfer button when item is disposed', async () => {
+    server.use(
+      http.get('/api/items/:id', () =>
+        HttpResponse.json(
+          mockItem({ id: ITEM_ID, status: 'disposed', dispose_reason: 'donated' })
+        )
+      )
+    )
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    expect(
+      screen.queryByRole('button', { name: /^transfer$/i })
+    ).not.toBeInTheDocument()
+  })
+
+  it('ItemDetailPage should show Transfer button in header when item is active and not locked', async () => {
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    expect(
+      screen.getByRole('button', { name: /^transfer$/i })
+    ).toBeInTheDocument()
+  })
+
+  it('ItemDetailPage should show error toast and not navigate when delete API returns 409 ErrItemTransferPending', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.delete('/api/items/:id', () =>
+        HttpResponse.json(
+          { error: 'ErrItemTransferPending' },
+          { status: 409 }
+        )
+      )
+    )
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.click(screen.getByRole('button', { name: /^delete$/i }))
+    await screen.findByRole('alertdialog')
+    await user.click(screen.getByRole('button', { name: /confirm delete/i }))
+
+    expect(await screen.findByTestId('item-detail-page')).toBeInTheDocument()
+    await waitFor(() => expect(toast.error).toHaveBeenCalled())
+  })
+
+  it('ItemDetailPage should open TransferDialog when Transfer button is clicked', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.get('/api/users', () =>
+        HttpResponse.json([
+          { id: 'user-001', email: 'me@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' },
+          { id: 'user-002', email: 'alice@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' },
+        ])
+      ),
+      http.get('/api/users/me', () =>
+        HttpResponse.json({ id: 'user-001', email: 'me@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' })
+      )
+    )
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.click(screen.getByRole('button', { name: /^transfer$/i }))
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByText(/transfer blue denim jacket/i)).toBeInTheDocument()
+  })
+
+  it('ItemDetailPage should close TransferDialog when Cancel is clicked inside it', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.get('/api/users', () =>
+        HttpResponse.json([
+          { id: 'user-001', email: 'me@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' },
+          { id: 'user-002', email: 'alice@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' },
+        ])
+      ),
+      http.get('/api/users/me', () =>
+        HttpResponse.json({ id: 'user-001', email: 'me@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' })
+      )
+    )
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.click(screen.getByRole('button', { name: /^transfer$/i }))
     await screen.findByRole('dialog')
     await user.click(screen.getByRole('button', { name: /^cancel$/i }))
 
