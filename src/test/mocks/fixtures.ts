@@ -267,7 +267,7 @@ export function mockItemTransferView(
     created_at: '2026-01-01T00:00:00Z',
     decided_at: null,
     item: mockItem(),
-    sender: mockUserSummary({ id: 'user-001' }),
+    sender: mockUserSummary({ id: 'user-001', email: 'bob@example.com' }),
     recipient: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
     ...overrides,
   }
