@@ -45,6 +45,20 @@ describe('ItemCard', () => {
     expect(screen.queryByRole('menuitem', { name: 'Transfer…' })).not.toBeInTheDocument()
   })
 
+  it('ItemCard should not render locked badge when both isReadOnly and isLocked are true', () => {
+    render(
+      <ItemCard item={mockItem()} isReadOnly isLocked onAction={vi.fn()} onTransfer={vi.fn()} />
+    )
+
+    expect(screen.queryByTestId('item-locked-badge')).not.toBeInTheDocument()
+  })
+
+  it('ItemCard should not render locked badge when isLocked is not set', () => {
+    render(<ItemCard item={mockItem()} onAction={vi.fn()} />)
+
+    expect(screen.queryByTestId('item-locked-badge')).not.toBeInTheDocument()
+  })
+
   it('ItemCard should not render Transfer entry when onTransfer is not provided', async () => {
     render(<ItemCard item={mockItem()} onAction={vi.fn()} />)
 
@@ -130,14 +144,6 @@ describe('ItemCard', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Wore today' }))
 
     expect(onWoreToday).toHaveBeenCalledWith('item-001')
-  })
-
-  it('ItemCard should not render locked badge when both isReadOnly and isLocked are true', () => {
-    render(
-      <ItemCard item={mockItem()} isReadOnly isLocked onAction={vi.fn()} onTransfer={vi.fn()} />
-    )
-
-    expect(screen.queryByTestId('item-locked-badge')).not.toBeInTheDocument()
   })
 
   it('ItemCard should not render context menu trigger when isReadOnly is true', () => {
