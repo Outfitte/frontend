@@ -11,6 +11,7 @@ import {
   mockOutfitLog,
   mockShareView,
   mockShare,
+  mockItemTransferView,
 } from './fixtures'
 
 export const handlers = [
@@ -349,5 +350,69 @@ export const handlers = [
       mockCategory({ id: 'cat-001', label: 'Jackets' }),
       mockCategory({ id: 'cat-002', label: 'Trousers', field_hints: [] }),
     ])
+  }),
+
+  // --- Transfers ---
+
+  http.get('/api/transfers/outgoing', () => {
+    return HttpResponse.json([mockItemTransferView({ id: 'transfer-001' })])
+  }),
+
+  http.get('/api/transfers/incoming', () => {
+    return HttpResponse.json([
+      mockItemTransferView({
+        id: 'transfer-002',
+        sender: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+        recipient: mockUserSummary({ id: 'user-001' }),
+      }),
+    ])
+  }),
+
+  http.get('/api/transfers/:id', ({ params }) => {
+    return HttpResponse.json(
+      mockItemTransferView({ id: params['id'] as string })
+    )
+  }),
+
+  http.post('/api/transfers', async ({ request }) => {
+    const body = (await request.json()) as Record<string, unknown>
+    return HttpResponse.json(
+      mockItemTransferView({
+        item_id: body['item_id'] as string,
+        recipient_id: body['recipient_id'] as string,
+        transfer_history: body['transfer_history'] as boolean,
+      }),
+      { status: 201 }
+    )
+  }),
+
+  http.post('/api/transfers/:id/accept', ({ params }) => {
+    return HttpResponse.json(
+      mockItemTransferView({
+        id: params['id'] as string,
+        status: 'accepted',
+        decided_at: new Date().toISOString(),
+      })
+    )
+  }),
+
+  http.post('/api/transfers/:id/reject', ({ params }) => {
+    return HttpResponse.json(
+      mockItemTransferView({
+        id: params['id'] as string,
+        status: 'rejected',
+        decided_at: new Date().toISOString(),
+      })
+    )
+  }),
+
+  http.post('/api/transfers/:id/cancel', ({ params }) => {
+    return HttpResponse.json(
+      mockItemTransferView({
+        id: params['id'] as string,
+        status: 'cancelled',
+        decided_at: new Date().toISOString(),
+      })
+    )
   }),
 ]
