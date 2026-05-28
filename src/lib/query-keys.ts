@@ -35,4 +35,10 @@ export const queryKeys = {
     outgoing: ['shares'] as const,
     withMe: ['shares', 'with-me'] as const,
   },
+  transfers: {
+    all: ['transfers'] as const,
+    incoming: ['transfers', 'incoming'] as const,
+    outgoing: ['transfers', 'outgoing'] as const,
+    detail: (id: string) => ['transfers', 'detail', id] as const,
+  },
 }
