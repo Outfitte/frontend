@@ -3,16 +3,18 @@ import { api, ApiError } from '@/lib/api'
 import { queryKeys } from '@/lib/query-keys'
 import type { User, UserSummary } from '@/types'
 
-export function useUsers() {
+export function useUsers(options?: { enabled?: boolean }) {
   return useQuery<UserSummary[], ApiError>({
     queryKey: queryKeys.users.list(),
     queryFn: () => api.get<UserSummary[]>('/users'),
+    enabled: options?.enabled,
   })
 }
 
-export function useMe() {
+export function useMe(options?: { enabled?: boolean }) {
   return useQuery<User, ApiError>({
     queryKey: queryKeys.users.me(),
     queryFn: () => api.get<User>('/users/me'),
+    enabled: options?.enabled,
   })
 }
