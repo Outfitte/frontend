@@ -2,6 +2,8 @@ import type {
   Category,
   FieldHint,
   Item,
+  ItemTransfer,
+  ItemTransferView,
   Location,
   Outfit,
   OutfitItem,
@@ -232,6 +234,41 @@ export function mockSharedLocation(
     location: mockLocation(),
     items: [],
     shared_by: mockUserSummary(),
+    ...overrides,
+  }
+}
+
+export function mockItemTransfer(
+  overrides: Partial<ItemTransfer> = {}
+): ItemTransfer {
+  return {
+    id: 'transfer-001',
+    item_id: 'item-001',
+    sender_id: 'user-001',
+    recipient_id: 'user-002',
+    status: 'pending',
+    transfer_history: false,
+    created_at: '2026-01-01T00:00:00Z',
+    decided_at: null,
+    ...overrides,
+  }
+}
+
+export function mockItemTransferView(
+  overrides: Partial<ItemTransferView> = {}
+): ItemTransferView {
+  return {
+    id: 'transfer-001',
+    item_id: 'item-001',
+    sender_id: 'user-001',
+    recipient_id: 'user-002',
+    status: 'pending',
+    transfer_history: false,
+    created_at: '2026-01-01T00:00:00Z',
+    decided_at: null,
+    item: mockItem(),
+    sender: mockUserSummary({ id: 'user-001' }),
+    recipient: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
     ...overrides,
   }
 }

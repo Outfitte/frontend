@@ -12,5 +12,6 @@ export type {
   SharedWithMeResult,
   ShareView,
 } from './share'
+export type { ItemTransfer, ItemTransferView, TransferStatus } from './transfer'
 export type { User, UserSummary, TokenPair } from './user'
 export type { WearLog } from './wear-log'
