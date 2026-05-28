@@ -116,6 +116,14 @@ describe('queryKeys', () => {
     expect(queryKeys.shares.outgoing).not.toEqual(queryKeys.shares.withMe)
   })
 
+  it('queryKeys.transfers.all should not collide with queryKeys.items.all', () => {
+    expect(queryKeys.transfers.all).not.toEqual(queryKeys.items.all)
+  })
+
+  it('queryKeys.transfers.all should not collide with queryKeys.shares.outgoing', () => {
+    expect(queryKeys.transfers.all).not.toEqual(queryKeys.shares.outgoing)
+  })
+
   it('queryKeys.transfers.incoming should not collide with queryKeys.transfers.outgoing', () => {
     expect(queryKeys.transfers.incoming).not.toEqual(queryKeys.transfers.outgoing)
   })
