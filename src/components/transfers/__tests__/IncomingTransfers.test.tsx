@@ -82,6 +82,25 @@ describe('IncomingTransfers', () => {
     expect(screen.getByText(/failed to load transfers/i)).toBeInTheDocument()
   })
 
+  it('IncomingTransfers should retry fetch when Retry button is clicked in error state', async () => {
+    const user = userEvent.setup()
+    let callCount = 0
+    server.use(
+      http.get('/api/transfers/incoming', () => {
+        callCount++
+        if (callCount === 1) {
+          return HttpResponse.json({ error: 'Server error' }, { status: 500 })
+        }
+        return HttpResponse.json([])
+      })
+    )
+    renderComponent()
+    await screen.findByTestId('incoming-transfers-error')
+    await user.click(screen.getByRole('button', { name: /retry/i }))
+    await screen.findByTestId('incoming-transfers-empty')
+    expect(callCount).toBeGreaterThan(1)
+  })
+
   it('IncomingTransfers should close AlertDialog and not fire POST when Cancel is clicked', async () => {
     const user = userEvent.setup()
     let rejectCalled = false
