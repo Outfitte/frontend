@@ -362,7 +362,9 @@ export const handlers = [
     return HttpResponse.json([
       mockItemTransferView({
         id: 'transfer-002',
+        sender_id: 'user-002',
         sender: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+        recipient_id: 'user-001',
         recipient: mockUserSummary({ id: 'user-001' }),
       }),
     ])
@@ -378,6 +380,7 @@ export const handlers = [
     const body = (await request.json()) as Record<string, unknown>
     return HttpResponse.json(
       mockItemTransferView({
+        id: 'transfer-new-001',
         item_id: body['item_id'] as string,
         recipient_id: body['recipient_id'] as string,
         transfer_history: body['transfer_history'] as boolean,
@@ -391,7 +394,7 @@ export const handlers = [
       mockItemTransferView({
         id: params['id'] as string,
         status: 'accepted',
-        decided_at: new Date().toISOString(),
+        decided_at: '2026-05-01T00:00:00Z',
       })
     )
   }),
@@ -401,7 +404,7 @@ export const handlers = [
       mockItemTransferView({
         id: params['id'] as string,
         status: 'rejected',
-        decided_at: new Date().toISOString(),
+        decided_at: '2026-05-01T00:00:00Z',
       })
     )
   }),
@@ -411,7 +414,7 @@ export const handlers = [
       mockItemTransferView({
         id: params['id'] as string,
         status: 'cancelled',
-        decided_at: new Date().toISOString(),
+        decided_at: '2026-05-01T00:00:00Z',
       })
     )
   }),
