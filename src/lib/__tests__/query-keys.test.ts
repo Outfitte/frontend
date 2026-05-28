@@ -108,6 +108,36 @@ describe('queryKeys', () => {
     expect(queryKeys.shares.outgoing).not.toEqual(queryKeys.shares.withMe)
   })
 
+  it('queryKeys.transfers.incoming should not collide with queryKeys.transfers.outgoing', () => {
+    expect(queryKeys.transfers.incoming).not.toEqual(queryKeys.transfers.outgoing)
+  })
+
+  it('queryKeys.transfers.incoming should differ from queryKeys.transfers.all', () => {
+    expect(queryKeys.transfers.incoming).not.toEqual(queryKeys.transfers.all)
+  })
+
+  it('queryKeys.transfers.detail should produce different keys when given different ids', () => {
+    expect(queryKeys.transfers.detail('transfer-001')).not.toEqual(
+      queryKeys.transfers.detail('transfer-002')
+    )
+  })
+
+  it('queryKeys.transfers.detail should differ from queryKeys.transfers.incoming for same-prefix id', () => {
+    expect(queryKeys.transfers.detail('transfer-abc')).not.toEqual(
+      queryKeys.transfers.incoming
+    )
+  })
+
+  it('queryKeys.transfers.detail should differ from queryKeys.transfers.outgoing for same-prefix id', () => {
+    expect(queryKeys.transfers.detail('transfer-abc')).not.toEqual(
+      queryKeys.transfers.outgoing
+    )
+  })
+
+  it('queryKeys.transfers.outgoing should not collide with queryKeys.shares.outgoing', () => {
+    expect(queryKeys.transfers.outgoing).not.toEqual(queryKeys.shares.outgoing)
+  })
+
   // --- Happy path: correct key structures ---
 
   it('queryKeys.items.all should return the base items key', () => {
@@ -230,5 +260,25 @@ describe('queryKeys', () => {
 
   it('queryKeys.shares.withMe should return the with-me shares key', () => {
     expect(queryKeys.shares.withMe).toEqual(['shares', 'with-me'])
+  })
+
+  it('queryKeys.transfers.all should return the base transfers key', () => {
+    expect(queryKeys.transfers.all).toEqual(['transfers'])
+  })
+
+  it('queryKeys.transfers.incoming should return the incoming transfers key', () => {
+    expect(queryKeys.transfers.incoming).toEqual(['transfers', 'incoming'])
+  })
+
+  it('queryKeys.transfers.outgoing should return the outgoing transfers key', () => {
+    expect(queryKeys.transfers.outgoing).toEqual(['transfers', 'outgoing'])
+  })
+
+  it('queryKeys.transfers.detail should return scoped detail key when given transfer id', () => {
+    expect(queryKeys.transfers.detail('transfer-abc')).toEqual([
+      'transfers',
+      'detail',
+      'transfer-abc',
+    ])
   })
 })
