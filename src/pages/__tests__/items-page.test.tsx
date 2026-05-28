@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/mocks/server'
 import { render } from '@/test/utils'
-import { mockItem, mockCategory, mockLocation } from '@/test/mocks/fixtures'
+import { mockItem, mockCategory, mockLocation, mockItemTransferView } from '@/test/mocks/fixtures'
 import { ItemsPage } from '@/pages/ItemsPage'
 
 describe('ItemsPage', () => {
@@ -39,7 +39,8 @@ describe('ItemsPage', () => {
           mockLocation({ id: 'loc-001', label: 'Main Closet' }),
           mockLocation({ id: 'loc-002', label: 'Spare Room' }),
         ])
-      )
+      ),
+      http.get('/api/transfers/outgoing', () => HttpResponse.json([]))
     )
   })
 
@@ -598,5 +599,121 @@ describe('ItemsPage', () => {
     expect(screen.getByTestId('item-status-badge')).toHaveTextContent(
       'Disposed'
     )
+  })
+
+  // --- Transfer lock gating ---
+
+  it('ItemsPage should show Transfer pending badge when item is in pending outgoing transfers', async () => {
+    server.use(
+      http.get('/api/transfers/outgoing', () =>
+        HttpResponse.json([
+          mockItemTransferView({ item_id: 'item-001', status: 'pending' }),
+        ])
+      )
+    )
+    render(<ItemsPage />)
+
+    await screen.findByText('Blue Denim Jacket')
+
+    expect(screen.getByTestId('item-locked-badge')).toBeInTheDocument()
+  })
+
+  it('ItemsPage should not offer Transfer for a locked item since it has no options menu', async () => {
+    server.use(
+      http.get('/api/transfers/outgoing', () =>
+        HttpResponse.json([
+          mockItemTransferView({ item_id: 'item-001', status: 'pending' }),
+        ])
+      )
+    )
+    render(<ItemsPage />)
+
+    await screen.findByText('Blue Denim Jacket')
+    await screen.findByText('Red Wool Coat')
+
+    // item-001 is locked: only item-002 retains the options button
+    expect(screen.getAllByRole('button', { name: /item options/i })).toHaveLength(1)
+  })
+
+  it('ItemsPage should close dialog and show locked badge after successful transfer', async () => {
+    const user = userEvent.setup()
+    let transfersCallCount = 0
+    server.use(
+      http.get('/api/transfers/outgoing', () => {
+        transfersCallCount++
+        if (transfersCallCount === 1) return HttpResponse.json([])
+        return HttpResponse.json([
+          mockItemTransferView({ item_id: 'item-001', status: 'pending' }),
+        ])
+      }),
+      http.post('/api/transfers', async ({ request }) => {
+        const body = (await request.json()) as Record<string, unknown>
+        return HttpResponse.json(
+          mockItemTransferView({
+            id: 'transfer-new-001',
+            item_id: body['item_id'] as string,
+            recipient_id: body['recipient_id'] as string,
+          }),
+          { status: 201 }
+        )
+      })
+    )
+    render(<ItemsPage />)
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.click(screen.getAllByRole('button', { name: /item options/i })[0])
+    await user.click(screen.getByRole('menuitem', { name: /transfer/i }))
+
+    await screen.findByRole('dialog')
+    await screen.findByText('alice@example.com')
+    await user.click(screen.getByText('alice@example.com'))
+    await user.click(screen.getByRole('button', { name: /^transfer$/i }))
+
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    )
+    await screen.findByTestId('item-locked-badge')
+  })
+
+  it('ItemsPage should open TransferDialog with correct item name when Transfer is selected', async () => {
+    const user = userEvent.setup()
+    render(<ItemsPage />)
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.click(screen.getAllByRole('button', { name: /item options/i })[0])
+    await user.click(screen.getByRole('menuitem', { name: /transfer/i }))
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByText(/transfer blue denim jacket/i)).toBeInTheDocument()
+  })
+
+  it('ItemsPage should show Transfer menu entry for non-locked active items', async () => {
+    const user = userEvent.setup()
+    render(<ItemsPage />)
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.click(screen.getAllByRole('button', { name: /item options/i })[0])
+
+    expect(
+      screen.getByRole('menuitem', { name: /transfer/i })
+    ).toBeInTheDocument()
+  })
+
+  it('ItemsPage should hide Wore today and options menu for locked items and show them for unlocked items', async () => {
+    server.use(
+      http.get('/api/transfers/outgoing', () =>
+        HttpResponse.json([
+          mockItemTransferView({ item_id: 'item-001', status: 'pending' }),
+        ])
+      )
+    )
+    render(<ItemsPage />)
+
+    await screen.findByText('Blue Denim Jacket')
+
+    // item-001 is locked: no Wore today, no options button
+    // item-002 is unlocked: one Wore today, one options button remain
+    expect(screen.getAllByRole('button', { name: /wore today/i })).toHaveLength(1)
+    expect(screen.getAllByRole('button', { name: /item options/i })).toHaveLength(1)
   })
 })

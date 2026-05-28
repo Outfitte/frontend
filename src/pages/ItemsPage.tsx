@@ -14,6 +14,8 @@ import {
 import { useCategories } from '@/hooks/use-categories'
 import { useLocations } from '@/hooks/use-locations'
 import { useLogWear } from '@/hooks/use-wear-logs'
+import { usePendingTransferItemIds } from '@/hooks/use-pending-transfers'
+import { TransferDialog } from '@/components/shared/TransferDialog'
 import { cn } from '@/lib/utils'
 import type { Item } from '@/types'
 
@@ -43,6 +45,7 @@ export function ItemsPage() {
   const [optimisticallyRemovedIds, setOptimisticallyRemovedIds] = useState<
     Set<string>
   >(new Set())
+  const [transferItemId, setTransferItemId] = useState<string | null>(null)
 
   const status = (searchParams.get('status') as ItemStatus) ?? 'active'
   const categoryFilter = searchParams.get('category') ?? ''
@@ -52,6 +55,8 @@ export function ItemsPage() {
   const { isLoading, data: items } = useItems(status)
   const { data: categories } = useCategories()
   const { data: locations } = useLocations()
+  const { ids: pendingTransferItemIds } = usePendingTransferItemIds()
+
   const { mutate: logWear } = useLogWear()
   const { mutate: archiveItem } = useArchiveItem()
   const { mutate: unarchiveItem } = useUnarchiveItem()
@@ -222,11 +227,23 @@ export function ItemsPage() {
                 item.category_id ? categoryMap[item.category_id] : undefined
               }
               isArchived={item.status !== 'active'}
+              isLocked={pendingTransferItemIds.has(item.id)}
               onWoreToday={handleWoreToday}
               onAction={handleAction}
+              onTransfer={setTransferItemId}
             />
           ))}
         </div>
+      )}
+      {transferItemId !== null && (
+        <TransferDialog
+          open={true}
+          onClose={() => setTransferItemId(null)}
+          itemId={transferItemId}
+          itemName={
+            (items ?? []).find((i) => i.id === transferItemId)?.name ?? ''
+          }
+        />
       )}
     </div>
   )
