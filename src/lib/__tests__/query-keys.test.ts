@@ -254,6 +254,10 @@ describe('queryKeys', () => {
     expect(queryKeys.users.list()).toEqual(['users', 'list'])
   })
 
+  it('queryKeys.users.me should return the me key', () => {
+    expect(queryKeys.users.me()).toEqual(['users', 'me'])
+  })
+
   it('queryKeys.shares.outgoing should return the outgoing shares key', () => {
     expect(queryKeys.shares.outgoing).toEqual(['shares'])
   })
