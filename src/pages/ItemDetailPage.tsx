@@ -47,6 +47,8 @@ import {
 } from '@/hooks/use-wear-logs'
 import { useLocations } from '@/hooks/use-locations'
 import { useCategories } from '@/hooks/use-categories'
+import { useIsItemLocked } from '@/hooks/use-pending-transfers'
+import { TransferDialog } from '@/components/shared/TransferDialog'
 import { getAncestors } from '@/lib/location-tree'
 import { cn } from '@/lib/utils'
 
@@ -78,9 +80,12 @@ export function ItemDetailPage() {
     undefined
   )
 
+  const locked = useIsItemLocked(id)
+
   const [showWearForm, setShowWearForm] = useState(false)
   const [showDisposeDialog, setShowDisposeDialog] = useState(false)
   const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showTransferDialog, setShowTransferDialog] = useState(false)
   const [disposeReason, setDisposeReason] = useState<DisposeReason>('donated')
 
   const { data: item, isLoading, error } = useItem(id!)
@@ -222,6 +227,18 @@ export function ItemDetailPage() {
 
   return (
     <div data-testid="item-detail-page">
+      {locked && (
+        <div
+          data-testid="item-transfer-banner"
+          className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg px-4 py-3 mb-4 text-sm"
+        >
+          This item has a pending transfer. Go to{' '}
+          <Link to="/transfers" className="underline font-medium">
+            Transfers
+          </Link>{' '}
+          to cancel it.
+        </div>
+      )}
       {/* Header: name + action buttons */}
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -233,19 +250,23 @@ export function ItemDetailPage() {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button asChild variant="outline" size="sm">
-            <Link to={`/items/${id}/edit`}>Edit</Link>
-          </Button>
-          {isArchived ? (
-            <Button variant="outline" size="sm" onClick={handleUnarchive}>
-              Unarchive
-            </Button>
-          ) : (
-            <Button variant="outline" size="sm" onClick={handleArchive}>
-              Archive
+          {!locked && (
+            <Button asChild variant="outline" size="sm">
+              <Link to={`/items/${id}/edit`}>Edit</Link>
             </Button>
           )}
-          {item.status !== 'disposed' && (
+          {!locked && (
+            isArchived ? (
+              <Button variant="outline" size="sm" onClick={handleUnarchive}>
+                Unarchive
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" onClick={handleArchive}>
+                Archive
+              </Button>
+            )
+          )}
+          {!locked && item.status !== 'disposed' && (
             <Button
               variant="outline"
               size="sm"
@@ -254,35 +275,48 @@ export function ItemDetailPage() {
               Share
             </Button>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowDisposeDialog(true)}
-          >
-            Dispose
-          </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" size="sm">
-                Delete
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete {item.name}?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. &ldquo;{item.name}&rdquo; will
-                  be permanently deleted.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete}>
-                  Confirm delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          {!locked && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowDisposeDialog(true)}
+            >
+              Dispose
+            </Button>
+          )}
+          {!locked && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm">
+                  Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete {item.name}?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. &ldquo;{item.name}&rdquo; will
+                    be permanently deleted.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}>
+                    Confirm delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+          {!locked && item.status !== 'disposed' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowTransferDialog(true)}
+            >
+              Transfer
+            </Button>
+          )}
         </div>
       </div>
 
@@ -459,9 +493,11 @@ export function ItemDetailPage() {
       <div>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Wear History</h2>
-          <Button size="sm" onClick={() => setShowWearForm(true)}>
-            Log wear
-          </Button>
+          {!locked && (
+            <Button size="sm" onClick={() => setShowWearForm(true)}>
+              Log wear
+            </Button>
+          )}
         </div>
 
         {/* Wear stats */}
@@ -551,14 +587,16 @@ export function ItemDetailPage() {
                   <p className="text-muted-foreground">{log.notes}</p>
                 )}
               </div>
-              <button
-                type="button"
-                aria-label="Delete wear log"
-                onClick={() => deleteWearLog({ itemId: id!, logId: log.id })}
-                className="text-muted-foreground hover:bg-muted hover:text-destructive ml-2 rounded p-1"
-              >
-                <Trash2Icon className="h-4 w-4" />
-              </button>
+              {!locked && (
+                <button
+                  type="button"
+                  aria-label="Delete wear log"
+                  onClick={() => deleteWearLog({ itemId: id!, logId: log.id })}
+                  className="text-muted-foreground hover:bg-muted hover:text-destructive ml-2 rounded p-1"
+                >
+                  <Trash2Icon className="h-4 w-4" />
+                </button>
+              )}
             </li>
           ))}
         </ul>
@@ -607,6 +645,13 @@ export function ItemDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <TransferDialog
+        open={showTransferDialog}
+        onClose={() => setShowTransferDialog(false)}
+        itemId={id!}
+        itemName={item.name}
+      />
     </div>
   )
 }
