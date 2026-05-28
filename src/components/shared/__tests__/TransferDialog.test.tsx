@@ -29,6 +29,75 @@ describe('TransferDialog', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
+  it('TransferDialog should show validation error and not call mutate when submitting without selecting a recipient', async () => {
+    const user = userEvent.setup()
+    render(<TransferDialog {...baseProps} />)
+
+    await user.click(screen.getByRole('button', { name: /transfer/i }))
+
+    expect(screen.getByText('Please select a recipient')).toBeInTheDocument()
+  })
+
+  it('TransferDialog should surface error inline and keep dialog open and not toast when API returns 409', async () => {
+    server.use(
+      http.post('/api/transfers', () =>
+        HttpResponse.json({ error: 'Item already has a pending transfer' }, { status: 409 })
+      )
+    )
+    const user = userEvent.setup()
+    render(<TransferDialog {...baseProps} />)
+
+    await screen.findByText('alice@example.com')
+    await user.click(screen.getByText('alice@example.com'))
+    await user.click(screen.getByRole('button', { name: /transfer/i }))
+
+    expect(await screen.findByTestId('transfer-dialog-error')).toBeInTheDocument()
+    expect(screen.getByTestId('transfer-dialog-error')).toHaveTextContent(
+      'Item already has a pending transfer'
+    )
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(toast.error).not.toHaveBeenCalled()
+  })
+
+  it('TransferDialog should surface error inline and keep dialog open and not toast when API returns 422', async () => {
+    server.use(
+      http.post('/api/transfers', () =>
+        HttpResponse.json({ error: 'Cannot transfer to self' }, { status: 422 })
+      )
+    )
+    const user = userEvent.setup()
+    render(<TransferDialog {...baseProps} />)
+
+    await screen.findByText('alice@example.com')
+    await user.click(screen.getByText('alice@example.com'))
+    await user.click(screen.getByRole('button', { name: /transfer/i }))
+
+    expect(await screen.findByTestId('transfer-dialog-error')).toBeInTheDocument()
+    expect(screen.getByTestId('transfer-dialog-error')).toHaveTextContent('Cannot transfer to self')
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(toast.error).not.toHaveBeenCalled()
+  })
+
+  it('TransferDialog should not show inline error and show toast and keep dialog open for non-409-422 API errors', async () => {
+    server.use(
+      http.post('/api/transfers', () =>
+        HttpResponse.json({ error: 'Internal server error' }, { status: 500 })
+      )
+    )
+    const user = userEvent.setup()
+    render(<TransferDialog {...baseProps} />)
+
+    await screen.findByText('alice@example.com')
+    await user.click(screen.getByText('alice@example.com'))
+    await user.click(screen.getByRole('button', { name: /transfer/i }))
+
+    await vi.waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('Internal server error')
+    })
+    expect(screen.queryByTestId('transfer-dialog-error')).not.toBeInTheDocument()
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+  })
+
   it('TransferDialog should render dialog with recipient picker and include wear history checkbox when open is true', async () => {
     render(<TransferDialog {...baseProps} />)
 
@@ -48,15 +117,6 @@ describe('TransferDialog', () => {
     render(<TransferDialog {...baseProps} />)
 
     expect(screen.getByRole('checkbox', { name: /include wear history/i })).not.toBeChecked()
-  })
-
-  it('TransferDialog should show validation error and not call mutate when submitting without selecting a recipient', async () => {
-    const user = userEvent.setup()
-    render(<TransferDialog {...baseProps} />)
-
-    await user.click(screen.getByRole('button', { name: /transfer/i }))
-
-    expect(screen.getByText('Please select a recipient')).toBeInTheDocument()
   })
 
   it('TransferDialog should call useCreateTransfer mutate with transfer_history false when checkbox is unchecked on submit', async () => {
@@ -132,7 +192,7 @@ describe('TransferDialog', () => {
     })
   })
 
-  it('TransferDialog should close dialog and not fire error toast on successful transfer', async () => {
+  it('TransferDialog should close dialog and fire success toast on successful transfer', async () => {
     const user = userEvent.setup()
     const onClose = vi.fn()
     render(<TransferDialog {...baseProps} onClose={onClose} />)
@@ -144,46 +204,7 @@ describe('TransferDialog', () => {
     await vi.waitFor(() => {
       expect(onClose).toHaveBeenCalled()
     })
-    expect(toast.error).not.toHaveBeenCalled()
-  })
-
-  it('TransferDialog should surface error inline and keep dialog open and not toast when API returns 409', async () => {
-    server.use(
-      http.post('/api/transfers', () =>
-        HttpResponse.json({ error: 'Item already has a pending transfer' }, { status: 409 })
-      )
-    )
-    const user = userEvent.setup()
-    render(<TransferDialog {...baseProps} />)
-
-    await screen.findByText('alice@example.com')
-    await user.click(screen.getByText('alice@example.com'))
-    await user.click(screen.getByRole('button', { name: /transfer/i }))
-
-    expect(await screen.findByTestId('transfer-dialog-error')).toBeInTheDocument()
-    expect(screen.getByTestId('transfer-dialog-error')).toHaveTextContent(
-      'Item already has a pending transfer'
-    )
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
-    expect(toast.error).not.toHaveBeenCalled()
-  })
-
-  it('TransferDialog should surface error inline and keep dialog open and not toast when API returns 422', async () => {
-    server.use(
-      http.post('/api/transfers', () =>
-        HttpResponse.json({ error: 'Cannot transfer to self' }, { status: 422 })
-      )
-    )
-    const user = userEvent.setup()
-    render(<TransferDialog {...baseProps} />)
-
-    await screen.findByText('alice@example.com')
-    await user.click(screen.getByText('alice@example.com'))
-    await user.click(screen.getByRole('button', { name: /transfer/i }))
-
-    expect(await screen.findByTestId('transfer-dialog-error')).toBeInTheDocument()
-    expect(screen.getByTestId('transfer-dialog-error')).toHaveTextContent('Cannot transfer to self')
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(toast.success).toHaveBeenCalledWith('Transfer sent')
     expect(toast.error).not.toHaveBeenCalled()
   })
 
@@ -206,6 +227,20 @@ describe('TransferDialog', () => {
     await user.keyboard('{Escape}')
 
     expect(onClose).toHaveBeenCalled()
+  })
+
+  it('TransferDialog should reset checkbox to unchecked after cancel', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    const { rerender } = render(<TransferDialog {...baseProps} onClose={onClose} />)
+
+    await user.click(screen.getByRole('checkbox', { name: /include wear history/i }))
+    expect(screen.getByRole('checkbox', { name: /include wear history/i })).toBeChecked()
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    rerender(<TransferDialog {...baseProps} onClose={onClose} open={true} />)
+
+    expect(screen.getByRole('checkbox', { name: /include wear history/i })).not.toBeChecked()
   })
 
   it('TransferDialog should display explanatory copy for the wear history checkbox', () => {
@@ -270,25 +305,5 @@ describe('TransferDialog', () => {
 
     expect(screen.getByRole('button', { name: 'Transferring…' })).toBeDisabled()
     await screen.findByRole('button', { name: 'Transfer' })
-  })
-
-  it('TransferDialog should not show inline error and keep dialog open for non-409-422 API errors', async () => {
-    server.use(
-      http.post('/api/transfers', () =>
-        HttpResponse.json({ error: 'Internal server error' }, { status: 500 })
-      )
-    )
-    const user = userEvent.setup()
-    render(<TransferDialog {...baseProps} />)
-
-    await screen.findByText('alice@example.com')
-    await user.click(screen.getByText('alice@example.com'))
-    await user.click(screen.getByRole('button', { name: /transfer/i }))
-
-    await vi.waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith('Internal server error')
-    })
-    expect(screen.queryByTestId('transfer-dialog-error')).not.toBeInTheDocument()
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
   })
 })

@@ -31,8 +31,8 @@ export function TransferDialog({
   const [validationError, setValidationError] = useState<string | null>(null)
   const [apiError, setApiError] = useState<string | null>(null)
 
-  const { data: users, isLoading: usersLoading } = useUsers()
-  const { data: me } = useMe()
+  const { data: users, isLoading: usersLoading } = useUsers({ enabled: open })
+  const { data: me } = useMe({ enabled: open })
   const createTransfer = useCreateTransfer()
 
   const recipients = (users ?? []).filter((u) => u.id !== me?.id)
