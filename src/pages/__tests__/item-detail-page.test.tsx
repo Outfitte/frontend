@@ -892,4 +892,29 @@ describe('ItemDetailPage', () => {
     expect(await screen.findByRole('dialog')).toBeInTheDocument()
     expect(screen.getByText(/transfer blue denim jacket/i)).toBeInTheDocument()
   })
+
+  it('ItemDetailPage should close TransferDialog when Cancel is clicked inside it', async () => {
+    const user = userEvent.setup()
+    server.use(
+      http.get('/api/users', () =>
+        HttpResponse.json([
+          { id: 'user-001', email: 'me@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' },
+          { id: 'user-002', email: 'alice@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' },
+        ])
+      ),
+      http.get('/api/users/me', () =>
+        HttpResponse.json({ id: 'user-001', email: 'me@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' })
+      )
+    )
+    renderPage()
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.click(screen.getByRole('button', { name: /^transfer$/i }))
+    await screen.findByRole('dialog')
+    await user.click(screen.getByRole('button', { name: /^cancel$/i }))
+
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    )
+  })
 })
