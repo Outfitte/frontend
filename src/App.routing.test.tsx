@@ -549,6 +549,29 @@ describe('Routing', () => {
     expect(await screen.findByTestId('locations-page')).toBeInTheDocument()
   })
 
+  it('App should redirect to /login when unauthenticated user visits /transfers', () => {
+    render(<AppWithLocation />, { initialEntries: ['/transfers'] })
+    expect(screen.getByTestId('login-page')).toBeInTheDocument()
+  })
+
+  it('App should render transfers page when authenticated user visits /transfers', async () => {
+    useAuthStore.setState({
+      accessToken: 'access-token-abc123',
+      refreshToken: 'refresh-token-xyz789',
+      user: {
+        id: 'user-001',
+        email: 'alice@example.com',
+        role: 'user',
+        created_at: '2024-01-01T00:00:00Z',
+      },
+      isAuthenticated: true,
+      isHydrating: false,
+      hydrateFromStorage: async () => {},
+    })
+    render(<AppWithLocation />, { initialEntries: ['/transfers'] })
+    expect(await screen.findByTestId('transfers-page')).toBeInTheDocument()
+  })
+
   it('App should redirect to /items after login when unauthenticated user was redirected from /items', async () => {
     const user = userEvent.setup()
     render(<AppWithLocation />, { initialEntries: ['/items'] })

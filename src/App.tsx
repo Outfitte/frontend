@@ -22,6 +22,7 @@ import { SharedItemDetailPage } from '@/pages/SharedItemDetailPage'
 import { SharedOutfitDetailPage } from '@/pages/SharedOutfitDetailPage'
 import { SharedLocationDetailPage } from '@/pages/SharedLocationDetailPage'
 import { OutgoingSharesPage } from '@/pages/OutgoingSharesPage'
+import { TransfersPage } from '@/pages/TransfersPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 
@@ -95,6 +96,7 @@ function App() {
               element={<SharedLocationDetailPage />}
             />
             <Route path="/shares" element={<OutgoingSharesPage />} />
+            <Route path="/transfers" element={<TransfersPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
         </Route>

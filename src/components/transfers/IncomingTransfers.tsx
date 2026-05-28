@@ -17,20 +17,18 @@ import {
   useAcceptTransfer,
   useRejectTransfer,
 } from '@/hooks/use-transfers'
-import { useQueryClient } from '@tanstack/react-query'
-import { queryKeys } from '@/lib/query-keys'
 import type { ItemTransferView } from '@/types'
 
 interface TransferRowProps {
   transfer: ItemTransferView
   onAccept: (id: string) => void
   onReject: (id: string) => void
-  isPending: boolean
+  isMutating: boolean
 }
 
-function TransferRow({ transfer, onAccept, onReject, isPending }: TransferRowProps) {
+function TransferRow({ transfer, onAccept, onReject, isMutating }: TransferRowProps) {
   const firstPhoto = transfer.item.photos?.[0]
-  const isPendingStatus = transfer.status === 'pending'
+  const isPending = transfer.status === 'pending'
 
   return (
     <li
@@ -58,12 +56,12 @@ function TransferRow({ transfer, onAccept, onReject, isPending }: TransferRowPro
           </p>
         </div>
       </div>
-      {isPendingStatus && (
+      {isPending && (
         <div className="flex gap-2">
           <Button
             size="sm"
             onClick={() => onAccept(transfer.id)}
-            disabled={isPending}
+            disabled={isMutating}
           >
             Accept
           </Button>
@@ -71,7 +69,7 @@ function TransferRow({ transfer, onAccept, onReject, isPending }: TransferRowPro
             variant="outline"
             size="sm"
             onClick={() => onReject(transfer.id)}
-            disabled={isPending}
+            disabled={isMutating}
           >
             Reject
           </Button>
@@ -82,17 +80,12 @@ function TransferRow({ transfer, onAccept, onReject, isPending }: TransferRowPro
 }
 
 export function IncomingTransfers() {
-  const { data: transfers, isLoading, refetch } = useIncomingTransfers()
+  const { data: transfers, isLoading, isError, refetch } = useIncomingTransfers()
   const acceptTransfer = useAcceptTransfer()
   const rejectTransfer = useRejectTransfer()
-  const queryClient = useQueryClient()
   const [rejectId, setRejectId] = useState<string | null>(null)
 
   const isMutating = acceptTransfer.isPending || rejectTransfer.isPending
-
-  function handleAccept(id: string) {
-    acceptTransfer.mutate(id)
-  }
 
   function handleRejectRequest(id: string) {
     setRejectId(id)
@@ -105,16 +98,23 @@ export function IncomingTransfers() {
     })
   }
 
-  function handleRefresh() {
-    queryClient.invalidateQueries({ queryKey: queryKeys.transfers.incoming })
-  }
-
   if (isLoading) {
     return (
       <div data-testid="incoming-transfers-skeleton" className="space-y-3">
         {Array.from({ length: 3 }).map((_, i) => (
           <Skeleton key={i} className="h-20 w-full" />
         ))}
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div data-testid="incoming-transfers-error" className="py-12 text-center">
+        <p className="text-muted-foreground">Failed to load transfers</p>
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => refetch()}>
+          Retry
+        </Button>
       </div>
     )
   }
@@ -130,7 +130,7 @@ export function IncomingTransfers() {
   return (
     <div data-testid="incoming-transfers">
       <div className="mb-3 flex justify-end">
-        <Button variant="outline" size="sm" onClick={handleRefresh}>
+        <Button variant="outline" size="sm" onClick={() => refetch()}>
           Refresh
         </Button>
       </div>
@@ -139,9 +139,9 @@ export function IncomingTransfers() {
           <TransferRow
             key={transfer.id}
             transfer={transfer}
-            onAccept={handleAccept}
+            onAccept={(id) => acceptTransfer.mutate(id)}
             onReject={handleRejectRequest}
-            isPending={isMutating}
+            isMutating={isMutating}
           />
         ))}
       </ul>
