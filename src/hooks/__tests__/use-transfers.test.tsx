@@ -61,14 +61,6 @@ describe('useOutgoingTransfers', () => {
     ])
   })
 
-  it('useOutgoingTransfers should have refetchOnWindowFocus enabled', async () => {
-    const { wrapper } = makeWrapper()
-    const { result } = renderHook(() => useOutgoingTransfers(), { wrapper })
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    // refetchOnWindowFocus is a query option — verify via the hook's options
-    // by checking the query has no refetchInterval set (it should be undefined)
-    expect((result.current as { refetchInterval?: unknown }).refetchInterval).toBeUndefined()
-  })
 })
 
 // ─── useIncomingTransfers ────────────────────────────────────────────────────
@@ -106,12 +98,6 @@ describe('useIncomingTransfers', () => {
     ])
   })
 
-  it('useIncomingTransfers should have refetchOnWindowFocus enabled and no refetchInterval', async () => {
-    const { wrapper } = makeWrapper()
-    const { result } = renderHook(() => useIncomingTransfers(), { wrapper })
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect((result.current as { refetchInterval?: unknown }).refetchInterval).toBeUndefined()
-  })
 })
 
 // ─── useCreateTransfer ───────────────────────────────────────────────────────
@@ -134,6 +120,7 @@ describe('useCreateTransfer', () => {
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(toast.error).not.toHaveBeenCalled()
+    expect(toast.success).not.toHaveBeenCalled()
   })
 
   it('useCreateTransfer should set isError and not show toast when POST /transfers returns 422 (self-transfer or inactive)', async () => {
@@ -149,6 +136,7 @@ describe('useCreateTransfer', () => {
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(toast.error).not.toHaveBeenCalled()
+    expect(toast.success).not.toHaveBeenCalled()
   })
 
   it('useCreateTransfer should show error toast when POST /transfers returns 404', async () => {

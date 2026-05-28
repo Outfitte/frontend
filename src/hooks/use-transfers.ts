@@ -48,7 +48,7 @@ export function useCreateTransfer() {
 export function useAcceptTransfer() {
   const queryClient = useQueryClient()
   return useMutation<ItemTransferView, ApiError, string>({
-    mutationFn: (id) => api.post<ItemTransferView>(`/transfers/${id}/accept`, {}),
+    mutationFn: (id) => api.post<ItemTransferView>(`/transfers/${id}/accept`),
     onSuccess: () => {
       toast.success('Transfer accepted')
     },
@@ -66,7 +66,7 @@ export function useAcceptTransfer() {
 export function useRejectTransfer() {
   const queryClient = useQueryClient()
   return useMutation<ItemTransferView, ApiError, string>({
-    mutationFn: (id) => api.post<ItemTransferView>(`/transfers/${id}/reject`, {}),
+    mutationFn: (id) => api.post<ItemTransferView>(`/transfers/${id}/reject`),
     onSuccess: () => {
       toast.success('Transfer rejected')
     },
@@ -82,7 +82,7 @@ export function useRejectTransfer() {
 export function useCancelTransfer() {
   const queryClient = useQueryClient()
   return useMutation<ItemTransferView, ApiError, string>({
-    mutationFn: (id) => api.post<ItemTransferView>(`/transfers/${id}/cancel`, {}),
+    mutationFn: (id) => api.post<ItemTransferView>(`/transfers/${id}/cancel`),
     onSuccess: () => {
       toast.success('Transfer cancelled')
     },
