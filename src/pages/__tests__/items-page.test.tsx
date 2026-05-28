@@ -635,18 +635,34 @@ describe('ItemsPage', () => {
     expect(screen.getAllByRole('button', { name: /item options/i })).toHaveLength(1)
   })
 
+  it('ItemsPage should keep TransferDialog open and show validation error when submitted without selecting a recipient', async () => {
+    const user = userEvent.setup()
+    render(<ItemsPage />)
+
+    await screen.findByText('Blue Denim Jacket')
+    await user.click(screen.getAllByRole('button', { name: /item options/i })[0])
+    await user.click(screen.getByRole('menuitem', { name: /transfer/i }))
+
+    await screen.findByRole('dialog')
+    await user.click(screen.getByRole('button', { name: /^transfer$/i }))
+
+    expect(screen.getByText('Please select a recipient')).toBeInTheDocument()
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+  })
+
   it('ItemsPage should close dialog and show locked badge after successful transfer', async () => {
     const user = userEvent.setup()
-    let transfersCallCount = 0
+    let posted = false
     server.use(
-      http.get('/api/transfers/outgoing', () => {
-        transfersCallCount++
-        if (transfersCallCount === 1) return HttpResponse.json([])
-        return HttpResponse.json([
-          mockItemTransferView({ item_id: 'item-001', status: 'pending' }),
-        ])
-      }),
+      http.get('/api/transfers/outgoing', () =>
+        HttpResponse.json(
+          posted
+            ? [mockItemTransferView({ item_id: 'item-001', status: 'pending' })]
+            : []
+        )
+      ),
       http.post('/api/transfers', async ({ request }) => {
+        posted = true
         const body = (await request.json()) as Record<string, unknown>
         return HttpResponse.json(
           mockItemTransferView({

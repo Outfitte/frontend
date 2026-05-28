@@ -45,7 +45,10 @@ export function ItemsPage() {
   const [optimisticallyRemovedIds, setOptimisticallyRemovedIds] = useState<
     Set<string>
   >(new Set())
-  const [transferItemId, setTransferItemId] = useState<string | null>(null)
+  const [transferTarget, setTransferTarget] = useState<{
+    id: string
+    name: string
+  } | null>(null)
 
   const status = (searchParams.get('status') as ItemStatus) ?? 'active'
   const categoryFilter = searchParams.get('category') ?? ''
@@ -230,19 +233,20 @@ export function ItemsPage() {
               isLocked={pendingTransferItemIds.has(item.id)}
               onWoreToday={handleWoreToday}
               onAction={handleAction}
-              onTransfer={setTransferItemId}
+              onTransfer={(id) => {
+                const found = (items ?? []).find((i) => i.id === id)
+                if (found) setTransferTarget({ id, name: found.name })
+              }}
             />
           ))}
         </div>
       )}
-      {transferItemId !== null && (
+      {transferTarget !== null && (
         <TransferDialog
           open={true}
-          onClose={() => setTransferItemId(null)}
-          itemId={transferItemId}
-          itemName={
-            (items ?? []).find((i) => i.id === transferItemId)?.name ?? ''
-          }
+          onClose={() => setTransferTarget(null)}
+          itemId={transferTarget.id}
+          itemName={transferTarget.name}
         />
       )}
     </div>
