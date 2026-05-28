@@ -104,6 +104,14 @@ describe('queryKeys', () => {
     expect(queryKeys.users.all).not.toEqual(queryKeys.users.list())
   })
 
+  it('queryKeys.users.me should not collide with queryKeys.users.all', () => {
+    expect(queryKeys.users.me()).not.toEqual(queryKeys.users.all)
+  })
+
+  it('queryKeys.users.me should not collide with queryKeys.users.list', () => {
+    expect(queryKeys.users.me()).not.toEqual(queryKeys.users.list())
+  })
+
   it('queryKeys.shares.outgoing should not collide with queryKeys.shares.withMe', () => {
     expect(queryKeys.shares.outgoing).not.toEqual(queryKeys.shares.withMe)
   })
@@ -114,6 +122,10 @@ describe('queryKeys', () => {
 
   it('queryKeys.transfers.incoming should differ from queryKeys.transfers.all', () => {
     expect(queryKeys.transfers.incoming).not.toEqual(queryKeys.transfers.all)
+  })
+
+  it('queryKeys.transfers.outgoing should differ from queryKeys.transfers.all', () => {
+    expect(queryKeys.transfers.outgoing).not.toEqual(queryKeys.transfers.all)
   })
 
   it('queryKeys.transfers.detail should produce different keys when given different ids', () => {
