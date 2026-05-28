@@ -31,6 +31,18 @@ describe('usePendingTransferItemIds', () => {
     vi.clearAllMocks()
   })
 
+  it('usePendingTransferItemIds should return empty Set and isLoading false when GET /transfers/outgoing returns 500', async () => {
+    server.use(
+      http.get('/api/transfers/outgoing', () =>
+        new HttpResponse(null, { status: 500 })
+      )
+    )
+    const { wrapper } = makeWrapper()
+    const { result } = renderHook(() => usePendingTransferItemIds(), { wrapper })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    expect(result.current.ids).toEqual(new Set())
+  })
+
   it('usePendingTransferItemIds should return empty Set and isLoading true while query is loading', async () => {
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => usePendingTransferItemIds(), { wrapper })
