@@ -23,7 +23,9 @@ test.describe('F4 auth guard — /transfers route', () => {
     page,
   }) => {
     await page.goto('/transfers?tab=outgoing')
-    await expect(page).toHaveURL(/\/login/)
+    // ProtectedRoute encodes only location.pathname, so the query string is not
+    // preserved in the next param — the redirect lands on /login?next=%2Ftransfers
+    await expect(page).toHaveURL(/\/login\?next=%2Ftransfers/)
   })
 
   test('return URL should redirect to /transfers after login when next param is set', async ({
@@ -36,6 +38,7 @@ test.describe('F4 auth guard — /transfers route', () => {
     await page.getByLabel('Password').fill(ADMIN_PASSWORD)
     await page.getByRole('button', { name: 'Sign in' }).click()
 
+    await page.waitForURL('/transfers')
     await expect(page).toHaveURL('/transfers')
   })
 })
