@@ -173,26 +173,6 @@ describe('useCreateTransfer', () => {
     expect(toast.error).toHaveBeenCalledWith('Item not found')
   })
 
-  it('useCreateTransfer should optimistically add a pending entry for item_id to transfers.outgoing cache when mutation fires', async () => {
-    const { queryClient, wrapper } = makeWrapper()
-    queryClient.setQueryData<ItemTransferView[]>(queryKeys.transfers.outgoing, [])
-    server.use(
-      http.post('/api/transfers', () => new Promise(() => {})) // never resolves — keeps mutation pending
-    )
-    const { result } = renderHook(() => useCreateTransfer(), { wrapper })
-    act(() => {
-      result.current.mutate({
-        item_id: 'item-001',
-        recipient_id: 'user-002',
-        transfer_history: false,
-      })
-    })
-    await waitFor(() => {
-      const cached = queryClient.getQueryData<ItemTransferView[]>(queryKeys.transfers.outgoing)
-      expect(cached?.some((t) => t.item_id === 'item-001' && t.status === 'pending')).toBe(true)
-    })
-  })
-
   it('useCreateTransfer should restore transfers.outgoing cache to previous state when POST /transfers fails', async () => {
     const existing = mockItemTransferView({ id: 'transfer-existing', item_id: 'item-999', status: 'pending' })
     const { queryClient, wrapper } = makeWrapper()
@@ -213,6 +193,26 @@ describe('useCreateTransfer', () => {
     await waitFor(() => expect(result.current.isError).toBe(true))
     const cached = queryClient.getQueryData(queryKeys.transfers.outgoing)
     expect(cached).toEqual([existing])
+  })
+
+  it('useCreateTransfer should optimistically add a pending entry for item_id to transfers.outgoing cache when mutation fires', async () => {
+    const { queryClient, wrapper } = makeWrapper()
+    queryClient.setQueryData<ItemTransferView[]>(queryKeys.transfers.outgoing, [])
+    server.use(
+      http.post('/api/transfers', () => new Promise(() => {})) // never resolves — keeps mutation pending
+    )
+    const { result } = renderHook(() => useCreateTransfer(), { wrapper })
+    act(() => {
+      result.current.mutate({
+        item_id: 'item-001',
+        recipient_id: 'user-002',
+        transfer_history: false,
+      })
+    })
+    await waitFor(() => {
+      const cached = queryClient.getQueryData<ItemTransferView[]>(queryKeys.transfers.outgoing)
+      expect(cached?.some((t) => t.item_id === 'item-001' && t.status === 'pending')).toBe(true)
+    })
   })
 
   it('useCreateTransfer should call toast.success and invalidate transfers.outgoing and items.all when POST /transfers succeeds', async () => {
