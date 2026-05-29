@@ -96,33 +96,6 @@ async function initiateTransferViaUI(
 }
 
 /**
- * Cancel a pending outgoing transfer from the Outgoing tab.
- * Waits for the row's status badge to update to "cancelled".
- */
-async function cancelTransferViaUI(
-  page: Page,
-  itemName: string
-): Promise<void> {
-  await page.goto('/transfers?tab=outgoing')
-  await expect(page.getByTestId('outgoing-transfers')).toBeVisible()
-
-  const row = page
-    .getByTestId('outgoing-transfers')
-    .locator('[data-testid^="transfer-row-"]')
-    .filter({ hasText: itemName })
-    .first()
-  await expect(row).toBeVisible()
-
-  await row.getByRole('button', { name: 'Cancel transfer' }).click()
-  await page
-    .getByRole('alertdialog')
-    .getByRole('button', { name: 'Confirm cancel' })
-    .click()
-
-  await expect(row.getByText('cancelled')).toBeVisible()
-}
-
-/**
  * Ensure an item has at least 2 wear logs; adds logs via API if fewer exist.
  * Uses past dates to avoid future-date validation errors.
  */
@@ -189,7 +162,7 @@ test.describe('Transfer history, reject, and cancel flows', () => {
 
   // ── B. Proactive gate ─────────────────────────────────────────────────────
 
-  test('"Item options" button should be hidden when item has a pending transfer (proactive — Transfer… not accessible)', async ({
+  test('"Item options" button should not be visible when item has a pending transfer', async ({
     page,
   }) => {
     const { id, name } = await findFirstUnlockedItem(page)
@@ -225,10 +198,6 @@ test.describe('Transfer history, reject, and cancel flows', () => {
     await expect(
       lockedCard.getByRole('button', { name: 'Item options' })
     ).not.toBeVisible()
-
-    // Restore the item for subsequent tests
-    await cancelTransferViaUI(page, name)
-    pendingTransferId = null
   })
 
   // ── C. Backstop 409 ───────────────────────────────────────────────────────
@@ -525,7 +494,11 @@ test.describe('Transfer history, reject, and cancel flows', () => {
     await switchUser(page, RECIPIENT_EMAIL, RECIPIENT_PASSWORD)
 
     await page.goto('/transfers')
-    await page.waitForLoadState('networkidle')
+    await expect(
+      page
+        .getByTestId('incoming-transfers')
+        .or(page.getByTestId('incoming-transfers-empty'))
+    ).toBeVisible()
 
     // Cancelled transfer no longer offers Accept/Reject
     await expect(
