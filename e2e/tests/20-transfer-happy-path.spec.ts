@@ -31,7 +31,8 @@ test.describe('Transfer happy path — send, accept, ownership change', () => {
     await expect(firstCard).toBeVisible()
 
     // Capture the item name so we can find it later
-    const itemName = (await firstCard.locator('p.font-medium').first().textContent()) ?? ''
+    const itemName =
+      (await firstCard.locator('p.font-medium').first().textContent()) ?? ''
     expect(itemName).not.toBe('')
 
     // Capture item id from the card link href (e.g. /items/<id>)
@@ -41,7 +42,9 @@ test.describe('Transfer happy path — send, accept, ownership change', () => {
     expect(itemId).not.toBe('')
 
     // ── 2. Open context menu → Transfer… ──
-    const optionsButton = firstCard.getByRole('button', { name: 'Item options' })
+    const optionsButton = firstCard.getByRole('button', {
+      name: 'Item options',
+    })
     await optionsButton.click()
 
     const transferMenuItem = page.getByRole('menuitem', { name: 'Transfer…' })
@@ -79,10 +82,14 @@ test.describe('Transfer happy path — send, accept, ownership change', () => {
     await expect(lockedCard.getByText('Transfer pending')).toBeVisible()
 
     // Context-menu trigger is gone (card is locked)
-    await expect(lockedCard.getByRole('button', { name: 'Item options' })).not.toBeVisible()
+    await expect(
+      lockedCard.getByRole('button', { name: 'Item options' })
+    ).not.toBeVisible()
 
     // "Wore today" button is gone
-    await expect(lockedCard.getByRole('button', { name: 'Wore today' })).not.toBeVisible()
+    await expect(
+      lockedCard.getByRole('button', { name: 'Wore today' })
+    ).not.toBeVisible()
 
     // ── 7. Item detail page — pending banner; action buttons absent ──
     await page.goto(`/items/${itemId}`)
@@ -93,12 +100,20 @@ test.describe('Transfer happy path — send, accept, ownership change', () => {
     await expect(banner).toContainText('pending transfer')
 
     await expect(page.getByRole('link', { name: 'Edit' })).not.toBeVisible()
-    await expect(page.getByRole('button', { name: /archive/i })).not.toBeVisible()
+    await expect(
+      page.getByRole('button', { name: /archive/i })
+    ).not.toBeVisible()
     await expect(page.getByRole('button', { name: 'Share' })).not.toBeVisible()
-    await expect(page.getByRole('button', { name: 'Dispose' })).not.toBeVisible()
+    await expect(
+      page.getByRole('button', { name: 'Dispose' })
+    ).not.toBeVisible()
     await expect(page.getByRole('button', { name: 'Delete' })).not.toBeVisible()
-    await expect(page.getByRole('button', { name: 'Log wear' })).not.toBeVisible()
-    await expect(page.getByRole('button', { name: 'Transfer' })).not.toBeVisible()
+    await expect(
+      page.getByRole('button', { name: 'Log wear' })
+    ).not.toBeVisible()
+    await expect(
+      page.getByRole('button', { name: 'Transfer' })
+    ).not.toBeVisible()
 
     // ── 8. /transfers → Outgoing tab shows pending transfer ──
     await page.goto('/transfers?tab=outgoing')
@@ -140,7 +155,7 @@ test.describe('Transfer happy path — send, accept, ownership change', () => {
       page
         .getByTestId('incoming-transfers')
         .locator('[data-testid^="transfer-row-"]')
-        .filter({ hasText: itemName }),
+        .filter({ hasText: itemName })
     ).not.toBeVisible()
 
     // ── 12. Recipient's /items — item appears; no wear history; location unset ──
@@ -171,7 +186,7 @@ test.describe('Transfer happy path — send, accept, ownership change', () => {
     await expect(page.getByTestId('items-page')).toBeVisible()
 
     await expect(
-      page.getByTestId('item-card').filter({ hasText: itemName }),
+      page.getByTestId('item-card').filter({ hasText: itemName })
     ).not.toBeVisible()
 
     // ── 15. Outgoing tab shows transfer as "accepted" with a decided date ──

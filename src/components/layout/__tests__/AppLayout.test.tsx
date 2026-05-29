@@ -88,9 +88,7 @@ describe('AppLayout', () => {
       screen.getByRole('link', { name: /shared with me/i })
     ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /my shares/i })).toBeInTheDocument()
-    expect(
-      screen.getByRole('link', { name: /transfers/i })
-    ).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /transfers/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /settings/i })).toBeInTheDocument()
   })
 

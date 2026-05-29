@@ -2,14 +2,16 @@ import { type Page } from '@playwright/test'
 
 export const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'admin@example.com'
 export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'admin-password-123'
-export const RECIPIENT_EMAIL = process.env.RECIPIENT_EMAIL ?? 'recipient@example.com'
-export const RECIPIENT_PASSWORD = process.env.RECIPIENT_PASSWORD ?? 'recipient-password-123'
+export const RECIPIENT_EMAIL =
+  process.env.RECIPIENT_EMAIL ?? 'recipient@example.com'
+export const RECIPIENT_PASSWORD =
+  process.env.RECIPIENT_PASSWORD ?? 'recipient-password-123'
 
 /** Log in with the given credentials via the /login form. */
 export async function adminLogin(
   page: Page,
   email = ADMIN_EMAIL,
-  password = ADMIN_PASSWORD,
+  password = ADMIN_PASSWORD
 ): Promise<void> {
   await page.goto('/login')
   await page.getByLabel('Email').fill(email)
@@ -26,7 +28,7 @@ export async function adminLogin(
 export async function registerRecipient(
   page: Page,
   email = RECIPIENT_EMAIL,
-  password = RECIPIENT_PASSWORD,
+  password = RECIPIENT_PASSWORD
 ): Promise<string> {
   await page.goto('/register')
   await page.getByLabel('Email').fill(email)
@@ -55,7 +57,7 @@ export async function registerRecipient(
 export async function recipientLogin(
   page: Page,
   email = RECIPIENT_EMAIL,
-  password = RECIPIENT_PASSWORD,
+  password = RECIPIENT_PASSWORD
 ): Promise<void> {
   await page.goto('/login')
   await page.getByLabel('Email').fill(email)
@@ -75,7 +77,7 @@ export async function logout(page: Page): Promise<void> {
 export async function switchUser(
   page: Page,
   email: string,
-  password: string,
+  password: string
 ): Promise<void> {
   await logout(page)
   // logout already calls waitForURL('/login'), but wait for the form to render

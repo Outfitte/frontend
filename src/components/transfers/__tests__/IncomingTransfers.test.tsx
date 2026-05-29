@@ -4,7 +4,12 @@ import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/mocks/server'
 import { render } from '@/test/utils'
-import { mockItemTransferView, mockUserSummary, mockItem, mockPhoto } from '@/test/mocks/fixtures'
+import {
+  mockItemTransferView,
+  mockUserSummary,
+  mockItem,
+  mockPhoto,
+} from '@/test/mocks/fixtures'
 import { IncomingTransfers } from '@/components/transfers/IncomingTransfers'
 import { toast } from '@/lib/toast'
 
@@ -31,7 +36,10 @@ describe('IncomingTransfers', () => {
           mockItemTransferView({
             id: 'transfer-002',
             status: 'pending',
-            sender: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            sender: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
           }),
         ])
       ),
@@ -54,7 +62,10 @@ describe('IncomingTransfers', () => {
           mockItemTransferView({
             id: 'transfer-002',
             status: 'pending',
-            sender: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            sender: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
           }),
         ])
       ),
@@ -78,7 +89,9 @@ describe('IncomingTransfers', () => {
       )
     )
     renderComponent()
-    expect(await screen.findByTestId('incoming-transfers-error')).toBeInTheDocument()
+    expect(
+      await screen.findByTestId('incoming-transfers-error')
+    ).toBeInTheDocument()
     expect(screen.getByText(/failed to load transfers/i)).toBeInTheDocument()
   })
 
@@ -110,13 +123,18 @@ describe('IncomingTransfers', () => {
           mockItemTransferView({
             id: 'transfer-002',
             status: 'pending',
-            sender: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            sender: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
           }),
         ])
       ),
       http.post('/api/transfers/:id/reject', () => {
         rejectCalled = true
-        return HttpResponse.json(mockItemTransferView({ id: 'transfer-002', status: 'rejected' }))
+        return HttpResponse.json(
+          mockItemTransferView({ id: 'transfer-002', status: 'rejected' })
+        )
       })
     )
     renderComponent()
@@ -139,13 +157,13 @@ describe('IncomingTransfers', () => {
       })
     )
     renderComponent()
-    expect(screen.getByTestId('incoming-transfers-skeleton')).toBeInTheDocument()
+    expect(
+      screen.getByTestId('incoming-transfers-skeleton')
+    ).toBeInTheDocument()
   })
 
   it('IncomingTransfers should show empty state when there are no incoming transfers', async () => {
-    server.use(
-      http.get('/api/transfers/incoming', () => HttpResponse.json([]))
-    )
+    server.use(http.get('/api/transfers/incoming', () => HttpResponse.json([])))
     renderComponent()
     expect(await screen.findByText('No incoming transfers')).toBeInTheDocument()
   })
@@ -157,8 +175,15 @@ describe('IncomingTransfers', () => {
           mockItemTransferView({
             id: 'transfer-002',
             status: 'pending',
-            item: mockItem({ id: 'item-001', name: 'Blue Denim Jacket', photos: [mockPhoto({ media_key: 'uploads/photo-001.jpg' })] }),
-            sender: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            item: mockItem({
+              id: 'item-001',
+              name: 'Blue Denim Jacket',
+              photos: [mockPhoto({ media_key: 'uploads/photo-001.jpg' })],
+            }),
+            sender: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
             created_at: '2026-03-15T00:00:00Z',
             transfer_history: true,
           }),
@@ -170,10 +195,9 @@ describe('IncomingTransfers', () => {
     expect(screen.getByText(/alice@example\.com/)).toBeInTheDocument()
     expect(screen.getByText('Mar 15, 2026')).toBeInTheDocument()
     expect(screen.getByText(/wear history included/i)).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: 'Blue Denim Jacket' })).toHaveAttribute(
-      'src',
-      '/media/uploads/photo-001.jpg'
-    )
+    expect(
+      screen.getByRole('img', { name: 'Blue Denim Jacket' })
+    ).toHaveAttribute('src', '/media/uploads/photo-001.jpg')
   })
 
   it('IncomingTransfers should not show Accept or Reject buttons for non-pending transfers', async () => {
@@ -183,15 +207,22 @@ describe('IncomingTransfers', () => {
           mockItemTransferView({
             id: 'transfer-010',
             status: 'accepted',
-            sender: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            sender: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
           }),
         ])
       )
     )
     renderComponent()
     await screen.findByTestId('transfer-row-transfer-010')
-    expect(screen.queryByRole('button', { name: /accept/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /reject/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /accept/i })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /reject/i })
+    ).not.toBeInTheDocument()
   })
 
   it('IncomingTransfers should fire POST /transfers/:id/accept, show success toast when Accept is clicked', async () => {
@@ -202,7 +233,10 @@ describe('IncomingTransfers', () => {
           mockItemTransferView({
             id: 'transfer-002',
             status: 'pending',
-            sender: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            sender: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
           }),
         ])
       )
@@ -210,7 +244,9 @@ describe('IncomingTransfers', () => {
     renderComponent()
     const acceptBtn = await screen.findByRole('button', { name: /accept/i })
     await user.click(acceptBtn)
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Transfer accepted'))
+    await waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith('Transfer accepted')
+    )
   })
 
   it('IncomingTransfers should open AlertDialog when Reject is clicked without firing POST', async () => {
@@ -222,13 +258,18 @@ describe('IncomingTransfers', () => {
           mockItemTransferView({
             id: 'transfer-002',
             status: 'pending',
-            sender: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            sender: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
           }),
         ])
       ),
       http.post('/api/transfers/:id/reject', () => {
         rejectCalled = true
-        return HttpResponse.json(mockItemTransferView({ id: 'transfer-002', status: 'rejected' }))
+        return HttpResponse.json(
+          mockItemTransferView({ id: 'transfer-002', status: 'rejected' })
+        )
       })
     )
     renderComponent()
@@ -246,7 +287,10 @@ describe('IncomingTransfers', () => {
           mockItemTransferView({
             id: 'transfer-002',
             status: 'pending',
-            sender: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            sender: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
           }),
         ])
       )
@@ -256,7 +300,9 @@ describe('IncomingTransfers', () => {
     await user.click(rejectBtn)
     await screen.findByRole('alertdialog')
     await user.click(screen.getByRole('button', { name: /confirm reject/i }))
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Transfer rejected'))
+    await waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith('Transfer rejected')
+    )
   })
 
   it('IncomingTransfers should render placeholder div when item has no photos', async () => {
@@ -266,8 +312,15 @@ describe('IncomingTransfers', () => {
           mockItemTransferView({
             id: 'transfer-002',
             status: 'pending',
-            item: mockItem({ id: 'item-001', name: 'Blue Denim Jacket', photos: [] }),
-            sender: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            item: mockItem({
+              id: 'item-001',
+              name: 'Blue Denim Jacket',
+              photos: [],
+            }),
+            sender: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
           }),
         ])
       )
@@ -275,7 +328,9 @@ describe('IncomingTransfers', () => {
     renderComponent()
     await screen.findByText('Blue Denim Jacket')
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
-    expect(screen.getByTestId('transfer-row-transfer-002').querySelector('.bg-muted')).toBeInTheDocument()
+    expect(
+      screen.getByTestId('transfer-row-transfer-002').querySelector('.bg-muted')
+    ).toBeInTheDocument()
   })
 
   it('IncomingTransfers should trigger a refetch when Refresh button is clicked', async () => {
@@ -288,7 +343,10 @@ describe('IncomingTransfers', () => {
           mockItemTransferView({
             id: 'transfer-002',
             status: 'pending',
-            sender: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            sender: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
           }),
         ])
       })

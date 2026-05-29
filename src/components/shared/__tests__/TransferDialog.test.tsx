@@ -41,7 +41,10 @@ describe('TransferDialog', () => {
   it('TransferDialog should surface error inline and keep dialog open and not toast when API returns 409', async () => {
     server.use(
       http.post('/api/transfers', () =>
-        HttpResponse.json({ error: 'Item already has a pending transfer' }, { status: 409 })
+        HttpResponse.json(
+          { error: 'Item already has a pending transfer' },
+          { status: 409 }
+        )
       )
     )
     const user = userEvent.setup()
@@ -51,7 +54,9 @@ describe('TransferDialog', () => {
     await user.click(screen.getByText('alice@example.com'))
     await user.click(screen.getByRole('button', { name: /transfer/i }))
 
-    expect(await screen.findByTestId('transfer-dialog-error')).toBeInTheDocument()
+    expect(
+      await screen.findByTestId('transfer-dialog-error')
+    ).toBeInTheDocument()
     expect(screen.getByTestId('transfer-dialog-error')).toHaveTextContent(
       'Item already has a pending transfer'
     )
@@ -72,8 +77,12 @@ describe('TransferDialog', () => {
     await user.click(screen.getByText('alice@example.com'))
     await user.click(screen.getByRole('button', { name: /transfer/i }))
 
-    expect(await screen.findByTestId('transfer-dialog-error')).toBeInTheDocument()
-    expect(screen.getByTestId('transfer-dialog-error')).toHaveTextContent('Cannot transfer to self')
+    expect(
+      await screen.findByTestId('transfer-dialog-error')
+    ).toBeInTheDocument()
+    expect(screen.getByTestId('transfer-dialog-error')).toHaveTextContent(
+      'Cannot transfer to self'
+    )
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     expect(toast.error).not.toHaveBeenCalled()
   })
@@ -94,7 +103,9 @@ describe('TransferDialog', () => {
     await vi.waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('Internal server error')
     })
-    expect(screen.queryByTestId('transfer-dialog-error')).not.toBeInTheDocument()
+    expect(
+      screen.queryByTestId('transfer-dialog-error')
+    ).not.toBeInTheDocument()
     expect(screen.getByRole('dialog')).toBeInTheDocument()
   })
 
@@ -103,7 +114,9 @@ describe('TransferDialog', () => {
 
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     expect(await screen.findByTestId('user-list')).toBeInTheDocument()
-    expect(screen.getByRole('checkbox', { name: /include wear history/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('checkbox', { name: /include wear history/i })
+    ).toBeInTheDocument()
   })
 
   it('TransferDialog should show only other users excluding authenticated user in recipient list', async () => {
@@ -116,7 +129,9 @@ describe('TransferDialog', () => {
   it('TransferDialog should have include wear history checkbox unchecked by default', () => {
     render(<TransferDialog {...baseProps} />)
 
-    expect(screen.getByRole('checkbox', { name: /include wear history/i })).not.toBeChecked()
+    expect(
+      screen.getByRole('checkbox', { name: /include wear history/i })
+    ).not.toBeChecked()
   })
 
   it('TransferDialog should call useCreateTransfer mutate with transfer_history false when checkbox is unchecked on submit', async () => {
@@ -180,7 +195,9 @@ describe('TransferDialog', () => {
 
     await screen.findByText('alice@example.com')
     await user.click(screen.getByText('alice@example.com'))
-    await user.click(screen.getByRole('checkbox', { name: /include wear history/i }))
+    await user.click(
+      screen.getByRole('checkbox', { name: /include wear history/i })
+    )
     await user.click(screen.getByRole('button', { name: /transfer/i }))
 
     await vi.waitFor(() => {
@@ -232,22 +249,32 @@ describe('TransferDialog', () => {
   it('TransferDialog should reset checkbox to unchecked after cancel', async () => {
     const user = userEvent.setup()
     const onClose = vi.fn()
-    const { rerender } = render(<TransferDialog {...baseProps} onClose={onClose} />)
+    const { rerender } = render(
+      <TransferDialog {...baseProps} onClose={onClose} />
+    )
 
-    await user.click(screen.getByRole('checkbox', { name: /include wear history/i }))
-    expect(screen.getByRole('checkbox', { name: /include wear history/i })).toBeChecked()
+    await user.click(
+      screen.getByRole('checkbox', { name: /include wear history/i })
+    )
+    expect(
+      screen.getByRole('checkbox', { name: /include wear history/i })
+    ).toBeChecked()
 
     await user.click(screen.getByRole('button', { name: 'Cancel' }))
     rerender(<TransferDialog {...baseProps} onClose={onClose} open={true} />)
 
-    expect(screen.getByRole('checkbox', { name: /include wear history/i })).not.toBeChecked()
+    expect(
+      screen.getByRole('checkbox', { name: /include wear history/i })
+    ).not.toBeChecked()
   })
 
   it('TransferDialog should display explanatory copy for the wear history checkbox', () => {
     render(<TransferDialog {...baseProps} />)
 
     expect(screen.getByText(/history stays with you/i)).toBeInTheDocument()
-    expect(screen.getByText(/history travels with the item/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/history travels with the item/i)
+    ).toBeInTheDocument()
   })
 
   it('TransferDialog should show loading skeleton while users are fetching', async () => {
@@ -263,7 +290,9 @@ describe('TransferDialog', () => {
 
     expect(screen.getByTestId('transfer-dialog-loading')).toBeInTheDocument()
     await screen.findByText('alice@example.com')
-    expect(screen.queryByTestId('transfer-dialog-loading')).not.toBeInTheDocument()
+    expect(
+      screen.queryByTestId('transfer-dialog-loading')
+    ).not.toBeInTheDocument()
   })
 
   it('TransferDialog should show empty message when all users are the authenticated user', async () => {
@@ -274,7 +303,9 @@ describe('TransferDialog', () => {
     )
     render(<TransferDialog {...baseProps} />)
 
-    expect(await screen.findByTestId('transfer-dialog-empty')).toBeInTheDocument()
+    expect(
+      await screen.findByTestId('transfer-dialog-empty')
+    ).toBeInTheDocument()
   })
 
   it('TransferDialog should show Transferring label and disable button while mutation is pending', async () => {

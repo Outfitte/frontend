@@ -3,7 +3,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { IncomingTransfers } from '@/components/transfers/IncomingTransfers'
 import { OutgoingTransfers } from '@/components/transfers/OutgoingTransfers'
-import { useIncomingTransfers, useOutgoingTransfers } from '@/hooks/use-transfers'
+import {
+  useIncomingTransfers,
+  useOutgoingTransfers,
+} from '@/hooks/use-transfers'
 
 type TabValue = 'incoming' | 'outgoing'
 

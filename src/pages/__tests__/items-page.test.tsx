@@ -4,7 +4,12 @@ import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/mocks/server'
 import { render } from '@/test/utils'
-import { mockItem, mockCategory, mockLocation, mockItemTransferView } from '@/test/mocks/fixtures'
+import {
+  mockItem,
+  mockCategory,
+  mockLocation,
+  mockItemTransferView,
+} from '@/test/mocks/fixtures'
 import { ItemsPage } from '@/pages/ItemsPage'
 
 describe('ItemsPage', () => {
@@ -632,7 +637,9 @@ describe('ItemsPage', () => {
     await screen.findByText('Red Wool Coat')
 
     // item-001 is locked: only item-002 retains the options button
-    expect(screen.getAllByRole('button', { name: /item options/i })).toHaveLength(1)
+    expect(
+      screen.getAllByRole('button', { name: /item options/i })
+    ).toHaveLength(1)
   })
 
   it('ItemsPage should keep TransferDialog open and show validation error when submitted without selecting a recipient', async () => {
@@ -640,7 +647,9 @@ describe('ItemsPage', () => {
     render(<ItemsPage />)
 
     await screen.findByText('Blue Denim Jacket')
-    await user.click(screen.getAllByRole('button', { name: /item options/i })[0])
+    await user.click(
+      screen.getAllByRole('button', { name: /item options/i })[0]
+    )
     await user.click(screen.getByRole('menuitem', { name: /transfer/i }))
 
     await screen.findByRole('dialog')
@@ -677,7 +686,9 @@ describe('ItemsPage', () => {
     render(<ItemsPage />)
 
     await screen.findByText('Blue Denim Jacket')
-    await user.click(screen.getAllByRole('button', { name: /item options/i })[0])
+    await user.click(
+      screen.getAllByRole('button', { name: /item options/i })[0]
+    )
     await user.click(screen.getByRole('menuitem', { name: /transfer/i }))
 
     await screen.findByRole('dialog')
@@ -696,7 +707,9 @@ describe('ItemsPage', () => {
     render(<ItemsPage />)
 
     await screen.findByText('Blue Denim Jacket')
-    await user.click(screen.getAllByRole('button', { name: /item options/i })[0])
+    await user.click(
+      screen.getAllByRole('button', { name: /item options/i })[0]
+    )
     await user.click(screen.getByRole('menuitem', { name: /transfer/i }))
 
     expect(screen.getByRole('dialog')).toBeInTheDocument()
@@ -708,7 +721,9 @@ describe('ItemsPage', () => {
     render(<ItemsPage />)
 
     await screen.findByText('Blue Denim Jacket')
-    await user.click(screen.getAllByRole('button', { name: /item options/i })[0])
+    await user.click(
+      screen.getAllByRole('button', { name: /item options/i })[0]
+    )
 
     expect(
       screen.getByRole('menuitem', { name: /transfer/i })
@@ -729,7 +744,11 @@ describe('ItemsPage', () => {
 
     // item-001 is locked: no Wore today, no options button
     // item-002 is unlocked: one Wore today, one options button remain
-    expect(screen.getAllByRole('button', { name: /wore today/i })).toHaveLength(1)
-    expect(screen.getAllByRole('button', { name: /item options/i })).toHaveLength(1)
+    expect(screen.getAllByRole('button', { name: /wore today/i })).toHaveLength(
+      1
+    )
+    expect(
+      screen.getAllByRole('button', { name: /item options/i })
+    ).toHaveLength(1)
   })
 })
