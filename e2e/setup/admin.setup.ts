@@ -32,7 +32,7 @@ setup('authenticate admin and ensure test item exists', async ({ page }) => {
 
   if (activeItems.length === 0) {
     throw new Error(
-      'Admin user has no active items. Create at least one active item with a wear log before running e2e tests.',
+      'Admin user has no active items. Create at least one active item with a wear log before running e2e tests.'
     )
   }
 
@@ -51,11 +51,10 @@ setup('authenticate admin and ensure test item exists', async ({ page }) => {
 
   if (!itemWithWearLog) {
     throw new Error(
-      'Admin user has no items with wear logs. Add at least one wear log to an active item before running e2e tests.',
+      'Admin user has no items with wear logs. Add at least one wear log to an active item before running e2e tests.'
     )
   }
 
   await ctx.dispose()
   await page.context().storageState({ path: AUTH_FILE })
 })
-

@@ -41,8 +41,9 @@ describe('useOutgoingTransfers', () => {
 
   it('useOutgoingTransfers should set isError when GET /transfers/outgoing returns 500', async () => {
     server.use(
-      http.get('/api/transfers/outgoing', () =>
-        new HttpResponse(null, { status: 500 })
+      http.get(
+        '/api/transfers/outgoing',
+        () => new HttpResponse(null, { status: 500 })
       )
     )
     const { wrapper } = makeWrapper()
@@ -60,7 +61,6 @@ describe('useOutgoingTransfers', () => {
       mockItemTransferView({ id: 'transfer-001' }),
     ])
   })
-
 })
 
 // ─── useIncomingTransfers ────────────────────────────────────────────────────
@@ -72,8 +72,9 @@ describe('useIncomingTransfers', () => {
 
   it('useIncomingTransfers should set isError when GET /transfers/incoming returns 500', async () => {
     server.use(
-      http.get('/api/transfers/incoming', () =>
-        new HttpResponse(null, { status: 500 })
+      http.get(
+        '/api/transfers/incoming',
+        () => new HttpResponse(null, { status: 500 })
       )
     )
     const { wrapper } = makeWrapper()
@@ -91,13 +92,15 @@ describe('useIncomingTransfers', () => {
       mockItemTransferView({
         id: 'transfer-002',
         sender_id: 'user-002',
-        sender: expect.objectContaining({ id: 'user-002', email: 'alice@example.com' }),
+        sender: expect.objectContaining({
+          id: 'user-002',
+          email: 'alice@example.com',
+        }),
         recipient_id: 'user-001',
         recipient: expect.objectContaining({ id: 'user-001' }),
       }),
     ])
   })
-
 })
 
 // ─── useCreateTransfer ───────────────────────────────────────────────────────
@@ -110,13 +113,20 @@ describe('useCreateTransfer', () => {
   it('useCreateTransfer should set isError and not show toast when POST /transfers returns 409 (already pending)', async () => {
     server.use(
       http.post('/api/transfers', () =>
-        HttpResponse.json({ error: 'Transfer already pending' }, { status: 409 })
+        HttpResponse.json(
+          { error: 'Transfer already pending' },
+          { status: 409 }
+        )
       )
     )
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useCreateTransfer(), { wrapper })
     act(() => {
-      result.current.mutate({ item_id: 'item-001', recipient_id: 'user-002', transfer_history: false })
+      result.current.mutate({
+        item_id: 'item-001',
+        recipient_id: 'user-002',
+        transfer_history: false,
+      })
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(toast.error).not.toHaveBeenCalled()
@@ -132,7 +142,11 @@ describe('useCreateTransfer', () => {
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useCreateTransfer(), { wrapper })
     act(() => {
-      result.current.mutate({ item_id: 'item-001', recipient_id: 'user-001', transfer_history: false })
+      result.current.mutate({
+        item_id: 'item-001',
+        recipient_id: 'user-001',
+        transfer_history: false,
+      })
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(toast.error).not.toHaveBeenCalled()
@@ -148,7 +162,11 @@ describe('useCreateTransfer', () => {
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useCreateTransfer(), { wrapper })
     act(() => {
-      result.current.mutate({ item_id: 'item-missing', recipient_id: 'user-002', transfer_history: false })
+      result.current.mutate({
+        item_id: 'item-missing',
+        recipient_id: 'user-002',
+        transfer_history: false,
+      })
     })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(toast.error).toHaveBeenCalledWith('Item not found')
@@ -159,12 +177,20 @@ describe('useCreateTransfer', () => {
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
     const { result } = renderHook(() => useCreateTransfer(), { wrapper })
     act(() => {
-      result.current.mutate({ item_id: 'item-001', recipient_id: 'user-002', transfer_history: true })
+      result.current.mutate({
+        item_id: 'item-001',
+        recipient_id: 'user-002',
+        transfer_history: true,
+      })
     })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(toast.success).toHaveBeenCalledWith('Transfer sent')
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.transfers.outgoing })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.transfers.outgoing,
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.all,
+    })
   })
 
   it('useCreateTransfer should post item_id, recipient_id, transfer_history to POST /transfers', async () => {
@@ -186,7 +212,11 @@ describe('useCreateTransfer', () => {
     const { wrapper } = makeWrapper()
     const { result } = renderHook(() => useCreateTransfer(), { wrapper })
     act(() => {
-      result.current.mutate({ item_id: 'item-001', recipient_id: 'user-002', transfer_history: true })
+      result.current.mutate({
+        item_id: 'item-001',
+        recipient_id: 'user-002',
+        transfer_history: true,
+      })
     })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(capturedBody).toEqual({
@@ -228,9 +258,15 @@ describe('useAcceptTransfer', () => {
     })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(toast.success).toHaveBeenCalledWith('Transfer accepted')
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.transfers.incoming })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.transfers.outgoing })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.transfers.incoming,
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.transfers.outgoing,
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.all,
+    })
   })
 })
 
@@ -265,7 +301,9 @@ describe('useRejectTransfer', () => {
     })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(toast.success).toHaveBeenCalledWith('Transfer rejected')
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.transfers.incoming })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.transfers.incoming,
+    })
   })
 })
 
@@ -300,7 +338,11 @@ describe('useCancelTransfer', () => {
     })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(toast.success).toHaveBeenCalledWith('Transfer cancelled')
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.transfers.outgoing })
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.items.all })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.transfers.outgoing,
+    })
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.items.all,
+    })
   })
 })

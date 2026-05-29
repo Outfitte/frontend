@@ -230,10 +230,10 @@ export function ItemDetailPage() {
       {locked && (
         <div
           data-testid="item-transfer-banner"
-          className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg px-4 py-3 mb-4 text-sm"
+          className="mb-4 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800"
         >
           This item has a pending transfer. Go to{' '}
-          <Link to="/transfers" className="underline font-medium">
+          <Link to="/transfers" className="font-medium underline">
             Transfers
           </Link>{' '}
           to cancel it.
@@ -255,8 +255,8 @@ export function ItemDetailPage() {
               <Link to={`/items/${id}/edit`}>Edit</Link>
             </Button>
           )}
-          {!locked && (
-            isArchived ? (
+          {!locked &&
+            (isArchived ? (
               <Button variant="outline" size="sm" onClick={handleUnarchive}>
                 Unarchive
               </Button>
@@ -264,8 +264,7 @@ export function ItemDetailPage() {
               <Button variant="outline" size="sm" onClick={handleArchive}>
                 Archive
               </Button>
-            )
-          )}
+            ))}
           {!locked && item.status !== 'disposed' && (
             <Button
               variant="outline"

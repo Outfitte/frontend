@@ -36,9 +36,7 @@ describe('TransfersPage', () => {
 
   it('TransfersPage should show outgoing empty state within the Outgoing tab panel', async () => {
     const user = userEvent.setup()
-    server.use(
-      http.get('/api/transfers/outgoing', () => HttpResponse.json([]))
-    )
+    server.use(http.get('/api/transfers/outgoing', () => HttpResponse.json([])))
     renderPage()
     await screen.findByRole('tab', { name: 'Incoming' })
     await user.click(screen.getByRole('tab', { name: 'Outgoing' }))
@@ -50,9 +48,7 @@ describe('TransfersPage', () => {
   it('TransfersPage should not show OutgoingTransfers content on default Incoming tab', async () => {
     renderPage()
     await screen.findByRole('tab', { name: 'Incoming' })
-    expect(
-      screen.queryByTestId('outgoing-transfers')
-    ).not.toBeInTheDocument()
+    expect(screen.queryByTestId('outgoing-transfers')).not.toBeInTheDocument()
     expect(
       screen.queryByTestId('outgoing-transfers-empty')
     ).not.toBeInTheDocument()
@@ -64,9 +60,7 @@ describe('TransfersPage', () => {
     await screen.findByTestId('incoming-transfers')
     await user.click(screen.getByRole('tab', { name: 'Outgoing' }))
     await waitFor(() =>
-      expect(
-        screen.queryByTestId('incoming-transfers')
-      ).not.toBeInTheDocument()
+      expect(screen.queryByTestId('incoming-transfers')).not.toBeInTheDocument()
     )
     expect(
       screen.queryByTestId('incoming-transfers-skeleton')
@@ -105,9 +99,7 @@ describe('TransfersPage', () => {
 
   it('TransfersPage should show IncomingTransfers content in default Incoming tab', async () => {
     renderPage()
-    expect(
-      await screen.findByTestId('incoming-transfers')
-    ).toBeInTheDocument()
+    expect(await screen.findByTestId('incoming-transfers')).toBeInTheDocument()
   })
 
   it('TransfersPage should show OutgoingTransfers content when Outgoing tab is clicked', async () => {
@@ -115,9 +107,7 @@ describe('TransfersPage', () => {
     renderPage()
     await screen.findByRole('tab', { name: 'Incoming' })
     await user.click(screen.getByRole('tab', { name: 'Outgoing' }))
-    expect(
-      await screen.findByTestId('outgoing-transfers')
-    ).toBeInTheDocument()
+    expect(await screen.findByTestId('outgoing-transfers')).toBeInTheDocument()
   })
 
   it('TransfersPage should activate Outgoing tab when it is clicked', async () => {
@@ -126,16 +116,15 @@ describe('TransfersPage', () => {
     await screen.findByRole('tab', { name: 'Incoming' })
     await user.click(screen.getByRole('tab', { name: 'Outgoing' }))
     await screen.findByTestId('outgoing-transfers')
-    expect(
-      screen.getByRole('tab', { name: 'Outgoing' })
-    ).toHaveAttribute('data-state', 'active')
+    expect(screen.getByRole('tab', { name: 'Outgoing' })).toHaveAttribute(
+      'data-state',
+      'active'
+    )
   })
 
   it('TransfersPage should open Outgoing tab when URL has ?tab=outgoing', async () => {
     renderPage(['/transfers?tab=outgoing'])
-    expect(
-      await screen.findByTestId('outgoing-transfers')
-    ).toBeInTheDocument()
+    expect(await screen.findByTestId('outgoing-transfers')).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: 'Outgoing' })).toHaveAttribute(
       'data-state',
       'active'
@@ -144,9 +133,7 @@ describe('TransfersPage', () => {
 
   it('TransfersPage should default to Incoming tab when URL has an unknown tab value', async () => {
     renderPage(['/transfers?tab=unknown'])
-    expect(
-      await screen.findByTestId('incoming-transfers')
-    ).toBeInTheDocument()
+    expect(await screen.findByTestId('incoming-transfers')).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: 'Incoming' })).toHaveAttribute(
       'data-state',
       'active'

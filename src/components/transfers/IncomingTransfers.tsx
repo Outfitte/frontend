@@ -26,7 +26,12 @@ interface TransferRowProps {
   isMutating: boolean
 }
 
-function TransferRow({ transfer, onAccept, onReject, isMutating }: TransferRowProps) {
+function TransferRow({
+  transfer,
+  onAccept,
+  onReject,
+  isMutating,
+}: TransferRowProps) {
   const firstPhoto = transfer.item.photos?.[0]
   const isPending = transfer.status === 'pending'
 
@@ -43,7 +48,7 @@ function TransferRow({ transfer, onAccept, onReject, isMutating }: TransferRowPr
             className="h-12 w-12 rounded object-cover"
           />
         ) : (
-          <div className="h-12 w-12 rounded bg-muted" />
+          <div className="bg-muted h-12 w-12 rounded" />
         )}
         <div className="text-sm">
           <p className="font-medium">{transfer.item.name}</p>
@@ -52,7 +57,9 @@ function TransferRow({ transfer, onAccept, onReject, isMutating }: TransferRowPr
             {format(parseISO(transfer.created_at), 'MMM d, yyyy')}
           </p>
           <p className="text-muted-foreground text-xs">
-            {transfer.transfer_history ? 'Wear history included' : 'Wear history not included'}
+            {transfer.transfer_history
+              ? 'Wear history included'
+              : 'Wear history not included'}
           </p>
         </div>
       </div>
@@ -80,7 +87,12 @@ function TransferRow({ transfer, onAccept, onReject, isMutating }: TransferRowPr
 }
 
 export function IncomingTransfers() {
-  const { data: transfers, isLoading, isError, refetch } = useIncomingTransfers()
+  const {
+    data: transfers,
+    isLoading,
+    isError,
+    refetch,
+  } = useIncomingTransfers()
   const acceptTransfer = useAcceptTransfer()
   const rejectTransfer = useRejectTransfer()
   const [rejectId, setRejectId] = useState<string | null>(null)
@@ -112,7 +124,12 @@ export function IncomingTransfers() {
     return (
       <div data-testid="incoming-transfers-error" className="py-12 text-center">
         <p className="text-muted-foreground">Failed to load transfers</p>
-        <Button variant="outline" size="sm" className="mt-3" onClick={() => refetch()}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-3"
+          onClick={() => refetch()}
+        >
           Retry
         </Button>
       </div>
@@ -156,7 +173,8 @@ export function IncomingTransfers() {
           <AlertDialogHeader>
             <AlertDialogTitle>Reject transfer?</AlertDialogTitle>
             <AlertDialogDescription>
-              The item will remain with the sender. This action cannot be undone.
+              The item will remain with the sender. This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -4,7 +4,12 @@ import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/mocks/server'
 import { render } from '@/test/utils'
-import { mockItemTransferView, mockUserSummary, mockItem, mockPhoto } from '@/test/mocks/fixtures'
+import {
+  mockItemTransferView,
+  mockUserSummary,
+  mockItem,
+  mockPhoto,
+} from '@/test/mocks/fixtures'
 import { OutgoingTransfers } from '@/components/transfers/OutgoingTransfers'
 import { toast } from '@/lib/toast'
 
@@ -31,7 +36,10 @@ describe('OutgoingTransfers', () => {
           mockItemTransferView({
             id: 'transfer-001',
             status: 'pending',
-            recipient: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            recipient: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
           }),
         ])
       ),
@@ -40,12 +48,16 @@ describe('OutgoingTransfers', () => {
       )
     )
     renderComponent()
-    const cancelBtn = await screen.findByRole('button', { name: /cancel transfer/i })
+    const cancelBtn = await screen.findByRole('button', {
+      name: /cancel transfer/i,
+    })
     await user.click(cancelBtn)
     await screen.findByRole('alertdialog')
     await user.click(screen.getByRole('button', { name: /confirm cancel/i }))
     await waitFor(() => expect(toast.error).toHaveBeenCalled())
-    expect(screen.getByRole('button', { name: /cancel transfer/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /cancel transfer/i })
+    ).toBeInTheDocument()
   })
 
   it('OutgoingTransfers should show error state when query fails', async () => {
@@ -55,7 +67,9 @@ describe('OutgoingTransfers', () => {
       )
     )
     renderComponent()
-    expect(await screen.findByTestId('outgoing-transfers-error')).toBeInTheDocument()
+    expect(
+      await screen.findByTestId('outgoing-transfers-error')
+    ).toBeInTheDocument()
     expect(screen.getByText(/failed to load transfers/i)).toBeInTheDocument()
   })
 
@@ -87,17 +101,24 @@ describe('OutgoingTransfers', () => {
           mockItemTransferView({
             id: 'transfer-001',
             status: 'pending',
-            recipient: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            recipient: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
           }),
         ])
       ),
       http.post('/api/transfers/:id/cancel', () => {
         cancelCalled = true
-        return HttpResponse.json(mockItemTransferView({ id: 'transfer-001', status: 'cancelled' }))
+        return HttpResponse.json(
+          mockItemTransferView({ id: 'transfer-001', status: 'cancelled' })
+        )
       })
     )
     renderComponent()
-    const cancelBtn = await screen.findByRole('button', { name: /cancel transfer/i })
+    const cancelBtn = await screen.findByRole('button', {
+      name: /cancel transfer/i,
+    })
     await user.click(cancelBtn)
     await screen.findByRole('alertdialog')
     await user.click(screen.getByRole('button', { name: /keep transfer/i }))
@@ -116,15 +137,17 @@ describe('OutgoingTransfers', () => {
       })
     )
     renderComponent()
-    expect(screen.getByTestId('outgoing-transfers-skeleton')).toBeInTheDocument()
+    expect(
+      screen.getByTestId('outgoing-transfers-skeleton')
+    ).toBeInTheDocument()
   })
 
   it('OutgoingTransfers should show empty state when there are no outgoing transfers', async () => {
-    server.use(
-      http.get('/api/transfers/outgoing', () => HttpResponse.json([]))
-    )
+    server.use(http.get('/api/transfers/outgoing', () => HttpResponse.json([])))
     renderComponent()
-    expect(await screen.findByText("You haven't started any transfers")).toBeInTheDocument()
+    expect(
+      await screen.findByText("You haven't started any transfers")
+    ).toBeInTheDocument()
   })
 
   it('OutgoingTransfers should show item name, recipient email, status badge, and created date per row', async () => {
@@ -134,8 +157,15 @@ describe('OutgoingTransfers', () => {
           mockItemTransferView({
             id: 'transfer-001',
             status: 'pending',
-            item: mockItem({ id: 'item-001', name: 'Blue Denim Jacket', photos: [mockPhoto({ media_key: 'uploads/photo-001.jpg' })] }),
-            recipient: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            item: mockItem({
+              id: 'item-001',
+              name: 'Blue Denim Jacket',
+              photos: [mockPhoto({ media_key: 'uploads/photo-001.jpg' })],
+            }),
+            recipient: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
             created_at: '2026-03-15T00:00:00Z',
           }),
         ])
@@ -146,10 +176,9 @@ describe('OutgoingTransfers', () => {
     expect(screen.getByText(/alice@example\.com/)).toBeInTheDocument()
     expect(screen.getByText('Sent: Mar 15, 2026')).toBeInTheDocument()
     expect(screen.getByText('pending')).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: 'Blue Denim Jacket' })).toHaveAttribute(
-      'src',
-      '/media/uploads/photo-001.jpg'
-    )
+    expect(
+      screen.getByRole('img', { name: 'Blue Denim Jacket' })
+    ).toHaveAttribute('src', '/media/uploads/photo-001.jpg')
   })
 
   it('OutgoingTransfers should show decided_at date when present', async () => {
@@ -160,7 +189,10 @@ describe('OutgoingTransfers', () => {
             id: 'transfer-001',
             status: 'accepted',
             decided_at: '2026-04-01T00:00:00Z',
-            recipient: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            recipient: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
           }),
         ])
       )
@@ -177,14 +209,19 @@ describe('OutgoingTransfers', () => {
           mockItemTransferView({
             id: 'transfer-010',
             status: 'accepted',
-            recipient: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            recipient: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
           }),
         ])
       )
     )
     renderComponent()
     await screen.findByTestId('transfer-row-transfer-010')
-    expect(screen.queryByRole('button', { name: /cancel transfer/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /cancel transfer/i })
+    ).not.toBeInTheDocument()
   })
 
   it('OutgoingTransfers should show Cancel transfer button only for pending transfers', async () => {
@@ -194,13 +231,18 @@ describe('OutgoingTransfers', () => {
           mockItemTransferView({
             id: 'transfer-001',
             status: 'pending',
-            recipient: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            recipient: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
           }),
         ])
       )
     )
     renderComponent()
-    expect(await screen.findByRole('button', { name: /cancel transfer/i })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('button', { name: /cancel transfer/i })
+    ).toBeInTheDocument()
   })
 
   it('OutgoingTransfers should open AlertDialog when Cancel transfer is clicked without firing POST', async () => {
@@ -212,17 +254,24 @@ describe('OutgoingTransfers', () => {
           mockItemTransferView({
             id: 'transfer-001',
             status: 'pending',
-            recipient: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            recipient: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
           }),
         ])
       ),
       http.post('/api/transfers/:id/cancel', () => {
         cancelCalled = true
-        return HttpResponse.json(mockItemTransferView({ id: 'transfer-001', status: 'cancelled' }))
+        return HttpResponse.json(
+          mockItemTransferView({ id: 'transfer-001', status: 'cancelled' })
+        )
       })
     )
     renderComponent()
-    const cancelBtn = await screen.findByRole('button', { name: /cancel transfer/i })
+    const cancelBtn = await screen.findByRole('button', {
+      name: /cancel transfer/i,
+    })
     await user.click(cancelBtn)
     expect(await screen.findByRole('alertdialog')).toBeInTheDocument()
     expect(cancelCalled).toBe(false)
@@ -236,17 +285,24 @@ describe('OutgoingTransfers', () => {
           mockItemTransferView({
             id: 'transfer-001',
             status: 'pending',
-            recipient: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            recipient: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
           }),
         ])
       )
     )
     renderComponent()
-    const cancelBtn = await screen.findByRole('button', { name: /cancel transfer/i })
+    const cancelBtn = await screen.findByRole('button', {
+      name: /cancel transfer/i,
+    })
     await user.click(cancelBtn)
     await screen.findByRole('alertdialog')
     await user.click(screen.getByRole('button', { name: /confirm cancel/i }))
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Transfer cancelled'))
+    await waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith('Transfer cancelled')
+    )
   })
 
   it('OutgoingTransfers should show placeholder div when item has no photos', async () => {
@@ -256,8 +312,15 @@ describe('OutgoingTransfers', () => {
           mockItemTransferView({
             id: 'transfer-001',
             status: 'pending',
-            item: mockItem({ id: 'item-001', name: 'Blue Denim Jacket', photos: [] }),
-            recipient: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            item: mockItem({
+              id: 'item-001',
+              name: 'Blue Denim Jacket',
+              photos: [],
+            }),
+            recipient: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
           }),
         ])
       )
@@ -272,10 +335,38 @@ describe('OutgoingTransfers', () => {
     server.use(
       http.get('/api/transfers/outgoing', () =>
         HttpResponse.json([
-          mockItemTransferView({ id: 'transfer-001', status: 'pending', recipient: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }) }),
-          mockItemTransferView({ id: 'transfer-002', status: 'accepted', recipient: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }) }),
-          mockItemTransferView({ id: 'transfer-003', status: 'rejected', recipient: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }) }),
-          mockItemTransferView({ id: 'transfer-004', status: 'cancelled', recipient: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }) }),
+          mockItemTransferView({
+            id: 'transfer-001',
+            status: 'pending',
+            recipient: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
+          }),
+          mockItemTransferView({
+            id: 'transfer-002',
+            status: 'accepted',
+            recipient: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
+          }),
+          mockItemTransferView({
+            id: 'transfer-003',
+            status: 'rejected',
+            recipient: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
+          }),
+          mockItemTransferView({
+            id: 'transfer-004',
+            status: 'cancelled',
+            recipient: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
+          }),
         ])
       )
     )
@@ -297,7 +388,10 @@ describe('OutgoingTransfers', () => {
           mockItemTransferView({
             id: 'transfer-001',
             status: 'pending',
-            recipient: mockUserSummary({ id: 'user-002', email: 'alice@example.com' }),
+            recipient: mockUserSummary({
+              id: 'user-002',
+              email: 'alice@example.com',
+            }),
           }),
         ])
       })

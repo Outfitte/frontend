@@ -16,7 +16,10 @@ import {
 import { useOutgoingTransfers, useCancelTransfer } from '@/hooks/use-transfers'
 import type { ItemTransferView, TransferStatus } from '@/types'
 
-const STATUS_VARIANT: Record<TransferStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+const STATUS_VARIANT: Record<
+  TransferStatus,
+  'default' | 'secondary' | 'destructive' | 'outline'
+> = {
   pending: 'default',
   accepted: 'secondary',
   rejected: 'destructive',
@@ -46,11 +49,16 @@ function TransferRow({ transfer, onCancel, isMutating }: TransferRowProps) {
             className="h-12 w-12 rounded object-cover"
           />
         ) : (
-          <div data-testid="photo-placeholder" className="h-12 w-12 rounded bg-muted" />
+          <div
+            data-testid="photo-placeholder"
+            className="bg-muted h-12 w-12 rounded"
+          />
         )}
         <div className="text-sm">
           <p className="font-medium">{transfer.item.name}</p>
-          <p className="text-muted-foreground">To: {transfer.recipient.email}</p>
+          <p className="text-muted-foreground">
+            To: {transfer.recipient.email}
+          </p>
           <p className="text-muted-foreground text-xs">
             Sent: {format(parseISO(transfer.created_at), 'MMM d, yyyy')}
           </p>
@@ -62,7 +70,9 @@ function TransferRow({ transfer, onCancel, isMutating }: TransferRowProps) {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Badge variant={STATUS_VARIANT[transfer.status]}>{transfer.status}</Badge>
+        <Badge variant={STATUS_VARIANT[transfer.status]}>
+          {transfer.status}
+        </Badge>
         {isPending && (
           <Button
             variant="outline"
@@ -79,7 +89,12 @@ function TransferRow({ transfer, onCancel, isMutating }: TransferRowProps) {
 }
 
 export function OutgoingTransfers() {
-  const { data: transfers, isLoading, isError, refetch } = useOutgoingTransfers()
+  const {
+    data: transfers,
+    isLoading,
+    isError,
+    refetch,
+  } = useOutgoingTransfers()
   const cancelTransfer = useCancelTransfer()
   const [cancelId, setCancelId] = useState<string | null>(null)
 
@@ -110,7 +125,12 @@ export function OutgoingTransfers() {
     return (
       <div data-testid="outgoing-transfers-error" className="py-12 text-center">
         <p className="text-muted-foreground">Failed to load transfers</p>
-        <Button variant="outline" size="sm" className="mt-3" onClick={() => refetch()}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-3"
+          onClick={() => refetch()}
+        >
           Retry
         </Button>
       </div>
@@ -120,7 +140,9 @@ export function OutgoingTransfers() {
   if (!transfers || transfers.length === 0) {
     return (
       <div data-testid="outgoing-transfers-empty" className="py-12 text-center">
-        <p className="text-muted-foreground">You haven&apos;t started any transfers</p>
+        <p className="text-muted-foreground">
+          You haven&apos;t started any transfers
+        </p>
       </div>
     )
   }

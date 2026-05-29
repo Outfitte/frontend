@@ -125,7 +125,9 @@ describe('queryKeys', () => {
   })
 
   it('queryKeys.transfers.incoming should not collide with queryKeys.transfers.outgoing', () => {
-    expect(queryKeys.transfers.incoming).not.toEqual(queryKeys.transfers.outgoing)
+    expect(queryKeys.transfers.incoming).not.toEqual(
+      queryKeys.transfers.outgoing
+    )
   })
 
   it('queryKeys.transfers.incoming should differ from queryKeys.transfers.all', () => {

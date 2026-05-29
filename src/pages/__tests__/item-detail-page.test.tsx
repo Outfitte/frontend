@@ -765,7 +765,11 @@ describe('ItemDetailPage', () => {
     server.use(
       http.get('/api/transfers/outgoing', () =>
         HttpResponse.json([
-          mockItemTransferView({ id: 'transfer-001', item_id: ITEM_ID, status: 'pending' }),
+          mockItemTransferView({
+            id: 'transfer-001',
+            item_id: ITEM_ID,
+            status: 'pending',
+          }),
         ])
       )
     )
@@ -776,16 +780,18 @@ describe('ItemDetailPage', () => {
     expect(screen.getByTestId('item-transfer-banner')).toHaveTextContent(
       /pending transfer/i
     )
-    expect(
-      screen.getByRole('link', { name: /transfers/i })
-    ).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /transfers/i })).toBeInTheDocument()
   })
 
   it('ItemDetailPage should hide all action affordances when item is locked by pending transfer', async () => {
     server.use(
       http.get('/api/transfers/outgoing', () =>
         HttpResponse.json([
-          mockItemTransferView({ id: 'transfer-001', item_id: ITEM_ID, status: 'pending' }),
+          mockItemTransferView({
+            id: 'transfer-001',
+            item_id: ITEM_ID,
+            status: 'pending',
+          }),
         ])
       )
     )
@@ -794,26 +800,44 @@ describe('ItemDetailPage', () => {
     await screen.findByText('Blue Denim Jacket')
 
     // Edit link
-    expect(screen.queryByRole('link', { name: /^edit$/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('link', { name: /^edit$/i })
+    ).not.toBeInTheDocument()
     // Archive button
-    expect(screen.queryByRole('button', { name: /^archive$/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /^archive$/i })
+    ).not.toBeInTheDocument()
     // Share button
-    expect(screen.queryByRole('button', { name: /^share$/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /^share$/i })
+    ).not.toBeInTheDocument()
     // Dispose button
-    expect(screen.queryByRole('button', { name: /^dispose$/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /^dispose$/i })
+    ).not.toBeInTheDocument()
     // Delete button
-    expect(screen.queryByRole('button', { name: /^delete$/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /^delete$/i })
+    ).not.toBeInTheDocument()
     // Log wear button
-    expect(screen.queryByRole('button', { name: /^log wear$/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /^log wear$/i })
+    ).not.toBeInTheDocument()
     // Delete wear log buttons
-    expect(screen.queryAllByRole('button', { name: /delete wear log/i })).toHaveLength(0)
+    expect(
+      screen.queryAllByRole('button', { name: /delete wear log/i })
+    ).toHaveLength(0)
   })
 
   it('ItemDetailPage should not show Transfer button when item is locked by pending transfer', async () => {
     server.use(
       http.get('/api/transfers/outgoing', () =>
         HttpResponse.json([
-          mockItemTransferView({ id: 'transfer-001', item_id: ITEM_ID, status: 'pending' }),
+          mockItemTransferView({
+            id: 'transfer-001',
+            item_id: ITEM_ID,
+            status: 'pending',
+          }),
         ])
       )
     )
@@ -829,7 +853,11 @@ describe('ItemDetailPage', () => {
     server.use(
       http.get('/api/items/:id', () =>
         HttpResponse.json(
-          mockItem({ id: ITEM_ID, status: 'disposed', dispose_reason: 'donated' })
+          mockItem({
+            id: ITEM_ID,
+            status: 'disposed',
+            dispose_reason: 'donated',
+          })
         )
       )
     )
@@ -854,10 +882,7 @@ describe('ItemDetailPage', () => {
     const user = userEvent.setup()
     server.use(
       http.delete('/api/items/:id', () =>
-        HttpResponse.json(
-          { error: 'ErrItemTransferPending' },
-          { status: 409 }
-        )
+        HttpResponse.json({ error: 'ErrItemTransferPending' }, { status: 409 })
       )
     )
     renderPage()
@@ -876,12 +901,27 @@ describe('ItemDetailPage', () => {
     server.use(
       http.get('/api/users', () =>
         HttpResponse.json([
-          { id: 'user-001', email: 'me@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' },
-          { id: 'user-002', email: 'alice@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' },
+          {
+            id: 'user-001',
+            email: 'me@example.com',
+            role: 'user',
+            created_at: '2026-01-01T00:00:00Z',
+          },
+          {
+            id: 'user-002',
+            email: 'alice@example.com',
+            role: 'user',
+            created_at: '2026-01-01T00:00:00Z',
+          },
         ])
       ),
       http.get('/api/users/me', () =>
-        HttpResponse.json({ id: 'user-001', email: 'me@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' })
+        HttpResponse.json({
+          id: 'user-001',
+          email: 'me@example.com',
+          role: 'user',
+          created_at: '2026-01-01T00:00:00Z',
+        })
       )
     )
     renderPage()
@@ -898,12 +938,27 @@ describe('ItemDetailPage', () => {
     server.use(
       http.get('/api/users', () =>
         HttpResponse.json([
-          { id: 'user-001', email: 'me@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' },
-          { id: 'user-002', email: 'alice@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' },
+          {
+            id: 'user-001',
+            email: 'me@example.com',
+            role: 'user',
+            created_at: '2026-01-01T00:00:00Z',
+          },
+          {
+            id: 'user-002',
+            email: 'alice@example.com',
+            role: 'user',
+            created_at: '2026-01-01T00:00:00Z',
+          },
         ])
       ),
       http.get('/api/users/me', () =>
-        HttpResponse.json({ id: 'user-001', email: 'me@example.com', role: 'user', created_at: '2026-01-01T00:00:00Z' })
+        HttpResponse.json({
+          id: 'user-001',
+          email: 'me@example.com',
+          role: 'user',
+          created_at: '2026-01-01T00:00:00Z',
+        })
       )
     )
     renderPage()

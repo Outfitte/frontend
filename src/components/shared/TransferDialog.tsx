@@ -138,11 +138,15 @@ export function TransferDialog({
                 }
               />
               <div className="space-y-1">
-                <Label htmlFor="transfer-history" className="text-sm font-medium">
+                <Label
+                  htmlFor="transfer-history"
+                  className="text-sm font-medium"
+                >
                   Include wear history
                 </Label>
                 <p className="text-muted-foreground text-xs">
-                  Unchecked: history stays with you. Checked: history travels with the item.
+                  Unchecked: history stays with you. Checked: history travels
+                  with the item.
                 </p>
               </div>
             </div>

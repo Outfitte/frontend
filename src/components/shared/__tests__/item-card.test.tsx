@@ -20,7 +20,12 @@ describe('ItemCard', () => {
 
   it('ItemCard should not render Wore today button when isLocked is true', () => {
     render(
-      <ItemCard item={mockItem()} isLocked onWoreToday={vi.fn()} onAction={vi.fn()} />
+      <ItemCard
+        item={mockItem()}
+        isLocked
+        onWoreToday={vi.fn()}
+        onAction={vi.fn()}
+      />
     )
 
     expect(
@@ -38,16 +43,31 @@ describe('ItemCard', () => {
 
   it('ItemCard should not offer Transfer entry when isLocked is true even with onTransfer provided', () => {
     render(
-      <ItemCard item={mockItem()} isLocked onAction={vi.fn()} onTransfer={vi.fn()} />
+      <ItemCard
+        item={mockItem()}
+        isLocked
+        onAction={vi.fn()}
+        onTransfer={vi.fn()}
+      />
     )
 
-    expect(screen.queryByRole('button', { name: 'Item options' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('menuitem', { name: 'Transfer…' })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Item options' })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('menuitem', { name: 'Transfer…' })
+    ).not.toBeInTheDocument()
   })
 
   it('ItemCard should not render locked badge when both isReadOnly and isLocked are true', () => {
     render(
-      <ItemCard item={mockItem()} isReadOnly isLocked onAction={vi.fn()} onTransfer={vi.fn()} />
+      <ItemCard
+        item={mockItem()}
+        isReadOnly
+        isLocked
+        onAction={vi.fn()}
+        onTransfer={vi.fn()}
+      />
     )
 
     expect(screen.queryByTestId('item-locked-badge')).not.toBeInTheDocument()
@@ -64,18 +84,16 @@ describe('ItemCard', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Item options' }))
 
-    expect(screen.queryByRole('menuitem', { name: 'Transfer…' })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('menuitem', { name: 'Transfer…' })
+    ).not.toBeInTheDocument()
   })
 
   it('ItemCard should render Transfer entry and call onTransfer with item id when selected', async () => {
     const onTransfer = vi.fn()
     const onAction = vi.fn()
     render(
-      <ItemCard
-        item={mockItem()}
-        onAction={onAction}
-        onTransfer={onTransfer}
-      />
+      <ItemCard item={mockItem()} onAction={onAction} onTransfer={onTransfer} />
     )
 
     await userEvent.click(screen.getByRole('button', { name: 'Item options' }))
@@ -138,7 +156,11 @@ describe('ItemCard', () => {
   it('ItemCard should call onWoreToday with item id when Wore today is clicked', async () => {
     const onWoreToday = vi.fn()
     render(
-      <ItemCard item={mockItem()} onWoreToday={onWoreToday} onAction={vi.fn()} />
+      <ItemCard
+        item={mockItem()}
+        onWoreToday={onWoreToday}
+        onAction={vi.fn()}
+      />
     )
 
     await userEvent.click(screen.getByRole('button', { name: 'Wore today' }))
