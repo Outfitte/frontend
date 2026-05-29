@@ -28,12 +28,41 @@ export function useIncomingTransfers() {
 
 export function useCreateTransfer() {
   const queryClient = useQueryClient()
-  return useMutation<ItemTransferView, ApiError, CreateTransferVars>({
+  return useMutation<
+    ItemTransferView,
+    ApiError,
+    CreateTransferVars,
+    { prev: ItemTransferView[] | undefined }
+  >({
     mutationFn: (data) => api.post<ItemTransferView>('/transfers', data),
+    onMutate: async (vars) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.transfers.outgoing })
+      const prev = queryClient.getQueryData<ItemTransferView[]>(queryKeys.transfers.outgoing)
+      queryClient.setQueryData<ItemTransferView[]>(queryKeys.transfers.outgoing, (old) => [
+        ...(old ?? []),
+        {
+          id: `optimistic-${vars.item_id}`,
+          item_id: vars.item_id,
+          sender_id: '',
+          recipient_id: vars.recipient_id,
+          status: 'pending',
+          transfer_history: vars.transfer_history,
+          created_at: new Date().toISOString(),
+          decided_at: null,
+          item: null as unknown as ItemTransferView['item'],
+          sender: null as unknown as ItemTransferView['sender'],
+          recipient: null as unknown as ItemTransferView['recipient'],
+        },
+      ])
+      return { prev }
+    },
     onSuccess: () => {
       toast.success('Transfer sent')
     },
-    onError: (error) => {
+    onError: (error, _vars, context) => {
+      if (context?.prev !== undefined) {
+        queryClient.setQueryData(queryKeys.transfers.outgoing, context.prev)
+      }
       if (error.status !== 409 && error.status !== 422) {
         toast.error(error.message)
       }
