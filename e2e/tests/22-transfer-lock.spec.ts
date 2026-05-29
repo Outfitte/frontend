@@ -8,20 +8,20 @@ import { logout, RECIPIENT_EMAIL } from '../helpers'
  *   - Admin has at least one active item with a wear log
  *   - Recipient user exists
  *
- * Covered:
+ * Covered (failure/error cases first, then happy-path assertions):
+ *   B. Backstop (reactive 409):
+ *      - Stale-cache scenario: item detail loaded before transfer is created;
+ *        mutation fires against locked item → 409 → error toast; page stays put
+ *   D. Outfit builder (documented behaviour):
+ *      - ItemPicker does NOT proactively gate locked items; the locked item appears in
+ *        the picker and the 409 is surfaced reactively when "Add" is clicked
  *   A. Proactive lock (UI gating):
  *      - Items grid: "Transfer pending" badge; context-menu and "Wore today" absent;
  *        no second "Transfer…" entry (entire menu is hidden)
  *      - Item detail: pending banner; Edit / Archive / Share / Dispose / Delete /
  *        Log-wear / Transfer buttons absent; wear-log delete buttons absent
- *   B. Backstop (reactive 409):
- *      - Stale-cache scenario: item detail loaded before transfer is created;
- *        mutation fires against locked item → 409 → error toast; page stays put
  *   C. Unlock on resolution:
  *      - Cancel transfer from Outgoing tab → all affordances restored in grid + detail
- *   D. Outfit builder (documented behaviour):
- *      - ItemPicker does NOT proactively gate locked items; the locked item appears in
- *        the picker and the 409 is surfaced reactively when "Add" is clicked
  */
 
 // ── helpers ──────────────────────────────────────────────────────────────────
@@ -116,10 +116,172 @@ async function cancelTransferViaUI(
 
 test.describe('Transfer lock enforcement — proactive gate, backstop 409, unlock', () => {
   /**
-   * Track the ID of any pending transfer created during a test so afterEach can
-   * cancel it if the test fails before cleaning up.
+   * Track resources created during a test so afterEach can clean up if the
+   * test fails before its own cleanup runs.
    */
   let pendingTransferId: string | null = null
+  let pendingOutfitId: string | null = null
+
+  test.afterEach(async ({ page }) => {
+    if (pendingTransferId) {
+      await page.request
+        .post(`/api/transfers/${pendingTransferId}/cancel`)
+        .catch(() => {})
+      pendingTransferId = null
+    }
+    if (pendingOutfitId) {
+      await page.request
+        .delete(`/api/outfits/${pendingOutfitId}`)
+        .catch(() => {})
+      pendingOutfitId = null
+    }
+    await logout(page).catch(() => {})
+  })
+
+  // ── B. Backstop — stale-cache reactive 409 ──────────────────────────────────
+
+  test('mutation should show 409 error toast and not navigate when item is locked and cache is stale', async ({
+    page,
+  }) => {
+    // 1. Navigate to item detail so React Query caches no-pending-transfers at mount.
+    const { id: itemId } = await findFirstUnlockedItem(page)
+
+    await page.goto(`/items/${itemId}`)
+    await expect(page.getByTestId('item-detail-page')).toBeVisible()
+
+    // Delete button is visible — no pending transfer yet
+    await expect(page.getByRole('button', { name: 'Delete' })).toBeVisible()
+
+    // 2. Locate the recipient user ID via the API (uses the page's auth context)
+    const usersRes = await page.request.get('/api/users')
+    expect(usersRes.ok()).toBeTruthy()
+    const users: Array<{ id: string; email: string }> = await usersRes.json()
+    const recipient = users.find((u) => u.email === RECIPIENT_EMAIL)
+    expect(recipient).toBeDefined()
+
+    // 3. Create a transfer directly via the API — bypasses React Query so the UI cache
+    //    remains stale: the detail page still renders "Delete" as if no transfer exists.
+    const transferRes = await page.request.post('/api/transfers', {
+      data: {
+        item_id: itemId,
+        recipient_id: recipient!.id,
+        transfer_history: false,
+      },
+    })
+    expect(transferRes.ok()).toBeTruthy()
+    const transfer: { id: string } = await transferRes.json()
+    pendingTransferId = transfer.id
+
+    // 4. Attempt the delete mutation on the still-visible button.
+    //    The backend enforces ErrItemTransferPending and returns 409.
+    await page.getByRole('button', { name: 'Delete' }).click()
+    // AlertDialog confirmation step
+    await page
+      .getByRole('alertdialog')
+      .getByRole('button', { name: 'Confirm delete' })
+      .click()
+
+    // 5. 409 → error toast shown; the page does NOT navigate away
+    await expect(
+      page.locator('[data-sonner-toast][data-type="error"]')
+    ).toBeVisible()
+    await expect(page).toHaveURL(new RegExp(`/items/${itemId}`))
+
+    // Cleanup
+    await page.request
+      .post(`/api/transfers/${pendingTransferId}/cancel`)
+      .catch(() => {})
+    pendingTransferId = null
+  })
+
+  // ── D. Outfit builder — reactive 409 (documented behaviour) ─────────────────
+
+  /**
+   * The ItemPicker component fetches only "active" items and does NOT proactively
+   * filter by transfer-pending status. Therefore a locked item appears in the picker
+   * and the 409 is surfaced reactively when the user clicks "Add".
+   *
+   * This test:
+   *   1. Creates a temporary outfit
+   *   2. Creates a pending transfer on an item
+   *   3. Navigates to the outfit's edit page
+   *   4. Opens the item picker and verifies the locked item is listed (no proactive gate)
+   *   5. Clicks "Add" on the locked item → error toast (409 backstop)
+   *   6. Cleans up both the transfer and the outfit
+   */
+  test('outfit builder should surface 409 error toast and not proactively hide locked item in item picker', async ({
+    page,
+  }) => {
+    // 1. Find an unlocked item
+    const { name } = await findFirstUnlockedItem(page)
+
+    // 2. Create a new outfit via the UI
+    await page.goto('/outfits')
+    await expect(page.getByTestId('outfits-page')).toBeVisible()
+    await page.getByRole('link', { name: 'Create outfit' }).first().click()
+
+    await expect(page.getByTestId('create-outfit-page')).toBeVisible()
+    await page.getByLabel('Name').fill('Lock-test outfit')
+    await page.getByRole('button', { name: 'Create' }).click()
+
+    // Redirected to /outfits/{id}/edit
+    await expect(page.getByTestId('edit-outfit-page')).toBeVisible()
+    const outfitEditUrl = page.url()
+    const outfitId = outfitEditUrl.match(/\/outfits\/([^/]+)\/edit/)?.[1] ?? ''
+    expect(outfitId).not.toBe('')
+    pendingOutfitId = outfitId
+
+    // 3. Initiate a transfer for the item (lock it)
+    await page.goto('/items')
+    await expect(page.getByTestId('items-page')).toBeVisible()
+
+    // Re-locate the card after navigation
+    const refreshedCard = page
+      .getByTestId('item-card')
+      .filter({ hasText: name })
+      .first()
+    await initiateTransferViaUI(page, refreshedCard, name)
+
+    // Capture transfer ID for afterEach cleanup
+    const outRes = await page.request.get('/api/transfers/outgoing')
+    const outgoing: Array<{ id: string; item: { name: string } }> =
+      await outRes.json()
+    const match = outgoing.find((t) => t.item.name === name)
+    expect(match).toBeDefined()
+    pendingTransferId = match!.id
+
+    // 4. Navigate to outfit edit page and open the item picker
+    await page.goto(outfitEditUrl)
+    await expect(page.getByTestId('edit-outfit-page')).toBeVisible()
+    await page.getByRole('button', { name: 'Add item' }).click()
+
+    // 5. The locked item is listed in the picker (no proactive filtering by lock state)
+    const pickerDialog = page.getByRole('dialog')
+    await expect(pickerDialog).toBeVisible()
+    await expect(pickerDialog.getByText(name)).toBeVisible()
+
+    // 6. Click "Add" on the locked item — backend returns 409
+    const itemRow = pickerDialog.locator('li').filter({ hasText: name }).first()
+    await itemRow.getByRole('button', { name: 'Add' }).click()
+
+    // Error toast is shown (reactive 409 backstop)
+    await expect(
+      page.locator('[data-sonner-toast][data-type="error"]')
+    ).toBeVisible()
+
+    // Page does not crash or navigate away
+    await expect(page.getByTestId('edit-outfit-page')).toBeVisible()
+
+    // Cleanup: cancel the transfer
+    await page.request
+      .post(`/api/transfers/${pendingTransferId}/cancel`)
+      .catch(() => {})
+    pendingTransferId = null
+
+    // Cleanup: delete the temporary outfit
+    await page.request.delete(`/api/outfits/${outfitId}`).catch(() => {})
+    pendingOutfitId = null
+  })
 
   // ── A. Proactive lock — items grid ──────────────────────────────────────────
 
@@ -260,164 +422,5 @@ test.describe('Transfer lock enforcement — proactive gate, backstop 409, unloc
     await expect(page.getByRole('link', { name: 'Edit' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Delete' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Log wear' })).toBeVisible()
-  })
-
-  // ── B. Backstop — stale-cache reactive 409 ───────────────────────────────
-
-  test('mutation should show 409 error toast and not navigate when item is locked and cache is stale', async ({
-    page,
-  }) => {
-    // 1. Find an unlocked item and navigate to its detail page.
-    //    React Query fetches /transfers/outgoing at mount → no pending transfers.
-    await page.goto('/items')
-    await expect(page.getByTestId('items-page')).toBeVisible()
-    const firstCard = page.getByTestId('item-card').first()
-    const href =
-      (await firstCard
-        .locator('a[href^="/items/"]')
-        .first()
-        .getAttribute('href')) ?? ''
-    const itemId = href.replace('/items/', '').split('/')[0]
-    expect(itemId).not.toBe('')
-
-    await page.goto(`/items/${itemId}`)
-    await expect(page.getByTestId('item-detail-page')).toBeVisible()
-
-    // Delete button is visible — no pending transfer yet
-    await expect(page.getByRole('button', { name: 'Delete' })).toBeVisible()
-
-    // 2. Locate the recipient user ID via the API (using the page's auth context)
-    const usersRes = await page.request.get('/api/users')
-    expect(usersRes.ok()).toBeTruthy()
-    const users: Array<{ id: string; email: string }> = await usersRes.json()
-    const recipient = users.find((u) => u.email === RECIPIENT_EMAIL)
-    expect(recipient).toBeDefined()
-
-    // 3. Create a transfer directly via API — bypasses React Query so the UI cache
-    //    remains stale: the detail page still renders "Delete" as if no transfer exists.
-    const transferRes = await page.request.post('/api/transfers', {
-      data: {
-        item_id: itemId,
-        recipient_id: recipient!.id,
-        include_history: false,
-      },
-    })
-    expect(transferRes.ok()).toBeTruthy()
-    const transfer: { id: string } = await transferRes.json()
-    pendingTransferId = transfer.id
-
-    // 4. Attempt the delete mutation on the still-visible button.
-    //    The backend enforces ErrItemTransferPending and returns 409.
-    await page.getByRole('button', { name: 'Delete' }).click()
-    // AlertDialog confirmation step
-    await page
-      .getByRole('alertdialog')
-      .getByRole('button', { name: 'Confirm delete' })
-      .click()
-
-    // 5. 409 → error toast is shown; the page does NOT navigate away
-    await expect(page.getByRole('status').first()).toBeVisible()
-    await expect(page).toHaveURL(new RegExp(`/items/${itemId}`))
-
-    // Cleanup: cancel the transfer
-    await page.request
-      .post(`/api/transfers/${pendingTransferId}/cancel`)
-      .catch(() => {})
-    pendingTransferId = null
-  })
-
-  // ── D. Outfit builder — reactive 409 (documented behaviour) ───────────────
-
-  /**
-   * The ItemPicker component fetches only "active" items and does NOT proactively
-   * filter by transfer-pending status. Therefore a locked item appears in the picker
-   * and the 409 is surfaced reactively when the user clicks "Add".
-   *
-   * This test:
-   *   1. Creates a temporary outfit
-   *   2. Creates a pending transfer on an item
-   *   3. Navigates to the outfit's edit page
-   *   4. Opens the item picker and verifies the locked item is listed (no proactive gate)
-   *   5. Clicks "Add" on the locked item → error toast (409 backstop)
-   *   6. Cleans up both the transfer and the outfit
-   */
-  test('outfit builder should surface 409 error toast and not proactively hide locked item in item picker', async ({
-    page,
-  }) => {
-    // 1. Find an unlocked item
-    const { name } = await findFirstUnlockedItem(page)
-
-    // 2. Create a new outfit via the UI
-    await page.goto('/outfits')
-    await expect(page.getByTestId('outfits-page')).toBeVisible()
-    await page.getByRole('link', { name: 'Create outfit' }).first().click()
-
-    await expect(page.getByTestId('create-outfit-page')).toBeVisible()
-    await page.getByLabel('Name').fill('Lock-test outfit')
-    await page.getByRole('button', { name: 'Create' }).click()
-
-    // Redirected to /outfits/{id}/edit
-    await expect(page.getByTestId('edit-outfit-page')).toBeVisible()
-    const outfitEditUrl = page.url()
-    const outfitId = outfitEditUrl.match(/\/outfits\/([^/]+)\/edit/)?.[1] ?? ''
-    expect(outfitId).not.toBe('')
-
-    // 3. Initiate a transfer for the item (lock it)
-    await page.goto('/items')
-    await expect(page.getByTestId('items-page')).toBeVisible()
-
-    // Re-locate the card after navigation
-    const refreshedCard = page
-      .getByTestId('item-card')
-      .filter({ hasText: name })
-      .first()
-    await initiateTransferViaUI(page, refreshedCard, name)
-
-    // Capture transfer ID for afterEach cleanup
-    const outRes = await page.request.get('/api/transfers/outgoing')
-    const outgoing: Array<{ id: string; item: { name: string } }> =
-      await outRes.json()
-    const match = outgoing.find((t) => t.item.name === name)
-    expect(match).toBeDefined()
-    pendingTransferId = match!.id
-
-    // 4. Navigate to outfit edit page and open the item picker
-    await page.goto(outfitEditUrl)
-    await expect(page.getByTestId('edit-outfit-page')).toBeVisible()
-    await page.getByRole('button', { name: 'Add item' }).click()
-
-    // 5. The locked item is listed in the picker (no proactive filtering by lock state)
-    const pickerDialog = page.getByRole('dialog')
-    await expect(pickerDialog).toBeVisible()
-    await expect(pickerDialog.getByText(name)).toBeVisible()
-
-    // 6. Click "Add" on the locked item — backend returns 409
-    const itemRow = pickerDialog.locator('li').filter({ hasText: name }).first()
-    await itemRow.getByRole('button', { name: 'Add' }).click()
-
-    // Error toast is shown (reactive 409 backstop)
-    await expect(page.getByRole('status').first()).toBeVisible()
-
-    // Picker is still open (or closed depending on implementation) — page does not crash
-    await expect(page.getByTestId('edit-outfit-page')).toBeVisible()
-
-    // Cleanup: cancel the transfer
-    await page.request
-      .post(`/api/transfers/${pendingTransferId}/cancel`)
-      .catch(() => {})
-    pendingTransferId = null
-
-    // Cleanup: delete the temporary outfit
-    await page.request.delete(`/api/outfits/${outfitId}`).catch(() => {})
-  })
-
-  test.afterEach(async ({ page }) => {
-    if (pendingTransferId) {
-      await page.request
-        .post(`/api/transfers/${pendingTransferId}/cancel`)
-        .catch(() => {})
-      pendingTransferId = null
-    }
-    await logout(page).catch(() => {})
   })
 })
