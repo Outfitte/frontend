@@ -7,9 +7,15 @@ import { useIncomingTransfers, useOutgoingTransfers } from '@/hooks/use-transfer
 
 type TabValue = 'incoming' | 'outgoing'
 
+const TAB_VALUES: TabValue[] = ['incoming', 'outgoing']
+
+function resolveTab(raw: string | null): TabValue {
+  return TAB_VALUES.includes(raw as TabValue) ? (raw as TabValue) : 'incoming'
+}
+
 export function TransfersPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const activeTab = (searchParams.get('tab') as TabValue) ?? 'incoming'
+  const activeTab = resolveTab(searchParams.get('tab'))
 
   const { refetch: refetchIncoming } = useIncomingTransfers()
   const { refetch: refetchOutgoing } = useOutgoingTransfers()
