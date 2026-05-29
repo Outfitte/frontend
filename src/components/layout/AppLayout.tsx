@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useLocation } from 'react-router'
 import {
+  ArrowLeftRightIcon,
   CalendarIcon,
   HomeIcon,
   MapPinIcon,
@@ -45,6 +46,7 @@ const NAV_ITEMS = [
   { to: '/locations', label: 'Locations', icon: MapPinIcon },
   { to: '/shared', label: 'Shared with me', icon: ShareIcon },
   { to: '/shares', label: 'My shares', icon: Share2Icon },
+  { to: '/transfers', label: 'Transfers', icon: ArrowLeftRightIcon },
   { to: '/settings', label: 'Settings', icon: SettingsIcon },
 ]
 

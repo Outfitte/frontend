@@ -19,6 +19,7 @@ function renderLayout(initialEntries?: string[]) {
         <Route path="/locations" element={<div>locations content</div>} />
         <Route path="/shared" element={<div>shared content</div>} />
         <Route path="/shares" element={<div>shares content</div>} />
+        <Route path="/transfers" element={<div>transfers content</div>} />
         <Route path="/settings" element={<div>settings content</div>} />
       </Route>
     </Routes>,
@@ -87,6 +88,9 @@ describe('AppLayout', () => {
       screen.getByRole('link', { name: /shared with me/i })
     ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /my shares/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: /transfers/i })
+    ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /settings/i })).toBeInTheDocument()
   })
 
@@ -167,6 +171,20 @@ describe('AppLayout', () => {
     expect(sharesLink).not.toHaveAttribute('data-active', 'true')
   })
 
+  it('AppLayout should not set data-active true on transfers link when on shares route', () => {
+    renderLayout(['/shares'])
+
+    const transfersLink = screen.getByRole('link', { name: /transfers/i })
+    expect(transfersLink).not.toHaveAttribute('data-active', 'true')
+  })
+
+  it('AppLayout should set data-active true on transfers nav button when on transfers route', () => {
+    renderLayout(['/transfers'])
+
+    const transfersLink = screen.getByRole('link', { name: /transfers/i })
+    expect(transfersLink).toHaveAttribute('data-active', 'true')
+  })
+
   it('AppLayout should navigate to /items when Items link is clicked', async () => {
     const user = userEvent.setup()
     renderLayout(['/'])
@@ -183,6 +201,15 @@ describe('AppLayout', () => {
     await user.click(screen.getByRole('link', { name: /locations/i }))
 
     expect(screen.getByText('locations content')).toBeInTheDocument()
+  })
+
+  it('AppLayout should navigate to /transfers when Transfers link is clicked', async () => {
+    const user = userEvent.setup()
+    renderLayout(['/'])
+
+    await user.click(screen.getByRole('link', { name: /transfers/i }))
+
+    expect(screen.getByText('transfers content')).toBeInTheDocument()
   })
 
   it('AppLayout should show Settings and Log out in user dropdown when opened', async () => {
