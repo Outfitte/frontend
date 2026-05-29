@@ -34,11 +34,16 @@ export async function registerRecipient(
   await page.getByLabel('Confirm password').fill(password)
   await page.getByRole('button', { name: 'Register' }).click()
 
-  // If registration fails (account already exists), fall through to login
-  const loginError = page.getByRole('alert')
-  const alreadyExists = await loginError.isVisible().catch(() => false)
-  if (alreadyExists) {
-    await recipientLogin(page, email, password)
+  // If registration fails because the account already exists, fall through to login
+  const alert = page.getByRole('alert')
+  const alertVisible = await alert.isVisible().catch(() => false)
+  if (alertVisible) {
+    const alertText = await alert.textContent().catch(() => '')
+    if (alertText?.toLowerCase().includes('already')) {
+      await recipientLogin(page, email, password)
+    } else {
+      throw new Error(`Registration failed with unexpected error: ${alertText}`)
+    }
   } else {
     await page.waitForURL('/')
   }
@@ -73,6 +78,8 @@ export async function switchUser(
   password: string,
 ): Promise<void> {
   await logout(page)
+  // logout already calls waitForURL('/login'), but wait for the form to render
+  await page.waitForSelector('[data-testid="login-page"]')
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Password').fill(password)
   await page.getByRole('button', { name: 'Sign in' }).click()

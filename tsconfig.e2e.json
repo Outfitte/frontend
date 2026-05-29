@@ -3,7 +3,7 @@
     "target": "es2023",
     "lib": ["ES2023"],
     "module": "commonjs",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "ignoreDeprecations": "6.0",
     "types": ["node", "@playwright/test"],
     "skipLibCheck": true,

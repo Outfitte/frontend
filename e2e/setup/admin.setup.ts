@@ -16,7 +16,7 @@ setup('authenticate admin and ensure test item exists', async ({ page }) => {
 
   // Verify at least one active item with a wear log exists via the API
   const ctx = await request.newContext({
-    baseURL: page.url().replace(/\/$/, '').replace(/\/[^/]+$/, ''),
+    baseURL: new URL(page.url()).origin,
     extraHTTPHeaders: {
       // Re-use the session cookies from the authenticated browser context
       Cookie: await page

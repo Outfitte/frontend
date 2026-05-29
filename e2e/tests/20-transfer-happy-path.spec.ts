@@ -20,9 +20,6 @@ import {
  */
 
 test.describe('Transfer happy path — send, accept, ownership change', () => {
-  let itemName: string
-  let itemId: string
-
   test('admin sends item without history; recipient accepts; ownership transfers', async ({
     page,
   }) => {
@@ -34,13 +31,13 @@ test.describe('Transfer happy path — send, accept, ownership change', () => {
     await expect(firstCard).toBeVisible()
 
     // Capture the item name so we can find it later
-    itemName = (await firstCard.locator('p.font-medium').first().textContent()) ?? ''
+    const itemName = (await firstCard.locator('p.font-medium').first().textContent()) ?? ''
     expect(itemName).not.toBe('')
 
     // Capture item id from the card link href (e.g. /items/<id>)
     const cardLink = firstCard.locator('a[href^="/items/"]').first()
     const href = await cardLink.getAttribute('href')
-    itemId = href?.replace('/items/', '').split('/')[0] ?? ''
+    const itemId = href?.replace('/items/', '').split('/')[0] ?? ''
     expect(itemId).not.toBe('')
 
     // ── 2. Open context menu → Transfer… ──
@@ -52,7 +49,7 @@ test.describe('Transfer happy path — send, accept, ownership change', () => {
     await transferMenuItem.click()
 
     // ── 3. Transfer dialog opens ──
-    const dialog = page.getByRole('dialog', { name: new RegExp(`Transfer ${itemName}`) })
+    const dialog = page.getByRole('dialog', { name: `Transfer ${itemName}` })
     await expect(dialog).toBeVisible()
 
     // Recipient is listed; admin (self) is NOT listed
@@ -68,8 +65,8 @@ test.describe('Transfer happy path — send, accept, ownership change', () => {
     // ── 5. Submit transfer ──
     await dialog.getByRole('button', { name: 'Transfer' }).click()
 
-    // Success toast and dialog closes
-    await expect(page.getByText(/transferred/i).or(page.getByText(/success/i))).toBeVisible()
+    // Toast: "Transfer sent"; dialog closes
+    await expect(page.getByText('Transfer sent')).toBeVisible()
     await expect(dialog).not.toBeVisible()
 
     // ── 6. Item card shows "Transfer pending" badge; mutations are gated ──
@@ -107,16 +104,14 @@ test.describe('Transfer happy path — send, accept, ownership change', () => {
     await page.goto('/transfers?tab=outgoing')
     await expect(page.getByTestId('outgoing-transfers')).toBeVisible()
 
-    const outgoingRow = page.getByTestId('outgoing-transfers').locator('[data-testid^="transfer-row-"]').first()
+    const outgoingRow = page
+      .getByTestId('outgoing-transfers')
+      .locator('[data-testid^="transfer-row-"]')
+      .first()
     await expect(outgoingRow).toBeVisible()
     await expect(outgoingRow).toContainText(RECIPIENT_EMAIL)
     await expect(outgoingRow).toContainText(itemName)
-
-    // Status badge shows "pending"
-    const statusBadge = outgoingRow.locator('[class*="badge"], [role="status"]').or(
-      outgoingRow.getByText('pending')
-    )
-    await expect(statusBadge.first()).toContainText('pending')
+    await expect(outgoingRow.getByText('pending')).toBeVisible()
 
     // ── 9. Switch to recipient ──
     await switchUser(page, RECIPIENT_EMAIL, RECIPIENT_PASSWORD)
@@ -125,26 +120,27 @@ test.describe('Transfer happy path — send, accept, ownership change', () => {
     await page.goto('/transfers')
     await expect(page.getByTestId('incoming-transfers')).toBeVisible()
 
-    const incomingRow = page.getByTestId('incoming-transfers').locator('[data-testid^="transfer-row-"]').first()
+    const incomingRow = page
+      .getByTestId('incoming-transfers')
+      .locator('[data-testid^="transfer-row-"]')
+      .first()
     await expect(incomingRow).toBeVisible()
     await expect(incomingRow).toContainText(ADMIN_EMAIL)
     await expect(incomingRow).toContainText(itemName)
-    await expect(incomingRow).toContainText('not included')
+    await expect(incomingRow).toContainText('Wear history not included')
 
-    // ── 11. Accept the transfer ──
+    // ── 11. Accept the transfer (no confirmation dialog — fires immediately) ──
     await incomingRow.getByRole('button', { name: /accept/i }).click()
 
-    // Confirmation dialog
-    const confirmDialog = page.getByRole('alertdialog')
-    await expect(confirmDialog).toBeVisible()
-    await confirmDialog.getByRole('button', { name: /confirm/i }).click()
+    // Toast: "Transfer accepted"
+    await expect(page.getByText('Transfer accepted')).toBeVisible()
 
-    // Success toast
-    await expect(page.getByText(/accepted/i).or(page.getByText(/success/i))).toBeVisible()
-
-    // Row is no longer pending
+    // Row is no longer in the pending list
     await expect(
-      page.getByTestId('incoming-transfers').locator('[data-testid^="transfer-row-"]').filter({ hasText: itemName })
+      page
+        .getByTestId('incoming-transfers')
+        .locator('[data-testid^="transfer-row-"]')
+        .filter({ hasText: itemName }),
     ).not.toBeVisible()
 
     // ── 12. Recipient's /items — item appears; no wear history; location unset ──
@@ -162,10 +158,9 @@ test.describe('Transfer happy path — send, accept, ownership change', () => {
     await expect(page.getByTestId('item-detail-page')).toBeVisible()
 
     // Wear count is 0 (history was not transferred)
-    const wearCount = page.getByTestId('wear-count')
-    await expect(wearCount).toHaveText('0')
+    await expect(page.getByTestId('wear-count')).toHaveText('0')
 
-    // Location is absent (was unset on transfer)
+    // Location breadcrumb is absent (location was cleared on transfer)
     await expect(page.getByTestId('location-breadcrumb')).not.toBeVisible()
 
     // ── 13. Switch back to admin ──
@@ -176,7 +171,7 @@ test.describe('Transfer happy path — send, accept, ownership change', () => {
     await expect(page.getByTestId('items-page')).toBeVisible()
 
     await expect(
-      page.getByTestId('item-card').filter({ hasText: itemName })
+      page.getByTestId('item-card').filter({ hasText: itemName }),
     ).not.toBeVisible()
 
     // ── 15. Outgoing tab shows transfer as "accepted" with a decided date ──
@@ -195,9 +190,8 @@ test.describe('Transfer happy path — send, accept, ownership change', () => {
   })
 
   test.afterEach(async ({ page }) => {
-    // Restore admin session so each test run is clean
     await logout(page).catch(() => {
-      // Ignore logout errors — page may already be on login screen
+      // page may already be at /login if the test switched users mid-flow
     })
   })
 })
