@@ -144,7 +144,7 @@ describe('OutgoingTransfers', () => {
     renderComponent()
     expect(await screen.findByText('Blue Denim Jacket')).toBeInTheDocument()
     expect(screen.getByText(/alice@example\.com/)).toBeInTheDocument()
-    expect(screen.getByText('Mar 15, 2026')).toBeInTheDocument()
+    expect(screen.getByText('Sent: Mar 15, 2026')).toBeInTheDocument()
     expect(screen.getByText('pending')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: 'Blue Denim Jacket' })).toHaveAttribute(
       'src',
@@ -167,7 +167,7 @@ describe('OutgoingTransfers', () => {
     )
     renderComponent()
     await screen.findByTestId('transfer-row-transfer-001')
-    expect(screen.getByText('Apr 1, 2026')).toBeInTheDocument()
+    expect(screen.getByText('Decided: Apr 1, 2026')).toBeInTheDocument()
   })
 
   it('OutgoingTransfers should not show Cancel transfer button for non-pending transfers', async () => {
@@ -265,7 +265,7 @@ describe('OutgoingTransfers', () => {
     renderComponent()
     await screen.findByText('Blue Denim Jacket')
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
-    expect(screen.getByTestId('transfer-row-transfer-001').querySelector('.bg-muted')).toBeInTheDocument()
+    expect(screen.getByTestId('photo-placeholder')).toBeInTheDocument()
   })
 
   it('OutgoingTransfers should render status badges with correct text for all statuses', async () => {

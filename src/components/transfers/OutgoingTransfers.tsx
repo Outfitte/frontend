@@ -46,17 +46,17 @@ function TransferRow({ transfer, onCancel, isMutating }: TransferRowProps) {
             className="h-12 w-12 rounded object-cover"
           />
         ) : (
-          <div className="h-12 w-12 rounded bg-muted" />
+          <div data-testid="photo-placeholder" className="h-12 w-12 rounded bg-muted" />
         )}
         <div className="text-sm">
           <p className="font-medium">{transfer.item.name}</p>
           <p className="text-muted-foreground">To: {transfer.recipient.email}</p>
           <p className="text-muted-foreground text-xs">
-            {format(parseISO(transfer.created_at), 'MMM d, yyyy')}
+            Sent: {format(parseISO(transfer.created_at), 'MMM d, yyyy')}
           </p>
           {transfer.decided_at && (
             <p className="text-muted-foreground text-xs">
-              {format(parseISO(transfer.decided_at), 'MMM d, yyyy')}
+              Decided: {format(parseISO(transfer.decided_at), 'MMM d, yyyy')}
             </p>
           )}
         </div>
