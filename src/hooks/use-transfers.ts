@@ -28,12 +28,58 @@ export function useIncomingTransfers() {
 
 export function useCreateTransfer() {
   const queryClient = useQueryClient()
-  return useMutation<ItemTransferView, ApiError, CreateTransferVars>({
+  return useMutation<
+    ItemTransferView,
+    ApiError,
+    CreateTransferVars,
+    { prev: ItemTransferView[] | undefined }
+  >({
     mutationFn: (data) => api.post<ItemTransferView>('/transfers', data),
+    onMutate: async (vars) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.transfers.outgoing })
+      const prev = queryClient.getQueryData<ItemTransferView[]>(queryKeys.transfers.outgoing)
+      queryClient.setQueryData<ItemTransferView[]>(queryKeys.transfers.outgoing, (old) => [
+        ...(old ?? []),
+        {
+          id: `optimistic-${vars.item_id}`,
+          item_id: vars.item_id,
+          sender_id: '',
+          recipient_id: vars.recipient_id,
+          status: 'pending',
+          transfer_history: vars.transfer_history,
+          created_at: new Date().toISOString(),
+          decided_at: null,
+          item: {
+            id: vars.item_id,
+            owner_id: '',
+            name: '',
+            brand: null,
+            category_id: null,
+            color: null,
+            status: 'active',
+            metadata: {},
+            photos: [],
+            location_id: null,
+            purchase_price: null,
+            purchase_currency: null,
+            purchase_date: null,
+            seller_url: null,
+            dispose_reason: null,
+            created_at: '',
+          },
+          sender: { id: '', email: '' },
+          recipient: { id: vars.recipient_id, email: '' },
+        },
+      ])
+      return { prev }
+    },
     onSuccess: () => {
       toast.success('Transfer sent')
     },
-    onError: (error) => {
+    onError: (error, _vars, context) => {
+      if (context?.prev !== undefined) {
+        queryClient.setQueryData(queryKeys.transfers.outgoing, context.prev)
+      }
       if (error.status !== 409 && error.status !== 422) {
         toast.error(error.message)
       }
