@@ -3,7 +3,7 @@ import { renderHook, act, waitFor } from '@/test/utils'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/mocks/server'
-import { mockItemTransferView } from '@/test/mocks/fixtures'
+import { mockItem, mockItemTransferView } from '@/test/mocks/fixtures'
 import type { ItemTransferView } from '@/types'
 import { queryKeys } from '@/lib/query-keys'
 import { toast } from '@/lib/toast'
@@ -174,7 +174,7 @@ describe('useCreateTransfer', () => {
   })
 
   it('useCreateTransfer should restore transfers.outgoing cache to previous state when POST /transfers fails', async () => {
-    const existing = mockItemTransferView({ id: 'transfer-existing', item_id: 'item-999', status: 'pending' })
+    const existing = mockItemTransferView({ id: 'transfer-existing', item: mockItem({ id: 'item-999' }), status: 'pending' })
     const { queryClient, wrapper } = makeWrapper()
     queryClient.setQueryData(queryKeys.transfers.outgoing, [existing])
     server.use(
@@ -211,7 +211,7 @@ describe('useCreateTransfer', () => {
     })
     await waitFor(() => {
       const cached = queryClient.getQueryData<ItemTransferView[]>(queryKeys.transfers.outgoing)
-      expect(cached?.some((t) => t.item_id === 'item-001' && t.status === 'pending')).toBe(true)
+      expect(cached?.some((t) => t.item.id === 'item-001' && t.status === 'pending')).toBe(true)
     })
   })
 
@@ -244,7 +244,7 @@ describe('useCreateTransfer', () => {
         return HttpResponse.json(
           mockItemTransferView({
             id: 'transfer-new-001',
-            item_id: 'item-001',
+            item: mockItem({ id: 'item-001' }),
             recipient_id: 'user-002',
             transfer_history: true,
           }),

@@ -7,7 +7,7 @@ export function usePendingTransferItemIds() {
   const ids = useMemo(() => {
     if (!data) return new Set<string>()
     return new Set(
-      data.filter((t) => t.status === 'pending').map((t) => t.item_id)
+      data.filter((t) => t.status === 'pending').map((t) => t.item.id)
     )
   }, [data])
 

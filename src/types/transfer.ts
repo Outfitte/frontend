@@ -5,7 +5,6 @@ export type TransferStatus = 'pending' | 'accepted' | 'rejected' | 'cancelled'
 
 export interface ItemTransfer {
   id: string
-  item_id: string
   sender_id: string
   recipient_id: string
   status: TransferStatus

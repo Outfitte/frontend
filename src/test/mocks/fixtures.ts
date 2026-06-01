@@ -243,7 +243,6 @@ export function mockItemTransfer(
 ): ItemTransfer {
   return {
     id: 'transfer-001',
-    item_id: 'item-001',
     sender_id: 'user-001',
     recipient_id: 'user-002',
     status: 'pending',
@@ -259,7 +258,6 @@ export function mockItemTransferView(
 ): ItemTransferView {
   return {
     id: 'transfer-001',
-    item_id: 'item-001',
     sender_id: 'user-001',
     recipient_id: 'user-002',
     status: 'pending',
