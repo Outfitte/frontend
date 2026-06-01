@@ -174,7 +174,11 @@ describe('useCreateTransfer', () => {
   })
 
   it('useCreateTransfer should restore transfers.outgoing cache to previous state when POST /transfers fails', async () => {
-    const existing = mockItemTransferView({ id: 'transfer-existing', item: mockItem({ id: 'item-999' }), status: 'pending' })
+    const existing = mockItemTransferView({
+      id: 'transfer-existing',
+      item: mockItem({ id: 'item-999' }),
+      status: 'pending',
+    })
     const { queryClient, wrapper } = makeWrapper()
     queryClient.setQueryData(queryKeys.transfers.outgoing, [existing])
     server.use(
@@ -197,7 +201,10 @@ describe('useCreateTransfer', () => {
 
   it('useCreateTransfer should optimistically add a pending entry for item_id to transfers.outgoing cache when mutation fires', async () => {
     const { queryClient, wrapper } = makeWrapper()
-    queryClient.setQueryData<ItemTransferView[]>(queryKeys.transfers.outgoing, [])
+    queryClient.setQueryData<ItemTransferView[]>(
+      queryKeys.transfers.outgoing,
+      []
+    )
     server.use(
       http.post('/api/transfers', () => new Promise(() => {})) // never resolves — keeps mutation pending
     )
@@ -210,8 +217,12 @@ describe('useCreateTransfer', () => {
       })
     })
     await waitFor(() => {
-      const cached = queryClient.getQueryData<ItemTransferView[]>(queryKeys.transfers.outgoing)
-      expect(cached?.some((t) => t.item.id === 'item-001' && t.status === 'pending')).toBe(true)
+      const cached = queryClient.getQueryData<ItemTransferView[]>(
+        queryKeys.transfers.outgoing
+      )
+      expect(
+        cached?.some((t) => t.item.id === 'item-001' && t.status === 'pending')
+      ).toBe(true)
     })
   })
 

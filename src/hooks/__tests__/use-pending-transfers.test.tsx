@@ -128,7 +128,9 @@ describe('usePendingTransferItemIds', () => {
       )
     )
     const { wrapper } = makeWrapper()
-    const { result } = renderHook(() => usePendingTransferItemIds(), { wrapper })
+    const { result } = renderHook(() => usePendingTransferItemIds(), {
+      wrapper,
+    })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.ids).toEqual(new Set(['item-server-001']))
   })
