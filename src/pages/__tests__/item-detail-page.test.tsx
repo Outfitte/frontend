@@ -767,7 +767,7 @@ describe('ItemDetailPage', () => {
         HttpResponse.json([
           mockItemTransferView({
             id: 'transfer-001',
-            item_id: ITEM_ID,
+            item: mockItem({ id: ITEM_ID }),
             status: 'pending',
           }),
         ])
@@ -789,7 +789,7 @@ describe('ItemDetailPage', () => {
         HttpResponse.json([
           mockItemTransferView({
             id: 'transfer-001',
-            item_id: ITEM_ID,
+            item: mockItem({ id: ITEM_ID }),
             status: 'pending',
           }),
         ])
@@ -835,7 +835,7 @@ describe('ItemDetailPage', () => {
         HttpResponse.json([
           mockItemTransferView({
             id: 'transfer-001',
-            item_id: ITEM_ID,
+            item: mockItem({ id: ITEM_ID }),
             status: 'pending',
           }),
         ])
