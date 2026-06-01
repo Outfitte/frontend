@@ -42,7 +42,6 @@ export function useCreateTransfer() {
         ...(old ?? []),
         {
           id: `optimistic-${vars.item_id}`,
-          item_id: vars.item_id,
           sender_id: '',
           recipient_id: vars.recipient_id,
           status: 'pending',

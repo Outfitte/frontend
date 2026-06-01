@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@/test/utils'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/test/mocks/server'
-import { mockItemTransferView } from '@/test/mocks/fixtures'
+import { mockItem, mockItemTransferView } from '@/test/mocks/fixtures'
 import { queryKeys } from '@/lib/query-keys'
 import {
   usePendingTransferItemIds,
@@ -73,22 +73,22 @@ describe('usePendingTransferItemIds', () => {
         HttpResponse.json([
           mockItemTransferView({
             id: 'transfer-001',
-            item_id: 'item-001',
+            item: mockItem({ id: 'item-001' }),
             status: 'pending',
           }),
           mockItemTransferView({
             id: 'transfer-002',
-            item_id: 'item-002',
+            item: mockItem({ id: 'item-002' }),
             status: 'accepted',
           }),
           mockItemTransferView({
             id: 'transfer-003',
-            item_id: 'item-003',
+            item: mockItem({ id: 'item-003' }),
             status: 'rejected',
           }),
           mockItemTransferView({
             id: 'transfer-004',
-            item_id: 'item-004',
+            item: mockItem({ id: 'item-004' }),
             status: 'cancelled',
           }),
         ])
@@ -113,6 +113,24 @@ describe('usePendingTransferItemIds', () => {
     })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.ids).toEqual(new Set())
+  })
+
+  it('usePendingTransferItemIds should include item.id in pending set when server returns transfer with nested item object', async () => {
+    server.use(
+      http.get('/api/transfers/outgoing', () =>
+        HttpResponse.json([
+          mockItemTransferView({
+            id: 'transfer-server-001',
+            item: mockItem({ id: 'item-server-001' }),
+            status: 'pending',
+          }),
+        ])
+      )
+    )
+    const { wrapper } = makeWrapper()
+    const { result } = renderHook(() => usePendingTransferItemIds(), { wrapper })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    expect(result.current.ids).toEqual(new Set(['item-server-001']))
   })
 })
 
@@ -158,7 +176,7 @@ describe('useIsItemLocked', () => {
         HttpResponse.json([
           mockItemTransferView({
             id: 'transfer-001',
-            item_id: 'item-001',
+            item: mockItem({ id: 'item-001' }),
             status: 'cancelled',
           }),
         ])

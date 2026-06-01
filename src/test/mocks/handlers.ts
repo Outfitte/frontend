@@ -381,7 +381,7 @@ export const handlers = [
     return HttpResponse.json(
       mockItemTransferView({
         id: 'transfer-new-001',
-        item_id: body['item_id'] as string,
+        item: mockItem({ id: body['item_id'] as string }),
         recipient_id: body['recipient_id'] as string,
         transfer_history: body['transfer_history'] as boolean,
       }),
