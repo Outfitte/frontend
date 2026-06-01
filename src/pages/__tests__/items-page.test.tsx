@@ -612,7 +612,10 @@ describe('ItemsPage', () => {
     server.use(
       http.get('/api/transfers/outgoing', () =>
         HttpResponse.json([
-          mockItemTransferView({ item: mockItem({ id: 'item-001' }), status: 'pending' }),
+          mockItemTransferView({
+            item: mockItem({ id: 'item-001' }),
+            status: 'pending',
+          }),
         ])
       )
     )
@@ -627,7 +630,10 @@ describe('ItemsPage', () => {
     server.use(
       http.get('/api/transfers/outgoing', () =>
         HttpResponse.json([
-          mockItemTransferView({ item: mockItem({ id: 'item-001' }), status: 'pending' }),
+          mockItemTransferView({
+            item: mockItem({ id: 'item-001' }),
+            status: 'pending',
+          }),
         ])
       )
     )
@@ -666,7 +672,12 @@ describe('ItemsPage', () => {
       http.get('/api/transfers/outgoing', () =>
         HttpResponse.json(
           posted
-            ? [mockItemTransferView({ item: mockItem({ id: 'item-001' }), status: 'pending' })]
+            ? [
+                mockItemTransferView({
+                  item: mockItem({ id: 'item-001' }),
+                  status: 'pending',
+                }),
+              ]
             : []
         )
       ),
@@ -734,7 +745,10 @@ describe('ItemsPage', () => {
     server.use(
       http.get('/api/transfers/outgoing', () =>
         HttpResponse.json([
-          mockItemTransferView({ item: mockItem({ id: 'item-001' }), status: 'pending' }),
+          mockItemTransferView({
+            item: mockItem({ id: 'item-001' }),
+            status: 'pending',
+          }),
         ])
       )
     )
