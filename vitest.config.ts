@@ -20,6 +20,9 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov'],
       exclude: ['src/test/**'],
+      thresholds: {
+        lines: 90,
+      },
     },
   },
 })
