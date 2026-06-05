@@ -147,6 +147,7 @@ function TreeNode({
           <input
             ref={renameRef}
             data-testid={`rename-input-${node.id}`}
+            aria-label={`Rename ${node.label}`}
             defaultValue={node.label}
             className="min-w-0 flex-1 rounded border px-1 text-sm"
             onKeyDown={handleRenameKeyDown}

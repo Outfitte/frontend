@@ -250,7 +250,7 @@ export function OutfitDetailPage() {
                     >
                       <img
                         src={`/media/${photo.media_key}`}
-                        alt={`Thumbnail ${idx + 1}`}
+                        alt=""
                         className="h-16 w-16 object-cover"
                       />
                     </button>
