@@ -378,7 +378,7 @@ export function ItemDetailPage() {
                     >
                       <img
                         src={`/media/${photo.media_key}`}
-                        alt={`Photo ${idx + 1}`}
+                        alt={`Thumbnail ${idx + 1}`}
                         className="h-16 w-16 object-cover"
                       />
                     </button>
