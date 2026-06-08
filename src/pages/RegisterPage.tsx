@@ -43,7 +43,7 @@ export function RegisterPage() {
 
   function onSubmit(values: RegisterFormValues) {
     registerMutation.mutate(
-      { username: values.email, password: values.password },
+      { email: values.email, password: values.password },
       { onSuccess: () => navigate('/') }
     )
   }

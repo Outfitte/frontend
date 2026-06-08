@@ -35,7 +35,7 @@ export function LoginPage() {
   })
 
   function onSubmit(values: LoginFormValues) {
-    login.mutate({ username: values.email, password: values.password })
+    login.mutate({ email: values.email, password: values.password })
   }
 
   return (
