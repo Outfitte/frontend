@@ -94,7 +94,7 @@ describe('CreateItemPage', () => {
     const file = new File(['bytes'], 'photo.jpg', { type: 'image/jpeg' })
     const input = screen.getByLabelText(/add photos/i)
     await user.upload(input, file)
-    await screen.findByAltText(/photo 1/i)
+    await screen.findByAltText(/staged upload 1/i)
 
     await user.type(screen.getByLabelText(/^name/i), 'Test')
     await user.click(screen.getByRole('button', { name: /save/i }))
@@ -346,7 +346,7 @@ describe('CreateItemPage', () => {
     const input = screen.getByLabelText(/add photos/i)
     await user.upload(input, file)
 
-    expect(await screen.findByAltText(/photo 1/i)).toBeInTheDocument()
+    expect(await screen.findByAltText(/staged upload 1/i)).toBeInTheDocument()
   })
 
   it('CreateItemPage should queue multiple photos before submission', async () => {
@@ -358,8 +358,8 @@ describe('CreateItemPage', () => {
     const input = screen.getByLabelText(/add photos/i)
     await user.upload(input, [file1, file2])
 
-    expect(await screen.findByAltText(/photo 1/i)).toBeInTheDocument()
-    expect(screen.getByAltText(/photo 2/i)).toBeInTheDocument()
+    expect(await screen.findByAltText(/staged upload 1/i)).toBeInTheDocument()
+    expect(screen.getByAltText(/staged upload 2/i)).toBeInTheDocument()
   })
 
   it('CreateItemPage should remove a queued photo when its remove button is clicked', async () => {
@@ -369,11 +369,11 @@ describe('CreateItemPage', () => {
     const file = new File(['bytes'], 'photo.jpg', { type: 'image/jpeg' })
     const input = screen.getByLabelText(/add photos/i)
     await user.upload(input, file)
-    await screen.findByAltText(/photo 1/i)
+    await screen.findByAltText(/staged upload 1/i)
 
     await user.click(screen.getByRole('button', { name: /remove photo 1/i }))
 
-    expect(screen.queryByAltText(/photo 1/i)).not.toBeInTheDocument()
+    expect(screen.queryByAltText(/staged upload 1/i)).not.toBeInTheDocument()
   })
 
   it('CreateItemPage should create item and navigate to detail page on successful submission', async () => {
@@ -422,7 +422,7 @@ describe('CreateItemPage', () => {
     const file = new File(['bytes'], 'photo.jpg', { type: 'image/jpeg' })
     const input = screen.getByLabelText(/add photos/i)
     await user.upload(input, file)
-    await screen.findByAltText(/photo 1/i)
+    await screen.findByAltText(/staged upload 1/i)
 
     await user.type(screen.getByLabelText(/^name/i), 'Test')
     await user.click(screen.getByRole('button', { name: /save/i }))

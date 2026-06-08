@@ -488,7 +488,7 @@ describe('EditOutfitPage', () => {
     const input = screen.getByLabelText(/add photos/i)
     await user.upload(input, file)
 
-    expect(await screen.findByAltText(/photo 1/i)).toBeInTheDocument()
+    expect(await screen.findByAltText(/staged upload 1/i)).toBeInTheDocument()
   })
 
   it('EditOutfitPage should stay on page when queued photo upload fails', async () => {
@@ -512,7 +512,7 @@ describe('EditOutfitPage', () => {
     await screen.findByTestId('edit-outfit-page')
     const file = new File(['bytes'], 'photo.jpg', { type: 'image/jpeg' })
     await user.upload(screen.getByLabelText(/add photos/i), file)
-    await screen.findByAltText(/photo 1/i)
+    await screen.findByAltText(/staged upload 1/i)
     await user.click(screen.getByRole('button', { name: /save changes/i }))
 
     await waitFor(() => expect(toast.error).toHaveBeenCalled())
@@ -545,7 +545,7 @@ describe('EditOutfitPage', () => {
     const file = new File(['bytes'], 'photo.jpg', { type: 'image/jpeg' })
     const input = screen.getByLabelText(/add photos/i)
     await user.upload(input, file)
-    await screen.findByAltText(/photo 1/i)
+    await screen.findByAltText(/staged upload 1/i)
 
     await user.click(screen.getByRole('button', { name: /save changes/i }))
 

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -96,6 +96,12 @@ function TreeNode({
   const hasChildren = node.children.length > 0
   const renameRef = useRef<HTMLInputElement>(null)
 
+  useEffect(() => {
+    if (isRenaming) {
+      renameRef.current?.focus()
+    }
+  }, [isRenaming])
+
   function handleRenameKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') {
       const value = renameRef.current?.value.trim() ?? ''
@@ -108,10 +114,15 @@ function TreeNode({
   return (
     <>
       <div
+        role="button"
+        tabIndex={0}
         data-testid={`tree-node-${node.id}`}
         className={`group flex cursor-pointer items-center gap-1 rounded py-1 ${isSelected ? 'bg-muted' : 'hover:bg-muted'}`}
         style={{ paddingLeft: depth * 16 + 8 }}
         onClick={() => onSelect(node.id)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') onSelect(node.id)
+        }}
       >
         {hasChildren ? (
           <button
@@ -136,9 +147,9 @@ function TreeNode({
           <input
             ref={renameRef}
             data-testid={`rename-input-${node.id}`}
+            aria-label={`Rename ${node.label}`}
             defaultValue={node.label}
             className="min-w-0 flex-1 rounded border px-1 text-sm"
-            autoFocus
             onKeyDown={handleRenameKeyDown}
             onClick={(e) => e.stopPropagation()}
           />

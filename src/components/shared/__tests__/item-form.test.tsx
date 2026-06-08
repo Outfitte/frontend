@@ -307,7 +307,7 @@ describe('ItemForm', () => {
     const input = screen.getByLabelText(/add photos/i)
     await user.upload(input, file)
 
-    expect(await screen.findByAltText(/photo 1/i)).toBeInTheDocument()
+    expect(await screen.findByAltText(/staged upload 1/i)).toBeInTheDocument()
   })
 
   it('ItemForm should use /media/ path for existing photo src when item has photos', async () => {
@@ -318,7 +318,7 @@ describe('ItemForm', () => {
       itemId: 'item-001',
     })
 
-    const img = await screen.findByAltText('Existing photo photo-001')
+    const img = await screen.findByAltText('Uploaded item photo-001')
     expect(img).toHaveAttribute('src', '/media/uploads/photo-001.jpg')
   })
 
@@ -346,11 +346,11 @@ describe('ItemForm', () => {
     const file = new File(['bytes'], 'photo.jpg', { type: 'image/jpeg' })
     const input = screen.getByLabelText(/add photos/i)
     await user.upload(input, file)
-    await screen.findByAltText(/photo 1/i)
+    await screen.findByAltText(/staged upload 1/i)
 
     await user.click(screen.getByRole('button', { name: /remove photo 1/i }))
 
-    expect(screen.queryByAltText(/photo 1/i)).not.toBeInTheDocument()
+    expect(screen.queryByAltText(/staged upload 1/i)).not.toBeInTheDocument()
   })
 
   it('ItemForm should not call delete API when itemId is absent and delete button is clicked', async () => {
@@ -461,7 +461,7 @@ describe('ItemForm', () => {
     const file = new File(['bytes'], 'photo.jpg', { type: 'image/jpeg' })
     const input = screen.getByLabelText(/add photos/i)
     await user.upload(input, file)
-    await screen.findByAltText(/photo 1/i)
+    await screen.findByAltText(/staged upload 1/i)
 
     await user.type(screen.getByLabelText(/^name/i), 'My Jacket')
     await user.click(screen.getByRole('button', { name: /^save$/i }))

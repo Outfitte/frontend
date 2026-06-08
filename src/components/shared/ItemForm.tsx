@@ -468,7 +468,7 @@ export function ItemForm({
                 <div key={photo.id} className="relative">
                   <img
                     src={`/media/${photo.media_key}`}
-                    alt={`Existing photo ${photo.id}`}
+                    alt={`Uploaded item ${photo.id}`}
                     className="h-20 w-20 rounded-lg border object-cover"
                   />
                   <button
@@ -502,7 +502,7 @@ export function ItemForm({
                 <div key={photo.preview} className="relative">
                   <img
                     src={photo.preview}
-                    alt={`Photo ${idx + 1}`}
+                    alt={`Staged upload ${idx + 1}`}
                     className="h-20 w-20 rounded-lg border object-cover"
                   />
                   <button

@@ -335,7 +335,7 @@ describe('EditItemPage', () => {
     const file = new File(['bytes'], 'photo.jpg', { type: 'image/jpeg' })
     const input = screen.getByLabelText(/add photos/i)
     await user.upload(input, file)
-    await screen.findByAltText(/photo 1/i)
+    await screen.findByAltText(/staged upload 1/i)
 
     await user.click(screen.getByRole('button', { name: /save changes/i }))
 
