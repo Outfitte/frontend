@@ -47,13 +47,13 @@ Use `render` from `@/test/utils` (not bare `@testing-library/react`) so tests ru
 
 ## Coverage gate
 
-CI enforces **90% line coverage** via Vitest's `coverage.thresholds.lines` setting. Run coverage locally before pushing:
+CI enforces a **90% line coverage** threshold via Vitest's `coverage.thresholds.lines` setting (lines only; branches and statements are not thresholded). Run coverage locally before pushing:
 
 ```bash
 npm run test:coverage
 ```
 
-If your diff causes coverage to drop below 90% the CI job will fail and the PR cannot merge.
+If line coverage drops below 90% the CI job will fail and the PR cannot merge.
 
 ## Lint and formatting
 

@@ -27,12 +27,14 @@ Web frontend for [Outfitte](https://github.com/Outfitte).
 The app always calls `/api` for backend requests. In dev, Vite proxies `/api` and `/media` to `BACKEND_URL`:
 
 ```bash
+npm install
 BACKEND_URL=http://localhost:3000 npm run dev
 ```
 
 Alternatively, copy `.env.example` to `.env` and set `BACKEND_URL` there:
 
 ```bash
+npm install
 cp .env.example .env
 # edit .env: BACKEND_URL=http://localhost:3000
 npm run dev
