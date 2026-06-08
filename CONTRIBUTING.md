@@ -27,6 +27,7 @@ All code changes must follow the red-green-refactor cycle:
 4. Repeat from step 1 for the next behaviour.
 
 Rules:
+
 - Never write multiple tests upfront.
 - Never implement the full function body before each individual test is red.
 - Write failure/error-case tests before the happy-path test.
@@ -40,7 +41,9 @@ The test server is configured with `onUnhandledRequest: 'error'`, so any request
 
 ```typescript
 // src/test/mocks/handlers.ts
-http.get('/api/users/me', () => HttpResponse.json({ id: 1, email: 'alice@example.com' }))
+http.get('/api/users/me', () =>
+  HttpResponse.json({ id: 1, email: 'alice@example.com' })
+)
 ```
 
 Use `render` from `@/test/utils` (not bare `@testing-library/react`) so tests run with `QueryClientProvider` and `MemoryRouter` pre-wired.
