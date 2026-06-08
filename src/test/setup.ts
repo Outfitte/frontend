@@ -1,6 +1,9 @@
 import '@testing-library/jest-dom'
-import { afterAll, afterEach, beforeAll } from 'vitest'
+import * as axeMatchers from 'vitest-axe/matchers'
+import { afterAll, afterEach, beforeAll, expect } from 'vitest'
 import { server } from './mocks/server'
+
+expect.extend(axeMatchers)
 
 window.ResizeObserver = class ResizeObserver {
   observe() {}
