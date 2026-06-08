@@ -9,7 +9,8 @@ describe('vitest-axe harness', () => {
   })
 
   it('axe should report no violations for a well-formed accessible element', async () => {
-    document.body.innerHTML = '<main><img src="photo.jpg" alt="A product photo" /></main>'
+    document.body.innerHTML =
+      '<main><img src="photo.jpg" alt="A product photo" /></main>'
     const result = await axe(document.body)
     expect(result.violations).toHaveLength(0)
   })
