@@ -14,7 +14,7 @@ You should receive an acknowledgement within 72 hours. We will coordinate a fix 
 
 ## Security headers
 
-The nginx template (`nginx.conf.template`) sets the following response headers on every request.
+The nginx template (`nginx.conf.template`) is being hardened with the following response headers as part of the F5 launch milestone. Once merged, these headers will be set on every response.
 
 ### Content Security Policy
 
@@ -57,7 +57,7 @@ Content-Security-Policy:
 
 | Token | Storage | Rationale |
 |---|---|---|
-| Access token | In-memory (Zustand store) | Never persisted; lost on page reload. Not accessible to injected scripts that survive only in the current JS context because a reload clears the store. |
+| Access token | In-memory (Zustand store) | Never persisted; lost on page reload. A stolen in-memory token grants access only until the token expires. |
 | Refresh token | `localStorage` | Must survive page reloads to avoid forcing re-login. Accessible to any script running in the page origin. |
 
 **Risk:** A successful XSS attack can read `localStorage` and steal the refresh token, enabling persistent account access even after the attacker's script is removed. The primary mitigation is the strict CSP above, which blocks the script-injection vectors that would be needed to reach `localStorage`. HttpOnly cookies would eliminate this risk but require same-site or CORS-aware backend coordination and are not the current design.
