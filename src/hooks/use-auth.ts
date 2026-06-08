@@ -7,7 +7,7 @@ import type { User, TokenPair } from '@/types'
 const REFRESH_TOKEN_KEY = 'refresh_token'
 
 interface Credentials {
-  username: string
+  email: string
   password: string
 }
 

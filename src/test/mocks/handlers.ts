@@ -19,14 +19,22 @@ export const handlers = [
     return HttpResponse.json({ status: 'ok' })
   }),
 
-  http.post('/api/auth/login', () => {
+  http.post('/api/auth/login', async ({ request }) => {
+    const body = (await request.json()) as Record<string, unknown>
+    if (!body['email']) {
+      return HttpResponse.json({ error: 'email is required' }, { status: 400 })
+    }
     return HttpResponse.json({
       access_token: 'mock-access-token-abc123',
       refresh_token: 'mock-refresh-token-xyz789',
     })
   }),
 
-  http.post('/api/auth/register', () => {
+  http.post('/api/auth/register', async ({ request }) => {
+    const body = (await request.json()) as Record<string, unknown>
+    if (!body['email']) {
+      return HttpResponse.json({ error: 'email is required' }, { status: 400 })
+    }
     return HttpResponse.json(
       {
         user: {

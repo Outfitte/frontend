@@ -43,7 +43,7 @@ describe('useLogin', () => {
 
     act(() => {
       result.current.mutate({
-        username: 'alice@example.com',
+        email: 'alice@example.com',
         password: 'secret123',
       })
     })
@@ -69,7 +69,7 @@ describe('useLogin', () => {
 
     act(() => {
       result.current.mutate({
-        username: 'alice@example.com',
+        email: 'alice@example.com',
         password: 'secret123',
       })
     })
@@ -90,7 +90,7 @@ describe('useLogin', () => {
 
     act(() => {
       result.current.mutate({
-        username: 'alice@example.com',
+        email: 'alice@example.com',
         password: 'secret123',
       })
     })
@@ -111,7 +111,7 @@ describe('useLogin', () => {
 
     act(() => {
       result.current.mutate({
-        username: 'alice@example.com',
+        email: 'alice@example.com',
         password: 'wrongpassword',
       })
     })
@@ -136,7 +136,7 @@ describe('useLogin', () => {
 
     act(() => {
       result.current.mutate({
-        username: 'alice@example.com',
+        email: 'alice@example.com',
         password: 'secret123',
       })
     })
@@ -165,7 +165,7 @@ describe('useLogin', () => {
 
     act(() => {
       result.current.mutate({
-        username: 'alice@example.com',
+        email: 'alice@example.com',
         password: 'wrongpassword',
       })
     })
@@ -195,7 +195,7 @@ describe('useLogin', () => {
 
     act(() => {
       result.current.mutate({
-        username: 'alice@example.com',
+        email: 'alice@example.com',
         password: 'secret123',
       })
     })
@@ -232,7 +232,7 @@ describe('useLogin', () => {
 
     act(() => {
       result.current.mutate({
-        username: 'alice@example.com',
+        email: 'alice@example.com',
         password: 'secret123',
       })
     })
@@ -271,7 +271,7 @@ describe('useRegister', () => {
 
     act(() => {
       result.current.mutate({
-        username: 'alice@example.com',
+        email: 'alice@example.com',
         password: 'secret123',
       })
     })
@@ -307,7 +307,7 @@ describe('useRegister', () => {
 
     act(() => {
       result.current.mutate({
-        username: 'alice@example.com',
+        email: 'alice@example.com',
         password: 'secret123',
       })
     })

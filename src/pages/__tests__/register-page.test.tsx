@@ -229,7 +229,7 @@ describe('RegisterPage', () => {
     expect(await screen.findByText('Dashboard')).toBeInTheDocument()
   })
 
-  it('should send username field (not email) in the request body', async () => {
+  it('should send email field (not username) in the request body', async () => {
     let capturedBody: Record<string, unknown> | null = null
     server.use(
       http.post('/api/auth/register', async ({ request }) => {
@@ -269,10 +269,10 @@ describe('RegisterPage', () => {
     await screen.findByText('Dashboard')
     await waitFor(() => {
       expect(capturedBody).toEqual({
-        username: 'alice@example.com',
+        email: 'alice@example.com',
         password: 'securepassword',
       })
     })
-    expect(capturedBody).not.toHaveProperty('email')
+    expect(capturedBody).not.toHaveProperty('username')
   })
 })

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { screen, act } from '@testing-library/react'
+import { screen, act, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { render } from '@/test/utils'
@@ -210,5 +210,39 @@ describe('LoginPage', () => {
 
     // error banner should be gone while new request is in flight
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('LoginPage should send email field (not username) in the request body', async () => {
+    let capturedBody: Record<string, unknown> | null = null
+    server.use(
+      http.post('/api/auth/login', async ({ request }) => {
+        capturedBody = (await request.json()) as Record<string, unknown>
+        return HttpResponse.json({
+          access_token: 'access-token-abc123',
+          refresh_token: 'refresh-token-xyz789',
+        })
+      })
+    )
+    const user = userEvent.setup()
+    render(
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<div>Dashboard</div>} />
+      </Routes>,
+      { initialEntries: ['/login'] }
+    )
+
+    await user.type(screen.getByLabelText(/email/i), 'alice@example.com')
+    await user.type(screen.getByLabelText(/password/i), 'secret123')
+    await user.click(screen.getByRole('button', { name: /sign in/i }))
+
+    await screen.findByText('Dashboard')
+    await waitFor(() => {
+      expect(capturedBody).toEqual({
+        email: 'alice@example.com',
+        password: 'secret123',
+      })
+    })
+    expect(capturedBody).not.toHaveProperty('username')
   })
 })
