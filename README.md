@@ -22,10 +22,19 @@ Web frontend for [Outfitte](https://github.com/Outfitte).
 - Node.js 22+
 - npm
 
-## Quick start
+## Development
+
+The app always calls `/api` for backend requests. In dev, Vite proxies `/api` and `/media` to `BACKEND_URL`:
 
 ```bash
-npm install
+BACKEND_URL=http://localhost:3000 npm run dev
+```
+
+Alternatively, copy `.env.example` to `.env` and set `BACKEND_URL` there:
+
+```bash
+cp .env.example .env
+# edit .env: BACKEND_URL=http://localhost:3000
 npm run dev
 ```
 
@@ -44,41 +53,43 @@ npm run dev
 | Format            | `npm run format`        |
 | Check formatting  | `npm run format:check`  |
 
+CI enforces a **90% line coverage threshold** (`vitest.config.ts`). `npm run test:coverage` must pass before merging.
+
 ## Docker
 
 ```bash
 docker build -t frontend .
-docker run -p 8080:80 frontend
+docker run -p 8080:80 -e BACKEND_URL=http://backend:8080 frontend
 ```
 
-The multi-stage Dockerfile builds with Node 22 Alpine and serves the static output from Nginx on port 80.
+The multi-stage Dockerfile builds with **node:26-alpine** and serves the static output from **nginx**. Nginx:
 
-## Environment variables
+- Serves the React SPA with a `try_files` fallback for client-side routing
+- Proxies `/api/` → `${BACKEND_URL}/` (strips the `/api` prefix)
+- Proxies `/media/` → `${BACKEND_URL}/media/`
+- Caches hashed assets for 1 year; sets `no-cache` on `index.html`
 
-| Variable      | Description                                                      |
-| ------------- | ---------------------------------------------------------------- |
-| `BACKEND_URL` | URL of the backend API server (used by Vite dev proxy and nginx) |
+Set `BACKEND_URL` in your environment or orchestrator. See the [deploy repo](https://github.com/Outfitte/deploy) for a full self-hosting setup with Docker Compose.
 
-Copy `.env.example` to `.env` and set `BACKEND_URL`:
+## Authentication and token strategy
 
-```bash
-cp .env.example .env
-# edit .env to set BACKEND_URL=http://localhost:3000
-```
+- **Access token** — kept in memory only (Zustand store). Never written to `localStorage` or cookies. Lost on page reload; a silent refresh restores it from the refresh token.
+- **Refresh token** — persisted in `localStorage` under the key `refresh_token`. On app load `hydrateFromStorage` exchanges it for a fresh access token.
 
-Or pass it inline:
+**XSS trade-off:** storing the refresh token in `localStorage` means a successful XSS attack could steal it and maintain persistent access. The mitigation is a strict Content Security Policy that prevents inline script execution and restricts script sources to `'self'`. See [SECURITY.md](SECURITY.md) for the full CSP rationale and the responsible-disclosure process.
 
-```bash
-BACKEND_URL=http://localhost:3000 npm run dev
-```
+## Self-hosting
 
-In Docker, set `BACKEND_URL` via the environment. See `deploy/docker-compose.yml` for an example.
+See the [deploy repo](https://github.com/Outfitte/deploy) for Docker Compose configuration, environment variable reference, and operator guidance (TLS termination, HSTS, reverse proxy setup).
 
-## Links
+## Contributing
 
-- [Backend repo](https://github.com/Outfitte/backend)
-- [Deploy repo](https://github.com/Outfitte/deploy)
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for the vulnerability reporting process and security architecture notes.
 
 ## License
 
-[AGPL-3.0](LICENSE)
+[AGPL-3.0-only](LICENSE)
