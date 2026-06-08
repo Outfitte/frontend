@@ -5,6 +5,16 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
+    # Security headers — set at server scope. nginx does NOT inherit add_header
+    # into any location that defines its own add_header, so these are repeated in
+    # the two add_header-bearing locations below. HSTS is intentionally omitted:
+    # the container serves plain HTTP and HSTS belongs at the operator's TLS terminator.
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+
     gzip on;
     gzip_vary on;
     gzip_types text/plain text/css application/javascript application/json image/svg+xml;
@@ -13,12 +23,26 @@ server {
     # No-cache for index.html (entry point for SPA)
     location = /index.html {
         add_header Cache-Control "no-cache, no-store, must-revalidate";
+
+        # Repeated because this location defines its own add_header (see server scope)
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "DENY" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
     }
 
     # Long TTL for hashed static assets (JS, CSS, fonts, images)
     location ~* \.(js|css|woff2?|ttf|eot|svg|png|jpg|jpeg|gif|ico|webp)$ {
         expires 1y;
         add_header Cache-Control "public, immutable";
+
+        # Repeated because this location defines its own add_header (see server scope)
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header X-Frame-Options "DENY" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
     }
 
     # Proxy /api/ to backend — trailing slash on proxy_pass strips the /api/ prefix intentionally
