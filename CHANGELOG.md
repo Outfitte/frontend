@@ -18,11 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Items** — create, edit, and organise wardrobe items with fields for name, brand, category, colour, size, and notes
 - **Photos** — attach and manage photos for each wardrobe item
 - **Locations** — track where items are stored across multiple locations
-- **Wear logging** — record when and how often each item has been worn
+- **Wear logging** — record individual item wears and full-outfit wears; view outfit history on the calendar
 - **Outfits & calendar** — build outfit combinations and plan them on a calendar view
 - **Sharing** — share items or outfits with other users
 - **Item transfer** — transfer ownership of items between users
-- **Family / multi-user** — household and family account support for shared wardrobes
 - **Docker Compose self-hosting** — full deployment via Docker Compose with nginx reverse proxy and CSP headers
 
 [Unreleased]: https://github.com/Outfitte/frontend/compare/v0.1.0...HEAD
