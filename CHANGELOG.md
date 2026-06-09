@@ -24,3 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Item transfer** — transfer ownership of items between users
 - **Family / multi-user** — household and family account support for shared wardrobes
 - **Docker Compose self-hosting** — full deployment via Docker Compose with nginx reverse proxy and CSP headers
+
+[Unreleased]: https://github.com/Outfitte/frontend/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Outfitte/frontend/releases/tag/v0.1.0
