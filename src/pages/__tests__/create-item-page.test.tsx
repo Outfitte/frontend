@@ -488,8 +488,7 @@ describe('CreateItemPage', () => {
 
     await waitFor(() => expect(capturedBody['name']).toBe('Test'))
     const metadata = capturedBody['metadata'] as
-      | Record<string, string>
-      | undefined
+      Record<string, string> | undefined
     expect(metadata?.['material']).toBeUndefined()
   })
 
