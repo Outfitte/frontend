@@ -5,6 +5,24 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 15
+    groups:
+      npm-testing:
+        dependency-type: "development"
+        patterns:
+          - "@playwright/test"
+          - "@testing-library/*"
+          - "@vitest/*"
+          - "vitest*"
+          - "msw"
+          - "jsdom"
+      npm-production:
+        dependency-type: "production"
+        patterns:
+          - "*"
+      npm-dev-tooling:
+        dependency-type: "development"
+        patterns:
+          - "*"
 
   - package-ecosystem: "docker"
     directory: "/"
